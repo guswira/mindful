@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:mindfull/core/theme/glass_theme.dart';
-import 'package:mindfull/features/tasks/domain/task.dart';
-import 'package:mindfull/features/tasks/presentation/task_tab.dart';
+import 'package:mindful/core/theme/glass_theme.dart';
+import 'package:mindful/features/tasks/domain/task.dart';
+import 'package:mindful/features/tasks/presentation/task_tab.dart';
 
 final _now = DateTime.now();
 final _today = DateTime(_now.year, _now.month, _now.day);

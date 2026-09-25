@@ -1,4 +1,4 @@
-name: mindfull
+name: mindful
 description: "A personal mindfulness app: journal, habits, tasks, money, and AI food scanning."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.

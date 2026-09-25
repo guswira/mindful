@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:mindfull/features/ai/domain/food_analysis.dart';
-import 'package:mindfull/features/ai/domain/food_scan_exception.dart';
-import 'package:mindfull/features/ai/presentation/food_scan_retry.dart';
+import 'package:mindful/features/ai/domain/food_analysis.dart';
+import 'package:mindful/features/ai/domain/food_scan_exception.dart';
+import 'package:mindful/features/ai/presentation/food_scan_retry.dart';
 
 const _analysis = FoodAnalysis(
   foodName: 'Toast',

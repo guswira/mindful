@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
-import 'package:mindfull/features/settings/presentation/debug_section.dart';
-import 'package:mindfull/shared/services/notification_service.dart';
+import 'package:mindful/features/settings/presentation/debug_section.dart';
+import 'package:mindful/shared/services/notification_service.dart';
 
 class _MockNotificationService extends Mock implements NotificationService {}
 

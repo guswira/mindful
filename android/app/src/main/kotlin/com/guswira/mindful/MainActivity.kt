@@ -1,4 +1,4 @@
-package com.example.mindfull
+package com.guswira.mindful
 
 import io.flutter.embedding.android.FlutterActivity
 

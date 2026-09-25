@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:mindfull/shared/services/sync_service.dart';
+import 'package:mindful/shared/services/sync_service.dart';
 
 void main() {
   late DateTime now;

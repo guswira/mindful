@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:mindfull/core/l10n/app_language.dart';
-import 'package:mindfull/core/l10n/app_language_controller.dart';
-import 'package:mindfull/features/settings/data/journal_reminders_controller.dart';
-import 'package:mindfull/features/settings/data/settings_repository.dart';
-import 'package:mindfull/features/settings/presentation/settings_screen.dart';
+import 'package:mindful/core/l10n/app_language.dart';
+import 'package:mindful/core/l10n/app_language_controller.dart';
+import 'package:mindful/features/settings/data/journal_reminders_controller.dart';
+import 'package:mindful/features/settings/data/settings_repository.dart';
+import 'package:mindful/features/settings/presentation/settings_screen.dart';
 
 class _FakeJournalReminders extends JournalReminders {
   @override

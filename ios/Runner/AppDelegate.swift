@@ -9,7 +9,7 @@ import UIKit
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
     GeneratedPluginRegistrant.register(with: self)
-    if let registrar = registrar(forPlugin: "MindfullAppActions") {
+    if let registrar = registrar(forPlugin: "MindfulAppActions") {
       AppActionBridge.shared.attach(to: registrar.messenger())
     }
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
@@ -17,7 +17,7 @@ import UIKit
 }
 
 /// Hands actions triggered from outside the app (App Intents — Shortcuts,
-/// Siri, Back Tap) to Dart over the `mindfull/app_actions` channel.
+/// Siri, Back Tap) to Dart over the `mindful/app_actions` channel.
 ///
 /// An intent can fire before Dart has registered its handler (a cold start
 /// from Back Tap is the common case), so the action is kept as pending
@@ -31,7 +31,7 @@ final class AppActionBridge {
 
   func attach(to messenger: FlutterBinaryMessenger) {
     let channel = FlutterMethodChannel(
-      name: "mindfull/app_actions",
+      name: "mindful/app_actions",
       binaryMessenger: messenger
     )
     channel.setMethodCallHandler { [weak self] call, result in
@@ -58,11 +58,11 @@ final class AppActionBridge {
 
 /// "Add spending" — opens the app on the Add Money sheet with Spending
 /// selected. Exposed to Shortcuts (and so to Settings > Accessibility >
-/// Touch > Back Tap) through [MindfullShortcuts].
+/// Touch > Back Tap) through [MindfulShortcuts].
 @available(iOS 16.0, *)
 struct AddSpendingIntent: AppIntent {
   static var title: LocalizedStringResource = "Add spending"
-  static var description = IntentDescription("Opens Mindfull to log a new spending entry.")
+  static var description = IntentDescription("Opens Mindful to log a new spending entry.")
   static var openAppWhenRun: Bool = true
 
   @MainActor
@@ -75,7 +75,7 @@ struct AddSpendingIntent: AppIntent {
 /// Registers the app's intents as App Shortcuts, so they show up in the
 /// Shortcuts app with no setup by the user.
 @available(iOS 16.0, *)
-struct MindfullShortcuts: AppShortcutsProvider {
+struct MindfulShortcuts: AppShortcutsProvider {
   static var appShortcuts: [AppShortcut] {
     AppShortcut(
       intent: AddSpendingIntent(),

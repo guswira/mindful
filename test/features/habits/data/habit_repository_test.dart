@@ -2,11 +2,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 import 'package:mocktail/mocktail.dart';
 
-import 'package:mindfull/features/habits/data/habit_repository.dart';
-import 'package:mindfull/features/habits/data/supabase_habit_datasource.dart';
-import 'package:mindfull/features/habits/domain/habit.dart';
-import 'package:mindfull/features/habits/domain/habit_log.dart';
-import 'package:mindfull/shared/models/sync_status.dart';
+import 'package:mindful/features/habits/data/habit_repository.dart';
+import 'package:mindful/features/habits/data/supabase_habit_datasource.dart';
+import 'package:mindful/features/habits/domain/habit.dart';
+import 'package:mindful/features/habits/domain/habit_log.dart';
+import 'package:mindful/shared/models/sync_status.dart';
 
 class _MockBox extends Mock implements Box<dynamic> {}
 

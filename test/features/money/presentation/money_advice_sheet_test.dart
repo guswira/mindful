@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:mindfull/core/theme/app_theme.dart';
-import 'package:mindfull/features/money/domain/money_advice.dart';
-import 'package:mindfull/features/money/presentation/money_advice_sheet.dart';
+import 'package:mindful/core/theme/app_theme.dart';
+import 'package:mindful/features/money/domain/money_advice.dart';
+import 'package:mindful/features/money/presentation/money_advice_sheet.dart';
 
 void main() {
   Widget wrap(Widget child) => MaterialApp(

@@ -5,10 +5,10 @@ import 'package:mocktail/mocktail.dart';
 import 'package:timezone/data/latest_all.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
 
-import 'package:mindfull/features/habits/domain/habit.dart';
-import 'package:mindfull/features/habits/domain/habit_action.dart';
-import 'package:mindfull/features/tasks/domain/task.dart';
-import 'package:mindfull/shared/services/notification_service.dart';
+import 'package:mindful/features/habits/domain/habit.dart';
+import 'package:mindful/features/habits/domain/habit_action.dart';
+import 'package:mindful/features/tasks/domain/task.dart';
+import 'package:mindful/shared/services/notification_service.dart';
 
 class _MockPlugin extends Mock implements FlutterLocalNotificationsPlugin {}
 

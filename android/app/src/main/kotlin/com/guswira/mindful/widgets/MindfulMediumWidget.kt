@@ -1,4 +1,4 @@
-package com.example.mindfull.widgets
+package com.guswira.mindful.widgets
 
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
@@ -7,8 +7,8 @@ import android.content.Intent
 import android.net.Uri
 import android.view.View
 import android.widget.RemoteViews
-import com.example.mindfull.MainActivity
-import com.example.mindfull.R
+import com.guswira.mindful.MainActivity
+import com.guswira.mindful.R
 import es.antonborri.home_widget.HomeWidgetLaunchIntent
 import es.antonborri.home_widget.HomeWidgetPlugin
 
@@ -20,7 +20,7 @@ import es.antonborri.home_widget.HomeWidgetPlugin
  * written by `widget_service.dart`. See SPEC.md Home and Lock Screen
  * Widgets.
  */
-class MindfullMediumWidget : AppWidgetProvider() {
+class MindfulMediumWidget : AppWidgetProvider() {
   override fun onUpdate(
       context: Context,
       appWidgetManager: AppWidgetManager,
@@ -37,7 +37,7 @@ class MindfullMediumWidget : AppWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         widgetId: Int,
     ) {
-      val views = RemoteViews(context.packageName, R.layout.mindfull_medium_widget)
+      val views = RemoteViews(context.packageName, R.layout.mindful_medium_widget)
 
       // `home_widget`'s Flutter side saves data via `HomeWidgetPlugin`, which
       // persists it to its own "HomeWidgetPreferences" file with no key
@@ -109,7 +109,7 @@ class MindfullMediumWidget : AppWidgetProvider() {
           HomeWidgetLaunchIntent.getActivity(
               context,
               MainActivity::class.java,
-              Uri.parse("mindfull://open-write-sheet"),
+              Uri.parse("mindful://open-write-sheet"),
           )
       views.setOnClickPendingIntent(R.id.pencil_btn, writeIntent)
 

@@ -1,4 +1,4 @@
-package com.example.mindfull.widgets
+package com.guswira.mindful.widgets
 
 import android.content.Context
 import android.content.Intent
@@ -6,7 +6,7 @@ import android.net.Uri
 import android.view.View
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
-import com.example.mindfull.R
+import com.guswira.mindful.R
 import org.json.JSONArray
 
 /** One habit row's worth of the `habits` JSON `widget_service.dart` saves. */
@@ -55,7 +55,7 @@ class HabitWidgetFactory(
       // opens the habit's own detail screen, same as a task row does.
       val fillInIntent =
           Intent().apply {
-            data = Uri.parse("mindfull://open-habit?habitId=${habit.id}")
+            data = Uri.parse("mindful://open-habit?habitId=${habit.id}")
           }
       views.setOnClickFillInIntent(R.id.habit_row_root, fillInIntent)
     }
@@ -70,12 +70,12 @@ class HabitWidgetFactory(
         // A view inside a RemoteViewsService-backed list can't use
         // setOnClickPendingIntent (silently ignored) — only a fill-in
         // intent merged into the ListView's PendingIntentTemplate, set
-        // once in MindfullMediumWidget.
+        // once in MindfulMediumWidget.
         val fillInIntent =
             Intent().apply {
               data =
                   Uri.parse(
-                      "mindfull://log-habit?habitId=${habit.id}&action_label=$action",
+                      "mindful://log-habit?habitId=${habit.id}&action_label=$action",
                   )
             }
         pill.setOnClickFillInIntent(R.id.pill_label, fillInIntent)

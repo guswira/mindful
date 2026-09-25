@@ -5,16 +5,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 import 'package:mocktail/mocktail.dart';
 
-import 'package:mindfull/core/theme/app_theme.dart';
-import 'package:mindfull/features/auth/domain/auth_state.dart';
-import 'package:mindfull/features/money/data/money_repository.dart';
-import 'package:mindfull/features/money/domain/entry_type.dart';
-import 'package:mindfull/features/money/domain/money_entry.dart';
-import 'package:mindfull/features/money/presentation/add_money_sheet.dart';
-import 'package:mindfull/shared/models/sync_status.dart';
-import 'package:mindfull/shared/services/widget_service.dart';
-import 'package:mindfull/shared/widgets/shake_widget.dart';
-import 'package:mindfull/shared/widgets/tinted_pill.dart';
+import 'package:mindful/core/theme/app_theme.dart';
+import 'package:mindful/features/auth/domain/auth_state.dart';
+import 'package:mindful/features/money/data/money_repository.dart';
+import 'package:mindful/features/money/domain/entry_type.dart';
+import 'package:mindful/features/money/domain/money_entry.dart';
+import 'package:mindful/features/money/presentation/add_money_sheet.dart';
+import 'package:mindful/shared/models/sync_status.dart';
+import 'package:mindful/shared/services/widget_service.dart';
+import 'package:mindful/shared/widgets/shake_widget.dart';
+import 'package:mindful/shared/widgets/tinted_pill.dart';
 
 class _MockBox extends Mock implements Box<dynamic> {}
 

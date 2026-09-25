@@ -5,18 +5,18 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 import 'package:mocktail/mocktail.dart';
 
-import 'package:mindfull/core/theme/app_theme.dart';
-import 'package:mindfull/features/ai/domain/food_scan_exception.dart';
-import 'package:mindfull/features/ai/presentation/food_scan_retry.dart';
-import 'package:mindfull/features/money/data/money_repository.dart';
-import 'package:mindfull/features/money/domain/entry_type.dart';
-import 'package:mindfull/features/money/domain/money_advice.dart';
-import 'package:mindfull/features/money/domain/money_entry.dart';
-import 'package:mindfull/features/money/presentation/money_advice_flow.dart';
-import 'package:mindfull/features/money/presentation/money_advice_sheet.dart';
-import 'package:mindfull/shared/models/sync_status.dart';
-import 'package:mindfull/shared/services/gemini_service.dart';
-import 'package:mindfull/shared/services/notification_service.dart';
+import 'package:mindful/core/theme/app_theme.dart';
+import 'package:mindful/features/ai/domain/food_scan_exception.dart';
+import 'package:mindful/features/ai/presentation/food_scan_retry.dart';
+import 'package:mindful/features/money/data/money_repository.dart';
+import 'package:mindful/features/money/domain/entry_type.dart';
+import 'package:mindful/features/money/domain/money_advice.dart';
+import 'package:mindful/features/money/domain/money_entry.dart';
+import 'package:mindful/features/money/presentation/money_advice_flow.dart';
+import 'package:mindful/features/money/presentation/money_advice_sheet.dart';
+import 'package:mindful/shared/models/sync_status.dart';
+import 'package:mindful/shared/services/gemini_service.dart';
+import 'package:mindful/shared/services/notification_service.dart';
 
 class _MockBox extends Mock implements Box<dynamic> {}
 

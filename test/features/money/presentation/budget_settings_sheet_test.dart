@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:mindfull/core/theme/app_theme.dart';
-import 'package:mindfull/features/money/domain/budget_settings.dart';
-import 'package:mindfull/features/money/domain/budget_type.dart';
-import 'package:mindfull/features/money/presentation/budget_settings_sheet.dart';
-import 'package:mindfull/shared/widgets/tinted_pill.dart';
+import 'package:mindful/core/theme/app_theme.dart';
+import 'package:mindful/features/money/domain/budget_settings.dart';
+import 'package:mindful/features/money/domain/budget_type.dart';
+import 'package:mindful/features/money/presentation/budget_settings_sheet.dart';
+import 'package:mindful/shared/widgets/tinted_pill.dart';
 
 final _monthlySettings = BudgetSettings(
   id: 'b1',

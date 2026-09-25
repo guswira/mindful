@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:mindfull/core/theme/glass_theme.dart';
-import 'package:mindfull/features/habits/domain/habit.dart';
-import 'package:mindfull/features/habits/domain/habit_log.dart';
-import 'package:mindfull/features/habits/presentation/habit_tab.dart';
-import 'package:mindfull/features/home/presentation/widgets/streak_row.dart';
-import 'package:mindfull/features/journal/data/journal_entries_controller.dart';
-import 'package:mindfull/features/journal/domain/journal_entry.dart';
-import 'package:mindfull/features/tasks/domain/task.dart';
-import 'package:mindfull/features/tasks/presentation/task_tab.dart';
+import 'package:mindful/core/theme/glass_theme.dart';
+import 'package:mindful/features/habits/domain/habit.dart';
+import 'package:mindful/features/habits/domain/habit_log.dart';
+import 'package:mindful/features/habits/presentation/habit_tab.dart';
+import 'package:mindful/features/home/presentation/widgets/streak_row.dart';
+import 'package:mindful/features/journal/data/journal_entries_controller.dart';
+import 'package:mindful/features/journal/domain/journal_entry.dart';
+import 'package:mindful/features/tasks/domain/task.dart';
+import 'package:mindful/features/tasks/presentation/task_tab.dart';
 
 final _today = DateTime.now();
 final _todayDate = DateTime(_today.year, _today.month, _today.day);

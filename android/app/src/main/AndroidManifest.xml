@@ -13,7 +13,7 @@
     <uses-permission android:name="android.permission.CAMERA"/>
     <uses-feature android:name="android.hardware.camera" android:required="false"/>
     <application
-        android:label="mindfull"
+        android:label="Mindful"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
@@ -37,9 +37,9 @@
                  `data` URI as go_router's initial route whenever it's set —
                  which it always is for a widget tap, since home_widget's
                  own (separate) widgetClicked/initiallyLaunchedFromHomeWidget
-                 channel requires `data` to carry the mindfull:// URI. That
+                 channel requires `data` to carry the mindful:// URI. That
                  collision is what throws "no routes for location:
-                 mindfull://...": go_router has no route matching a raw
+                 mindful://...": go_router has no route matching a raw
                  widget URI, because it was never meant to see one. -->
             <meta-data
               android:name="flutter_deeplinking_enabled"
@@ -74,21 +74,21 @@
         <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ActionBroadcastReceiver" />
         <!-- Small (2x2) and medium (4x2) home screen widgets. See SPEC.md
              Home and Lock Screen Widgets. -->
-        <receiver android:name=".widgets.MindfullSmallWidget"
+        <receiver android:name=".widgets.MindfulSmallWidget"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
             </intent-filter>
             <meta-data android:name="android.appwidget.provider"
-                android:resource="@xml/mindfull_small_widget_info"/>
+                android:resource="@xml/mindful_small_widget_info"/>
         </receiver>
-        <receiver android:name=".widgets.MindfullMediumWidget"
+        <receiver android:name=".widgets.MindfulMediumWidget"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
             </intent-filter>
             <meta-data android:name="android.appwidget.provider"
-                android:resource="@xml/mindfull_medium_widget_info"/>
+                android:resource="@xml/mindful_medium_widget_info"/>
         </receiver>
         <service android:name=".widgets.HabitWidgetService"
             android:exported="false"

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:mindfull/features/home/presentation/widgets/unsynced_banner.dart';
+import 'package:mindful/features/home/presentation/widgets/unsynced_banner.dart';
 
 void main() {
   testWidgets('renders nothing when nothing is stale', (tester) async {

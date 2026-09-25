@@ -1,7 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:mindfull/features/money/presentation/amount_input_formatter.dart';
+import 'package:mindful/features/money/presentation/amount_input_formatter.dart';
 
 void main() {
   group('groupDigits', () {

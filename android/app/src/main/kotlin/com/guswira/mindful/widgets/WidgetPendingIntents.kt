@@ -1,17 +1,17 @@
-package com.example.mindfull.widgets
+package com.guswira.mindful.widgets
 
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import com.example.mindfull.MainActivity
+import com.guswira.mindful.MainActivity
 import es.antonborri.home_widget.HomeWidgetLaunchIntent
 
 /**
  * A `PendingIntent` opening [MainActivity] with no `data` of its own —
  * used as the `PendingIntentTemplate` for a RemoteViewsService-backed
- * `ListView` (the habits/tasks lists on both [MindfullMediumWidget] and
- * [MindfullSmallWidget]). Each row supplies its own `data` via
+ * `ListView` (the habits/tasks lists on both [MindfulMediumWidget] and
+ * [MindfulSmallWidget]). Each row supplies its own `data` via
  * `setOnClickFillInIntent` ([HabitWidgetFactory]/[TaskWidgetFactory]),
  * which the system merges in at click time — that merge requires
  * [PendingIntent.FLAG_MUTABLE], unlike [HomeWidgetLaunchIntent], which

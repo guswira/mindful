@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
-import 'package:mindfull/features/habits/data/habit_reminders_controller.dart';
-import 'package:mindfull/features/habits/data/habit_repository.dart';
-import 'package:mindfull/features/habits/domain/habit.dart';
-import 'package:mindfull/shared/services/notification_service.dart';
+import 'package:mindful/features/habits/data/habit_reminders_controller.dart';
+import 'package:mindful/features/habits/data/habit_repository.dart';
+import 'package:mindful/features/habits/domain/habit.dart';
+import 'package:mindful/shared/services/notification_service.dart';
 
 class _MockHabitRepository extends Mock implements HabitRepository {}
 

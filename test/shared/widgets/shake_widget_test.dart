@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:mindfull/shared/widgets/shake_widget.dart';
+import 'package:mindful/shared/widgets/shake_widget.dart';
 
 void main() {
   testWidgets('renders its child untranslated until shaken', (tester) async {

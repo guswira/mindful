@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:mindfull/core/theme/app_theme.dart';
-import 'package:mindfull/features/money/domain/entry_type.dart';
-import 'package:mindfull/features/money/domain/money_entry.dart';
-import 'package:mindfull/features/money/presentation/money_detail_sheet.dart';
-import 'package:mindfull/shared/models/sync_status.dart';
+import 'package:mindful/core/theme/app_theme.dart';
+import 'package:mindful/features/money/domain/entry_type.dart';
+import 'package:mindful/features/money/domain/money_entry.dart';
+import 'package:mindful/features/money/presentation/money_detail_sheet.dart';
+import 'package:mindful/shared/models/sync_status.dart';
 
 final _spending = MoneyEntry(
   id: 'm1',

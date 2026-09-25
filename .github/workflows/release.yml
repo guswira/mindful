@@ -66,7 +66,7 @@ jobs:
           flutter build apk --release \
             --build-name="$VERSION" \
             --build-number="${{ github.run_number }}"
-          mv build/app/outputs/flutter-apk/app-release.apk "mindfull-$GITHUB_REF_NAME.apk"
+          mv build/app/outputs/flutter-apk/app-release.apk "mindful-$GITHUB_REF_NAME.apk"
 
       - name: Publish GitHub release
         env:
@@ -75,7 +75,7 @@ jobs:
           # A tag like v1.2.0-beta.1 is published as a pre-release.
           PRERELEASE=""
           [[ "$GITHUB_REF_NAME" == *-* ]] && PRERELEASE="--prerelease"
-          gh release create "$GITHUB_REF_NAME" "mindfull-$GITHUB_REF_NAME.apk" \
-            --title "Mindfull $GITHUB_REF_NAME" \
+          gh release create "$GITHUB_REF_NAME" "mindful-$GITHUB_REF_NAME.apk" \
+            --title "Mindful $GITHUB_REF_NAME" \
             --generate-notes \
             --verify-tag $PRERELEASE

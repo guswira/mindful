@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:mindfull/shared/widgets/glass_icon_button.dart';
+import 'package:mindful/shared/widgets/glass_icon_button.dart';
 
 void main() {
   testWidgets('shows its icon and calls onTap when tapped', (tester) async {

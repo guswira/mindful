@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:mindfull/shared/widgets/tinted_pill.dart';
+import 'package:mindful/shared/widgets/tinted_pill.dart';
 
 void main() {
   testWidgets('shows its label and calls onTap when tapped', (tester) async {

@@ -1,11 +1,11 @@
-package com.example.mindfull.widgets
+package com.guswira.mindful.widgets
 
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
-import com.example.mindfull.R
+import com.guswira.mindful.R
 import org.json.JSONArray
 
 /** One task row's worth of the `tasks` JSON `widget_service.dart` saves. */
@@ -50,9 +50,9 @@ class TaskWidgetFactory(
     // A row inside a RemoteViewsService-backed list can't use
     // setOnClickPendingIntent (silently ignored) — only a fill-in intent
     // merged into the ListView's PendingIntentTemplate, set once in
-    // MindfullMediumWidget.
+    // MindfulMediumWidget.
     val fillInIntent =
-        Intent().apply { data = Uri.parse("mindfull://open-task?taskId=${task.id}") }
+        Intent().apply { data = Uri.parse("mindful://open-task?taskId=${task.id}") }
     views.setOnClickFillInIntent(R.id.task_row_root, fillInIntent)
     return views
   }

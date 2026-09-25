@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:mindfull/shared/services/quote_service.dart';
+import 'package:mindful/shared/services/quote_service.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

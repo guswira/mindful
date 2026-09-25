@@ -9,7 +9,7 @@ import 'sheet_navigation.dart';
 
 /// The channel `AppActionBridge` (ios/Runner/AppDelegate.swift) sends App
 /// Intent actions over.
-const MethodChannel appActionsChannel = MethodChannel('mindfull/app_actions');
+const MethodChannel appActionsChannel = MethodChannel('mindful/app_actions');
 
 /// Handles iOS App Intents — today just "Add spending", which the user can
 /// run from Shortcuts, Siri, or bind to a Back Tap in Settings >

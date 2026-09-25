@@ -1,4 +1,4 @@
-package com.example.mindfull.widgets
+package com.guswira.mindful.widgets
 
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
@@ -10,7 +10,7 @@ import android.content.SharedPreferences
 import android.net.Uri
 import android.widget.RemoteViews
 import androidx.core.content.ContextCompat
-import com.example.mindfull.R
+import com.guswira.mindful.R
 import es.antonborri.home_widget.HomeWidgetPlugin
 
 /**
@@ -20,9 +20,9 @@ import es.antonborri.home_widget.HomeWidgetPlugin
  * written by `widget_service.dart`. See SPEC.md Home and Lock Screen
  * Widgets.
  */
-class MindfullSmallWidget : AppWidgetProvider() {
+class MindfulSmallWidget : AppWidgetProvider() {
   companion object {
-    const val ACTION_CHOOSE_MODE = "com.example.mindfull.widgets.ACTION_CHOOSE_MODE"
+    const val ACTION_CHOOSE_MODE = "com.guswira.mindful.widgets.ACTION_CHOOSE_MODE"
     const val EXTRA_MODE = "mode"
     private const val REQUEST_CODE_CHOOSE_TASKS = 101
     private const val REQUEST_CODE_CHOOSE_HABITS = 102
@@ -51,7 +51,7 @@ class MindfullSmallWidget : AppWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         widgetId: Int,
     ) {
-      val views = RemoteViews(context.packageName, R.layout.mindfull_small_widget_choose)
+      val views = RemoteViews(context.packageName, R.layout.mindful_small_widget_choose)
       // Labels are pushed by widget_service.dart in the app's language;
       // the layout's English text is only a first-launch fallback.
       val prefs = HomeWidgetPlugin.getData(context)
@@ -77,7 +77,7 @@ class MindfullSmallWidget : AppWidgetProvider() {
         requestCode: Int,
     ): PendingIntent {
       val intent =
-          Intent(context, MindfullSmallWidget::class.java).apply {
+          Intent(context, MindfulSmallWidget::class.java).apply {
             action = ACTION_CHOOSE_MODE
             putExtra(EXTRA_MODE, mode)
           }
@@ -97,7 +97,7 @@ class MindfullSmallWidget : AppWidgetProvider() {
         prefs: SharedPreferences,
     ) {
       val isTasks = mode == "tasks"
-      val views = RemoteViews(context.packageName, R.layout.mindfull_small_widget)
+      val views = RemoteViews(context.packageName, R.layout.mindful_small_widget)
 
       views.setTextViewText(
           R.id.small_title,
@@ -164,7 +164,7 @@ class MindfullSmallWidget : AppWidgetProvider() {
 
     val appWidgetManager = AppWidgetManager.getInstance(context)
     val widgetIds =
-        appWidgetManager.getAppWidgetIds(ComponentName(context, MindfullSmallWidget::class.java))
+        appWidgetManager.getAppWidgetIds(ComponentName(context, MindfulSmallWidget::class.java))
     for (widgetId in widgetIds) {
       updateWidget(context, appWidgetManager, widgetId)
     }

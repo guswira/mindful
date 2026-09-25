@@ -5,10 +5,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/intl.dart';
 import 'package:mocktail/mocktail.dart';
 
-import 'package:mindfull/core/l10n/app_language.dart';
-import 'package:mindfull/core/l10n/app_language_controller.dart';
-import 'package:mindfull/core/l10n/l10n.dart';
-import 'package:mindfull/features/settings/data/settings_repository.dart';
+import 'package:mindful/core/l10n/app_language.dart';
+import 'package:mindful/core/l10n/app_language_controller.dart';
+import 'package:mindful/core/l10n/l10n.dart';
+import 'package:mindful/features/settings/data/settings_repository.dart';
 
 class _MockSettingsRepository extends Mock implements SettingsRepository {}
 

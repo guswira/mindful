@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:mindfull/core/theme/app_theme.dart';
-import 'package:mindfull/features/tasks/domain/task.dart';
-import 'package:mindfull/features/tasks/presentation/add_task_sheet.dart';
-import 'package:mindfull/features/tasks/presentation/add_task_sheet_subtasks.dart';
-import 'package:mindfull/shared/widgets/shake_widget.dart';
-import 'package:mindfull/shared/widgets/tinted_pill.dart';
+import 'package:mindful/core/theme/app_theme.dart';
+import 'package:mindful/features/tasks/domain/task.dart';
+import 'package:mindful/features/tasks/presentation/add_task_sheet.dart';
+import 'package:mindful/features/tasks/presentation/add_task_sheet_subtasks.dart';
+import 'package:mindful/shared/widgets/shake_widget.dart';
+import 'package:mindful/shared/widgets/tinted_pill.dart';
 
 final _task = Task(
   id: 't1',

@@ -4,15 +4,15 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
-import 'package:mindfull/features/habits/data/habit_repository.dart';
-import 'package:mindfull/features/habits/domain/habit.dart';
-import 'package:mindfull/features/habits/domain/habit_action.dart';
-import 'package:mindfull/features/habits/domain/habit_log.dart';
-import 'package:mindfull/features/journal/data/journal_repository.dart';
-import 'package:mindfull/features/journal/domain/journal_entry.dart';
-import 'package:mindfull/features/tasks/data/task_repository.dart';
-import 'package:mindfull/features/tasks/domain/task.dart';
-import 'package:mindfull/shared/services/widget_service.dart';
+import 'package:mindful/features/habits/data/habit_repository.dart';
+import 'package:mindful/features/habits/domain/habit.dart';
+import 'package:mindful/features/habits/domain/habit_action.dart';
+import 'package:mindful/features/habits/domain/habit_log.dart';
+import 'package:mindful/features/journal/data/journal_repository.dart';
+import 'package:mindful/features/journal/domain/journal_entry.dart';
+import 'package:mindful/features/tasks/data/task_repository.dart';
+import 'package:mindful/features/tasks/domain/task.dart';
+import 'package:mindful/shared/services/widget_service.dart';
 
 class _MockJournalRepository extends Mock implements JournalRepository {}
 

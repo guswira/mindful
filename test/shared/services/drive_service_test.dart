@@ -4,14 +4,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:mocktail/mocktail.dart';
 
-import 'package:mindfull/features/habits/domain/habit.dart';
-import 'package:mindfull/features/habits/domain/habit_log.dart';
-import 'package:mindfull/features/journal/domain/journal_entry.dart';
-import 'package:mindfull/features/money/domain/budget_settings.dart';
-import 'package:mindfull/features/money/domain/entry_type.dart';
-import 'package:mindfull/features/money/domain/money_entry.dart';
-import 'package:mindfull/features/tasks/domain/task.dart';
-import 'package:mindfull/shared/services/drive_service.dart';
+import 'package:mindful/features/habits/domain/habit.dart';
+import 'package:mindful/features/habits/domain/habit_log.dart';
+import 'package:mindful/features/journal/domain/journal_entry.dart';
+import 'package:mindful/features/money/domain/budget_settings.dart';
+import 'package:mindful/features/money/domain/entry_type.dart';
+import 'package:mindful/features/money/domain/money_entry.dart';
+import 'package:mindful/features/tasks/domain/task.dart';
+import 'package:mindful/shared/services/drive_service.dart';
 
 class _MockClient extends Mock implements http.Client {}
 

@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:mindfull/features/money/domain/entry_type.dart';
-import 'package:mindfull/features/money/domain/money_entry.dart';
-import 'package:mindfull/features/money/presentation/money_advice_summary.dart';
-import 'package:mindfull/shared/models/sync_status.dart';
+import 'package:mindful/features/money/domain/entry_type.dart';
+import 'package:mindful/features/money/domain/money_entry.dart';
+import 'package:mindful/features/money/presentation/money_advice_summary.dart';
+import 'package:mindful/shared/models/sync_status.dart';
 
 MoneyEntry _entry(
   String id,

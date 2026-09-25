@@ -24,17 +24,17 @@ class WidgetProviderNames {
   // only (no relative-package form), so this must stay in sync with
   // android/app/build.gradle.kts's applicationId and the `package`
   // declared in the widgets/ provider classes.
-  static const String _androidPackage = 'com.example.mindfull.widgets';
+  static const String _androidPackage = 'com.guswira.mindful.widgets';
   static const String mediumAndroidQualified =
-      '$_androidPackage.MindfullMediumWidget';
+      '$_androidPackage.MindfulMediumWidget';
   static const String smallAndroidQualified =
-      '$_androidPackage.MindfullSmallWidget';
+      '$_androidPackage.MindfulSmallWidget';
 
   // iOS widgets are looked up by the `kind` given to their WidgetKit
   // `StaticConfiguration`/`AppIntentConfiguration`, not a class name.
-  static const String iOSMediumWidget = 'MindfullMediumWidget';
-  static const String iOSSmallWidget = 'MindfullSmallWidget';
-  static const String iOSLockScreenWidget = 'MindfullLockScreen';
+  static const String iOSMediumWidget = 'MindfulMediumWidget';
+  static const String iOSSmallWidget = 'MindfulSmallWidget';
+  static const String iOSLockScreenWidget = 'MindfulLockScreen';
 }
 
 /// Collects today's home/lock screen widget data and pushes it to the

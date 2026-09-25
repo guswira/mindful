@@ -10,7 +10,7 @@ import 'glass_bottom_sheet.dart';
 
 /// Shows the write sheet's 4 options (journal/task/habit/money) as a modal
 /// over [context] — used by `WriteButton` and by the medium widget's
-/// pencil button (`mindfull://open-write-sheet`). See SPEC.md Floating
+/// pencil button (`mindful://open-write-sheet`). See SPEC.md Floating
 /// Island Nav Bar, Home and Lock Screen Widgets, and Money Flow Feature
 /// Write menu.
 ///

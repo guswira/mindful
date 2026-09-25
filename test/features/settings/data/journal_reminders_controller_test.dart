@@ -2,10 +2,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
-import 'package:mindfull/core/l10n/app_language.dart';
-import 'package:mindfull/features/settings/data/journal_reminders_controller.dart';
-import 'package:mindfull/features/settings/data/settings_repository.dart';
-import 'package:mindfull/shared/services/notification_service.dart';
+import 'package:mindful/core/l10n/app_language.dart';
+import 'package:mindful/features/settings/data/journal_reminders_controller.dart';
+import 'package:mindful/features/settings/data/settings_repository.dart';
+import 'package:mindful/shared/services/notification_service.dart';
 
 class _FakeSettingsRepository implements SettingsRepository {
   bool morning = true;

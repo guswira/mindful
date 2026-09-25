@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:mindfull/core/theme/glass_theme.dart';
-import 'package:mindfull/features/habits/domain/habit.dart';
-import 'package:mindfull/features/habits/domain/habit_log.dart';
-import 'package:mindfull/features/habits/presentation/habit_tab.dart';
-import 'package:mindfull/features/home/presentation/widgets/upcoming_habits_strip.dart';
+import 'package:mindful/core/theme/glass_theme.dart';
+import 'package:mindful/features/habits/domain/habit.dart';
+import 'package:mindful/features/habits/domain/habit_log.dart';
+import 'package:mindful/features/habits/presentation/habit_tab.dart';
+import 'package:mindful/features/home/presentation/widgets/upcoming_habits_strip.dart';
 
 final _notDoneHabit = Habit(
   id: 'h1',

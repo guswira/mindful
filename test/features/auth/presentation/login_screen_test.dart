@@ -4,8 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:supabase_flutter/supabase_flutter.dart' show AuthException;
 
-import 'package:mindfull/features/auth/domain/auth_state.dart';
-import 'package:mindfull/features/auth/presentation/login_screen.dart';
+import 'package:mindful/features/auth/domain/auth_state.dart';
+import 'package:mindful/features/auth/presentation/login_screen.dart';
 
 class _FailingAuthNotifier extends AuthNotifier {
   @override

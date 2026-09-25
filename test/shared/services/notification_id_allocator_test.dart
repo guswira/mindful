@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:mindfull/shared/services/notification_id_allocator.dart';
+import 'package:mindful/shared/services/notification_id_allocator.dart';
 
 void main() {
   late NotificationIdAllocator allocator;

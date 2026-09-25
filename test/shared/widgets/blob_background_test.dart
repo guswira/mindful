@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:mindfull/shared/widgets/blob_background.dart';
+import 'package:mindful/shared/widgets/blob_background.dart';
 
 void main() {
   testWidgets('renders its child above the blob layer', (tester) async {

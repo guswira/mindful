@@ -66,7 +66,7 @@ GoRouter appRouter(Ref ref) {
     redirect: (context, state) =>
         _redirect(ref.read(authNotifierProvider), state),
     // Defense in depth: the known cause of an unroutable location — a
-    // widget tap's launch Intent handing its `mindfull://` data URI to
+    // widget tap's launch Intent handing its `mindful://` data URI to
     // FlutterActivity as an initial route — is disabled via
     // flutter_deeplinking_enabled in AndroidManifest.xml. This is just a
     // backstop against any other stray location, so it never crashes the
@@ -186,9 +186,9 @@ GoRouter appRouter(Ref ref) {
     }
   });
 
-  // Home/lock screen widget taps: `mindfull://open-write-sheet`,
-  // `mindfull://log-habit`, `mindfull://open-task`, `mindfull://home/tasks`
-  // and `mindfull://home/habits`, set by the native widget providers. See
+  // Home/lock screen widget taps: `mindful://open-write-sheet`,
+  // `mindful://log-habit`, `mindful://open-task`, `mindful://home/tasks`
+  // and `mindful://home/habits`, set by the native widget providers. See
   // SPEC.md Home and Lock Screen Widgets.
   unawaited(
     HomeWidget.initiallyLaunchedFromHomeWidget().then(

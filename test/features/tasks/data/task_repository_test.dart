@@ -2,10 +2,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 import 'package:mocktail/mocktail.dart';
 
-import 'package:mindfull/features/tasks/data/supabase_task_datasource.dart';
-import 'package:mindfull/features/tasks/data/task_repository.dart';
-import 'package:mindfull/features/tasks/domain/task.dart';
-import 'package:mindfull/shared/models/sync_status.dart';
+import 'package:mindful/features/tasks/data/supabase_task_datasource.dart';
+import 'package:mindful/features/tasks/data/task_repository.dart';
+import 'package:mindful/features/tasks/domain/task.dart';
+import 'package:mindful/shared/models/sync_status.dart';
 
 class _MockBox extends Mock implements Box<dynamic> {}
 

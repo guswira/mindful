@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "mindfull" "\0"
+            VALUE "FileDescription", "mindful" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "mindfull" "\0"
+            VALUE "InternalName", "mindful" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "mindfull.exe" "\0"
-            VALUE "ProductName", "mindfull" "\0"
+            VALUE "OriginalFilename", "mindful.exe" "\0"
+            VALUE "ProductName", "mindful" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

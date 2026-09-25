@@ -2,10 +2,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
-import 'package:mindfull/features/tasks/data/task_reminders_controller.dart';
-import 'package:mindfull/features/tasks/data/task_repository.dart';
-import 'package:mindfull/features/tasks/domain/task.dart';
-import 'package:mindfull/shared/services/notification_service.dart';
+import 'package:mindful/features/tasks/data/task_reminders_controller.dart';
+import 'package:mindful/features/tasks/data/task_repository.dart';
+import 'package:mindful/features/tasks/domain/task.dart';
+import 'package:mindful/shared/services/notification_service.dart';
 
 class _MockTaskRepository extends Mock implements TaskRepository {}
 

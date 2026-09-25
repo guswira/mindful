@@ -1,4 +1,4 @@
-# Mindfull App
+# Mindful App
 
 A personal productivity app for daily journaling, habit tracking, and task
 management. Frosted glass dark theme throughout. Google Sign-In auth.
@@ -528,9 +528,9 @@ exposes an App Intent, and the user binds it to Double/Triple Tap.
 
 ios/Runner/AppDelegate.swift (iOS 16+):
   AddSpendingIntent — "Add spending", openAppWhenRun
-  MindfullShortcuts (AppShortcutsProvider) — lists it in Shortcuts with no
-    user setup; Siri phrases "Add/Log spending in Mindfull"
-  AppActionBridge — MethodChannel `mindfull/app_actions`:
+  MindfulShortcuts (AppShortcutsProvider) — lists it in Shortcuts with no
+    user setup; Siri phrases "Add/Log spending in Mindful"
+  AppActionBridge — MethodChannel `mindful/app_actions`:
     native → Dart: `action` (arg: action id, e.g. 'addSpending')
     Dart → native: `takePendingAction` — collects an action that fired
       before Dart registered its handler (cold start from Back Tap)
@@ -544,7 +544,7 @@ lib/core/router/app_intent_actions.dart — listenForAppIntentActions(router),
 
 User setup: Settings > Accessibility > Touch > Back Tap > Triple Tap >
   "Add spending" (under Shortcuts; if it isn't listed, add it from the
-  Mindfull section of the Shortcuts app first).
+  Mindful section of the Shortcuts app first).
 
 Intent titles/phrases are native (English only), like the home widgets'
 labels — out of scope for the Dart ARB files.

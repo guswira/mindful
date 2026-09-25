@@ -65,7 +65,7 @@ jobs:
 
       - uses: actions/upload-artifact@v7
         with:
-          name: mindfull-android-apk
+          name: mindful-android-apk
           path: build/app/outputs/flutter-apk/app-release.apk
           retention-days: 7
 
@@ -99,10 +99,10 @@ jobs:
       - name: Package unsigned .app
         run: |
           cd build/ios/iphoneos
-          zip -qr ../../../mindfull-ios-unsigned.zip Runner.app
+          zip -qr ../../../mindful-ios-unsigned.zip Runner.app
 
       - uses: actions/upload-artifact@v7
         with:
-          name: mindfull-ios-unsigned
-          path: mindfull-ios-unsigned.zip
+          name: mindful-ios-unsigned
+          path: mindful-ios-unsigned.zip
           retention-days: 7

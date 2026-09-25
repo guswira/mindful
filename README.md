@@ -1,10 +1,10 @@
-# Mindfull
+# Mindful
 
 > A personal project: Built this app for myself to track my own mindfulness,
 > habits, and day-to-day life. It isn't a commercial product and isn't on any
 > app store.
 
-Mindfull puts a daily journal, habit tracker, task list, spending tracker, and
+Mindful puts a daily journal, habit tracker, task list, spending tracker, and
 an experimental AI food scanner in one calm app with a dark frosted-glass
 look. I built it because I wanted a single place to check in with myself each
 day, instead of spreading that across five different apps.
@@ -59,7 +59,7 @@ Built with **Flutter** for **iOS and Android**, with **Supabase** as the backend
   a progress notification tracks it, so you can keep using the app
 
 ### 📱 Home screen widgets & shortcuts
-Most check-ins shouldn't need the full app, so Mindfull reaches out onto the
+Most check-ins shouldn't need the full app, so Mindful reaches out onto the
 home screen, the lock screen, and the system itself.
 
 **Home screen widgets** (native, not a Flutter view):
@@ -88,7 +88,7 @@ The titles follow the app language and change as soon as you switch it.
 **iOS App Intents: Siri, the Shortcuts app, and Back Tap**
 - "Add spending" is a native App Intent, so it shows up in the Shortcuts app
   with no setup
-- Say *"Add spending in Mindfull"* to Siri
+- Say *"Add spending in Mindful"* to Siri
 - Bind it to **Back Tap** (Settings › Accessibility › Touch › Back Tap), then
   triple-tap the back of your phone to log an expense
 - Works from a cold start too: the action waits until the app has finished

@@ -2,11 +2,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 import 'package:mocktail/mocktail.dart';
 
-import 'package:mindfull/features/money/data/money_repository.dart';
-import 'package:mindfull/features/money/domain/budget_settings.dart';
-import 'package:mindfull/features/money/domain/budget_type.dart';
-import 'package:mindfull/features/money/domain/entry_type.dart';
-import 'package:mindfull/features/money/domain/money_entry.dart';
+import 'package:mindful/features/money/data/money_repository.dart';
+import 'package:mindful/features/money/domain/budget_settings.dart';
+import 'package:mindful/features/money/domain/budget_type.dart';
+import 'package:mindful/features/money/domain/entry_type.dart';
+import 'package:mindful/features/money/domain/money_entry.dart';
 
 class _MockBox extends Mock implements Box<dynamic> {}
 

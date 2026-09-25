@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
-import 'package:mindfull/app.dart';
+import 'package:mindful/app.dart';
 
 void main() {
   // The full App now reads task/habit repositories unconditionally at
@@ -15,7 +15,7 @@ void main() {
   late Directory hiveDir;
 
   setUp(() async {
-    hiveDir = await Directory.systemTemp.createTemp('mindfull_test_hive');
+    hiveDir = await Directory.systemTemp.createTemp('mindful_test_hive');
     Hive.init(hiveDir.path);
   });
 

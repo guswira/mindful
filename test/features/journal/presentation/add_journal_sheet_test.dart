@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:mindfull/core/theme/app_theme.dart';
-import 'package:mindfull/features/journal/domain/journal_entry.dart';
-import 'package:mindfull/features/journal/presentation/add_journal_sheet.dart';
-import 'package:mindfull/shared/widgets/shake_widget.dart';
-import 'package:mindfull/shared/widgets/tinted_pill.dart';
+import 'package:mindful/core/theme/app_theme.dart';
+import 'package:mindful/features/journal/domain/journal_entry.dart';
+import 'package:mindful/features/journal/presentation/add_journal_sheet.dart';
+import 'package:mindful/shared/widgets/shake_widget.dart';
+import 'package:mindful/shared/widgets/tinted_pill.dart';
 
 void main() {
   Widget buildSheet() => ProviderScope(

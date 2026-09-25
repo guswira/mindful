@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:mindfull/core/theme/glass_theme.dart';
-import 'package:mindfull/shared/widgets/floating_nav_bar.dart';
+import 'package:mindful/core/theme/glass_theme.dart';
+import 'package:mindful/shared/widgets/floating_nav_bar.dart';
 
 void main() {
   Widget buildBar(int currentIndex, ValueChanged<int> onTabChanged) =>

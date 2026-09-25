@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:mindfull/core/theme/app_theme.dart';
-import 'package:mindfull/features/ai/domain/food_analysis.dart';
-import 'package:mindfull/features/ai/presentation/food_result_sheet.dart';
+import 'package:mindful/core/theme/app_theme.dart';
+import 'package:mindful/features/ai/domain/food_analysis.dart';
+import 'package:mindful/features/ai/presentation/food_result_sheet.dart';
 
 const _analysis = FoodAnalysis(
   foodName: 'Grilled Chicken Salad',

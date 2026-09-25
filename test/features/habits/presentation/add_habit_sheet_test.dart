@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:mindfull/core/theme/app_theme.dart';
-import 'package:mindfull/features/habits/domain/habit.dart';
-import 'package:mindfull/features/habits/domain/habit_action.dart';
-import 'package:mindfull/features/habits/presentation/add_habit_sheet.dart';
-import 'package:mindfull/features/habits/presentation/add_habit_sheet_actions.dart';
-import 'package:mindfull/shared/widgets/shake_widget.dart';
-import 'package:mindfull/shared/widgets/tinted_pill.dart';
+import 'package:mindful/core/theme/app_theme.dart';
+import 'package:mindful/features/habits/domain/habit.dart';
+import 'package:mindful/features/habits/domain/habit_action.dart';
+import 'package:mindful/features/habits/presentation/add_habit_sheet.dart';
+import 'package:mindful/features/habits/presentation/add_habit_sheet_actions.dart';
+import 'package:mindful/shared/widgets/shake_widget.dart';
+import 'package:mindful/shared/widgets/tinted_pill.dart';
 
 final _habit = Habit(
   id: 'h1',

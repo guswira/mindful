@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:mindfull/core/theme/app_theme.dart';
-import 'package:mindfull/features/ai/data/food_scan_repository.dart';
-import 'package:mindfull/features/ai/domain/food_scan.dart';
-import 'package:mindfull/features/ai/presentation/ai_tab.dart';
+import 'package:mindful/core/theme/app_theme.dart';
+import 'package:mindful/features/ai/data/food_scan_repository.dart';
+import 'package:mindful/features/ai/domain/food_scan.dart';
+import 'package:mindful/features/ai/presentation/ai_tab.dart';
 
 final _scan = FoodScan(
   id: 's1',

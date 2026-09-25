@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:mindfull/core/theme/glass_theme.dart';
-import 'package:mindfull/features/journal/data/journal_entries_controller.dart';
-import 'package:mindfull/features/journal/domain/journal_entry.dart';
-import 'package:mindfull/features/journal/presentation/journal_tab.dart';
+import 'package:mindful/core/theme/glass_theme.dart';
+import 'package:mindful/features/journal/data/journal_entries_controller.dart';
+import 'package:mindful/features/journal/domain/journal_entry.dart';
+import 'package:mindful/features/journal/presentation/journal_tab.dart';
 
 class _FakeJournalEntries extends JournalEntries {
   _FakeJournalEntries(this._entries);

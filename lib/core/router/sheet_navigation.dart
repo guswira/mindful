@@ -16,7 +16,7 @@ import '../../features/tasks/presentation/task_detail_sheet.dart';
 import '../../shared/widgets/glass_bottom_sheet.dart';
 import '../../shared/widgets/write_options_sheet.dart';
 
-/// Routes a home/lock screen widget tap (`mindfull://<host><path>`, set by
+/// Routes a home/lock screen widget tap (`mindful://<host><path>`, set by
 /// the native widget providers) to the right sheet, habit log or tab. [ref]
 /// is only needed for `log-habit`, which reads the habit repository and
 /// controller directly rather than through a widget's [BuildContext]. See
@@ -113,7 +113,7 @@ BuildContext? _rootContext(GoRouter router) =>
 
 /// Opens the write sheet's 3 options (journal/task/habit) as a modal over
 /// whatever's currently on screen — used by the medium widget's pencil
-/// button (`mindfull://open-write-sheet`).
+/// button (`mindful://open-write-sheet`).
 void openWriteOptionsSheet(GoRouter router) {
   final context = _rootContext(router);
   if (context == null) {

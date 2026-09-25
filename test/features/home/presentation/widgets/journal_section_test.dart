@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:mindfull/core/theme/glass_theme.dart';
-import 'package:mindfull/features/home/presentation/widgets/journal_section.dart';
-import 'package:mindfull/features/journal/presentation/add_journal_sheet.dart';
+import 'package:mindful/core/theme/glass_theme.dart';
+import 'package:mindful/features/home/presentation/widgets/journal_section.dart';
+import 'package:mindful/features/journal/presentation/add_journal_sheet.dart';
 
 Widget _buildSection() => ProviderScope(
   child: MaterialApp(

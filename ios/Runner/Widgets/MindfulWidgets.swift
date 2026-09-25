@@ -1,6 +1,6 @@
 //
-//  MindfullWidgets.swift
-//  MindfullWidgets
+//  MindfulWidgets.swift
+//  MindfulWidgets
 //
 //  Home screen (small/medium) and lock screen widgets. Data is written by
 //  `widget_service.dart` via `home_widget`'s shared App Group container.
@@ -14,69 +14,69 @@
 import SwiftUI
 import WidgetKit
 
-private let appGroupId = "group.com.example.mindfull.widget"
+private let appGroupId = "group.com.guswira.mindful.widget"
 
 // MARK: - Entry
 
-struct MindfullTask: Identifiable {
+struct MindfulTask: Identifiable {
   let id: String
   let name: String
 }
 
-struct MindfullEntry: TimelineEntry {
+struct MindfulEntry: TimelineEntry {
   let date: Date
   let dateLabel: String
   let journalStreak: Int
   let habitsCompleted: Int
   let habitsTotal: Int
-  let tasks: [MindfullTask]
+  let tasks: [MindfulTask]
   /// Pushed by widget_service.dart in the app's language.
   var habitsLabel: String = "Habits"
   var habitsCountLabel: String? = nil
 
-  static let placeholder = MindfullEntry(
+  static let placeholder = MindfulEntry(
     date: Date(),
     dateLabel: "Sep 21",
     journalStreak: 3,
     habitsCompleted: 2,
     habitsTotal: 4,
     tasks: [
-      MindfullTask(id: "1", name: "Buy groceries"),
-      MindfullTask(id: "2", name: "Renew passport"),
+      MindfulTask(id: "1", name: "Buy groceries"),
+      MindfulTask(id: "2", name: "Renew passport"),
     ]
   )
 }
 
 // MARK: - Provider
 
-struct MindfullProvider: TimelineProvider {
-  func placeholder(in context: Context) -> MindfullEntry {
+struct MindfulProvider: TimelineProvider {
+  func placeholder(in context: Context) -> MindfulEntry {
     .placeholder
   }
 
-  func getSnapshot(in context: Context, completion: @escaping (MindfullEntry) -> Void) {
+  func getSnapshot(in context: Context, completion: @escaping (MindfulEntry) -> Void) {
     completion(currentEntry())
   }
 
-  func getTimeline(in context: Context, completion: @escaping (Timeline<MindfullEntry>) -> Void) {
+  func getTimeline(in context: Context, completion: @escaping (Timeline<MindfulEntry>) -> Void) {
     // Data only changes when the app calls `widget_service.dart`'s
     // updateWidget(), which reloads this timeline directly — no periodic
     // refresh needed in between.
     completion(Timeline(entries: [currentEntry()], policy: .never))
   }
 
-  private func currentEntry() -> MindfullEntry {
+  private func currentEntry() -> MindfulEntry {
     let data = UserDefaults(suiteName: appGroupId)
     let tasks = [
       ("task1Id", "task1Name"), ("task2Id", "task2Name"), ("task3Id", "task3Name"),
-    ].compactMap { idKey, nameKey -> MindfullTask? in
+    ].compactMap { idKey, nameKey -> MindfulTask? in
       guard let id = data?.string(forKey: idKey), let name = data?.string(forKey: nameKey) else {
         return nil
       }
-      return MindfullTask(id: id, name: name)
+      return MindfulTask(id: id, name: name)
     }
 
-    return MindfullEntry(
+    return MindfulEntry(
       date: Date(),
       dateLabel: data?.string(forKey: "date") ?? "--",
       journalStreak: data?.integer(forKey: "journalStreak") ?? 0,
@@ -91,9 +91,9 @@ struct MindfullProvider: TimelineProvider {
 
 // MARK: - Home widget (small + medium)
 
-struct MindfullHomeWidgetView: View {
+struct MindfulHomeWidgetView: View {
   @Environment(\.widgetFamily) private var family
-  var entry: MindfullEntry
+  var entry: MindfulEntry
 
   var body: some View {
     VStack(alignment: .leading, spacing: 4) {
@@ -106,9 +106,9 @@ struct MindfullHomeWidgetView: View {
         Divider()
         ForEach(entry.tasks) { task in
           // Per-row deep link to that task's detail screen — falls back
-          // to the whole-widget `.widgetURL(mindfull://home)` below on
+          // to the whole-widget `.widgetURL(mindful://home)` below on
           // iOS versions that don't route per-view Links from widgets.
-          Link(destination: URL(string: "mindfull://tasks/\(task.id)")!) {
+          Link(destination: URL(string: "mindful://tasks/\(task.id)")!) {
             Text(task.name)
               .font(.caption)
               .lineLimit(1)
@@ -118,18 +118,18 @@ struct MindfullHomeWidgetView: View {
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     .padding()
-    .widgetURL(URL(string: "mindfull://home"))
+    .widgetURL(URL(string: "mindful://home"))
   }
 }
 
-struct MindfullHomeWidget: Widget {
-  let kind: String = "MindfullHomeWidget"
+struct MindfulHomeWidget: Widget {
+  let kind: String = "MindfulHomeWidget"
 
   var body: some WidgetConfiguration {
-    StaticConfiguration(kind: kind, provider: MindfullProvider()) { entry in
-      MindfullHomeWidgetView(entry: entry)
+    StaticConfiguration(kind: kind, provider: MindfulProvider()) { entry in
+      MindfulHomeWidgetView(entry: entry)
     }
-    .configurationDisplayName("Mindfull")
+    .configurationDisplayName("Mindful")
     .description("Today's date, journal streak, habit progress and tasks.")
     .supportedFamilies([.systemSmall, .systemMedium])
   }
@@ -137,8 +137,8 @@ struct MindfullHomeWidget: Widget {
 
 // MARK: - Lock screen widget (circular)
 
-struct MindfullLockScreenWidgetView: View {
-  var entry: MindfullEntry
+struct MindfulLockScreenWidgetView: View {
+  var entry: MindfulEntry
 
   var body: some View {
     Gauge(
@@ -150,18 +150,18 @@ struct MindfullLockScreenWidgetView: View {
       Text("\(entry.habitsCompleted)/\(entry.habitsTotal)")
     }
     .gaugeStyle(.accessoryCircular)
-    .widgetURL(URL(string: "mindfull://home"))
+    .widgetURL(URL(string: "mindful://home"))
   }
 }
 
-struct MindfullLockScreenWidget: Widget {
-  let kind: String = "MindfullLockScreenWidget"
+struct MindfulLockScreenWidget: Widget {
+  let kind: String = "MindfulLockScreenWidget"
 
   var body: some WidgetConfiguration {
-    StaticConfiguration(kind: kind, provider: MindfullProvider()) { entry in
-      MindfullLockScreenWidgetView(entry: entry)
+    StaticConfiguration(kind: kind, provider: MindfulProvider()) { entry in
+      MindfulLockScreenWidgetView(entry: entry)
     }
-    .configurationDisplayName("Mindfull Habits")
+    .configurationDisplayName("Mindful Habits")
     .description("Today's habit completion count.")
     .supportedFamilies([.accessoryCircular])
   }
@@ -170,22 +170,22 @@ struct MindfullLockScreenWidget: Widget {
 // MARK: - Bundle
 
 @main
-struct MindfullWidgets: WidgetBundle {
+struct MindfulWidgets: WidgetBundle {
   var body: some Widget {
-    MindfullHomeWidget()
-    MindfullLockScreenWidget()
+    MindfulHomeWidget()
+    MindfulLockScreenWidget()
   }
 }
 
 // MARK: - Previews
 
-struct MindfullWidgets_Previews: PreviewProvider {
+struct MindfulWidgets_Previews: PreviewProvider {
   static var previews: some View {
-    MindfullHomeWidgetView(entry: .placeholder)
+    MindfulHomeWidgetView(entry: .placeholder)
       .previewContext(WidgetPreviewContext(family: .systemSmall))
-    MindfullHomeWidgetView(entry: .placeholder)
+    MindfulHomeWidgetView(entry: .placeholder)
       .previewContext(WidgetPreviewContext(family: .systemMedium))
-    MindfullLockScreenWidgetView(entry: .placeholder)
+    MindfulLockScreenWidgetView(entry: .placeholder)
       .previewContext(WidgetPreviewContext(family: .accessoryCircular))
   }
 }
