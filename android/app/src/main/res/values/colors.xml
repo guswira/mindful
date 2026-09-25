@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Both home screen widgets' frosted-glass dark theme — fixed
+         regardless of system light/dark mode, matching GlassTheme in the
+         Flutter app. See SPEC.md Home and Lock Screen Widgets. -->
+    <color name="widget_glass_background">#99121312</color>
+    <color name="widget_glass_sheen">#1FFFFFFF</color>
+    <color name="widget_glass_border">#26FFFFFF</color>
+    <color name="widget_glass_divider">#1AFFFFFF</color>
+    <color name="widget_text_primary">#FFFFFF</color>
+    <color name="widget_text_secondary">#99FFFFFF</color>
+    <color name="widget_text_footer">#59FFFFFF</color>
+    <color name="widget_text_pencil">#B3FFFFFF</color>
+    <color name="widget_task_todo_stroke">#4DFFFFFF</color>
+    <color name="widget_habit_accent">#A78BFA</color>
+    <color name="widget_habit_accent_bg">#1AA78BFA</color>
+    <color name="widget_habit_accent_border">#26A78BFA</color>
+    <color name="widget_task_accent">#60A5FA</color>
+    <color name="widget_pencil_bg">#1AFFFFFF</color>
+    <color name="widget_pencil_border">#26FFFFFF</color>
+</resources>

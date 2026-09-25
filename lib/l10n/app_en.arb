@@ -1,0 +1,680 @@
+{
+  "@@locale": "en",
+  "appTitle": "MindFull",
+  "commonCancel": "Cancel",
+  "commonDelete": "Delete",
+  "commonEdit": "Edit",
+  "commonSave": "Save",
+  "commonClose": "Close",
+  "commonRetry": "Retry",
+  "commonDone": "Done",
+  "commonViewAll": "view all",
+  "commonToday": "Today",
+  "commonYesterday": "Yesterday",
+  "commonArchive": "Archive",
+  "settingsLanguageTitle": "Language",
+  "settingsLanguageSystem": "System default",
+  "settingsLanguageSystemWithCurrent": "System default ({language})",
+  "@settingsLanguageSystemWithCurrent": {
+    "placeholders": {
+      "language": {
+        "type": "String"
+      }
+    }
+  },
+  "languageNameEnglish": "English",
+  "languageNameBahasa": "Bahasa Indonesia",
+  "aiErrorNotFood": "Couldn't identify food. Try a clearer photo.",
+  "aiErrorNoConnection": "No connection. Check your internet.",
+  "aiErrorTimeout": "Request timed out. Try again.",
+  "aiErrorCompressFailed": "Failed to compress image",
+  "aiNotifAnalyzingBody": "Analyzing your food…",
+  "aiNotifRetryingBody": "Google's servers are busy — retrying (attempt {attempt}/{maxAttempts})…",
+  "@aiNotifRetryingBody": {
+    "placeholders": {
+      "attempt": {
+        "type": "int"
+      },
+      "maxAttempts": {
+        "type": "int"
+      }
+    }
+  },
+  "aiScanSaved": "Scan saved!",
+  "aiMainIngredients": "Main ingredients",
+  "aiResultDisclaimer": "⚠ AI estimates may vary based on portion size, preparation method, and ingredients.",
+  "aiLowConfidenceWarning": "Low confidence — try a clearer, closer photo.",
+  "aiDismiss": "Dismiss",
+  "aiDiscard": "Discard",
+  "aiSaveScan": "Save scan",
+  "aiMacroProtein": "Protein",
+  "aiMacroCarbs": "Carbs",
+  "aiMacroFat": "Fat",
+  "aiMacroFiber": "Fiber",
+  "aiConfidenceHigh": "✓ Confident",
+  "aiConfidenceLow": "! Uncertain",
+  "aiConfidenceMedium": "~ Estimate",
+  "aiCaloriesUnit": "calories",
+  "aiPerServing": "per serving",
+  "aiAnalyzingTitle": "Analyzing your food...",
+  "aiAnalyzingTipIngredients": "Identifying ingredients...",
+  "aiAnalyzingTipPortions": "Estimating portions...",
+  "aiAnalyzingTipNutrition": "Calculating nutrition...",
+  "aiAnalyzingTipAlmostDone": "Almost done...",
+  "aiExperimentalTitle": "Experimental AI Features",
+  "aiExperimentalBody": "AI estimates may not be accurate. Use as a guide only — not medical advice.",
+  "aiFoodCheckerTitle": "Food Calorie Checker",
+  "aiFoodCheckerSubtitle": "Take a photo of your food to get an AI-powered nutrition estimate.",
+  "aiScanYourFood": "Scan your food",
+  "aiScanYourFoodHint": "Point camera at a meal, snack or ingredient",
+  "aiCheckFoodCalories": "📷  Check food calories",
+  "aiChooseFromGallery": "Choose from gallery",
+  "aiUnknownFood": "Unknown food",
+  "aiKcal": "kcal",
+  "aiRecentScans": "Recent scans",
+  "aiNoScansYet": "No scans yet. Try scanning your next meal!",
+  "aiLoadScansFailed": "Couldn't load scans",
+  "geminiErrorUnknown": "Something went wrong. Try again.",
+  "geminiErrorInvalidKey": "Invalid Gemini API key. Check GEMINI_API_KEY in .env.",
+  "geminiErrorBusy": "Google's AI service is busy right now. Try again in a moment.",
+  "geminiErrorQuota": "You've hit the AI usage limit. Try again later.",
+  "geminiErrorModelUnavailable": "AI model unavailable. The app may need updating.",
+  "geminiErrorPermissionDenied": "AI access denied. Check your API key's permissions.",
+  "geminiErrorGeneric": "AI service error. Try again later.",
+  "notifBudgetResetTitle": "New month, new budget",
+  "notifBudgetResetBody": "Your budget has reset.",
+  "notifBudgetChannelName": "Budget reminders",
+  "notifBudgetChannelDescription": "Monthly budget reset reminder",
+  "notifTestTitle": "Test notification",
+  "notifTestBody": "If you see this, notification delivery works on this device.",
+  "notifDebugChannelName": "Debug test notifications",
+  "notifDebugChannelDescription": "A manually triggered test notification, from Settings",
+  "notifJournalMorningTitle": "Good morning ☀️",
+  "notifJournalMorningBody": "Time to write in your journal",
+  "notifJournalEveningTitle": "How was your day? 🌙",
+  "notifJournalEveningBody": "Write it down",
+  "notifJournalChannelName": "Journal reminders",
+  "notifJournalChannelDescription": "Daily journaling reminders",
+  "notifHabitBody": "Time for {habitName}",
+  "@notifHabitBody": {
+    "placeholders": {
+      "habitName": {
+        "type": "String"
+      }
+    }
+  },
+  "notifHabitChannelName": "Habit reminders",
+  "notifHabitChannelDescription": "Reminders to complete your habits",
+  "notifTaskChannelName": "Task reminders",
+  "notifTaskChannelDescription": "Reminders for tasks with a due date",
+  "notifTaskMarkDone": "Mark done",
+  "notifFoodScanProgressTitle": "Analyzing your food…",
+  "notifFoodScanProgressChannelName": "Food scan progress",
+  "notifFoodScanProgressChannelDescription": "Shows while a food photo is being analyzed",
+  "notifFoodScanFailedTitle": "Food scan failed",
+  "notifFoodScanResultChannelName": "Food scan result",
+  "notifFoodScanResultChannelDescription": "A food scan that failed after retrying",
+  "shortcutNewJournal": "New Journal",
+  "shortcutNewTask": "New Task",
+  "shortcutNewHabit": "New Habit",
+  "shortcutAddMoney": "Add Money",
+  "shortcutScanFood": "Scan Food",
+  "widgetLabelTasks": "Todo",
+  "widgetLabelHabits": "Routines",
+  "widgetLabelShowMe": "Show me:",
+  "widgetChooseTasks": "✅ Todo",
+  "widgetChooseHabits": "💪 Routines",
+  "widgetDoneCount": "{done}/{total} done",
+  "@widgetDoneCount": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "widgetRemaining": "{count} remaining",
+  "@widgetRemaining": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "habitWeekdayMon": "Mon",
+  "habitWeekdayTue": "Tue",
+  "habitWeekdayWed": "Wed",
+  "habitWeekdayThu": "Thu",
+  "habitWeekdayFri": "Fri",
+  "habitWeekdaySat": "Sat",
+  "habitWeekdaySun": "Sun",
+  "habitRepeatOn": "Repeat on",
+  "habitCurrentStreak": "Current streak",
+  "habitLongestStreak": "Longest streak",
+  "habitSavedLocallySyncFailed": "Saved locally — sync failed: {error}",
+  "@habitSavedLocallySyncFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "habitEditTitle": "Edit habit",
+  "habitBuildNewTitle": "Build new habit",
+  "habitSectionIcon": "Icon",
+  "habitSectionColor": "Color",
+  "habitSectionReminder": "Reminder",
+  "habitSectionCustomActions": "Custom actions",
+  "habitCustomActionsHint": "Optional — e.g. Gym, Run, Walk",
+  "habitCustomActionsEmptyHint": "Leave empty for a single Done button",
+  "habitSaveChanges": "Save changes",
+  "habitAddHabit": "Add habit",
+  "habitFallbackTitle": "Habit",
+  "habitLoadError": "Could not load habit: {error}",
+  "@habitLoadError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "habitNameHint": "Habit name...",
+  "habitEmptyList": "No habits yet",
+  "habitSyncFailed": "Could not sync \"{name}\": {error}",
+  "@habitSyncFailed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "habitArchiveConfirmTitle": "Archive habit?",
+  "habitArchiveConfirmBody": "\"{name}\" will be hidden from today's list.",
+  "@habitArchiveConfirmBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "habitDeleteConfirmTitle": "Delete habit?",
+  "habitDeleteConfirmBody": "\"{name}\" and its history will be removed.",
+  "@habitDeleteConfirmBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "habitTabTitle": "Routines",
+  "habitLoadListError": "Could not load habits: {error}",
+  "@habitLoadListError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "habitAddAction": "+ Add action",
+  "taskGroupUpcoming": "Upcoming",
+  "taskGroupNoDate": "No date",
+  "taskEmptyList": "No tasks yet",
+  "taskCompletedSection": "Completed ({count})",
+  "@taskCompletedSection": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "taskSyncFailed": "Could not sync \"{name}\": {error}",
+  "@taskSyncFailed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "taskTabTitle": "Todo",
+  "taskAddTask": "Add task",
+  "taskLoadListError": "Could not load tasks: {error}",
+  "@taskLoadListError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "taskAdded": "Task added",
+  "taskUndo": "Undo",
+  "taskSheetTitle": "What to do",
+  "taskAddDueDate": "Add due date",
+  "taskAddReminder": "Add reminder",
+  "taskSaveChanges": "Save changes",
+  "taskNameHint": "What needs to be done?",
+  "taskAddSubtasks": "Add subtasks",
+  "taskAddSubtask": "+ Add subtask",
+  "taskSubtaskHint": "Subtask...",
+  "taskSubtasks": "Subtasks",
+  "taskLoadError": "Could not load task: {error}",
+  "@taskLoadError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "taskNotFound": "Task not found",
+  "taskMarkAsDone": "Mark as done",
+  "taskDeleteConfirmTitle": "Delete task",
+  "taskDeleteConfirmBody": "\"{name}\" will be removed.",
+  "@taskDeleteConfirmBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeSettingsTooltip": "Settings",
+  "homeGreetingMorning": "Good morning",
+  "homeGreetingMorningName": "Good morning, {name}",
+  "@homeGreetingMorningName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeGreetingAfternoon": "Good afternoon",
+  "homeGreetingAfternoonName": "Good afternoon, {name}",
+  "@homeGreetingAfternoonName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeGreetingEvening": "Good evening",
+  "homeGreetingEveningName": "Good evening, {name}",
+  "@homeGreetingEveningName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeSectionTodayTasks": "Today's Todo",
+  "homeSectionHabits": "Routines",
+  "homeSectionJournal": "Journal",
+  "homeJournalPlanTitle": "Write today's plan",
+  "homeJournalPlanSubtitle": "Outline your goals for a focused day.",
+  "homeJournalPlanAction": "Start",
+  "homeJournalReflectTitle": "Review what happened",
+  "homeJournalReflectSubtitle": "Reflect on your day's accomplishments.",
+  "homeJournalReflectAction": "Reflect",
+  "homeHabitsProgress": "{done}/{total}",
+  "@homeHabitsProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "homeStreakJournalLabel": "Journal streak",
+  "homeStreakHabitsLabel": "Habits today",
+  "homeStreakTasksLabel": "Tasks due",
+  "homeTasksEmpty": "What needs to be done today?",
+  "homeAddTask": "Add task",
+  "homeSyncFailed": "Could not sync \"{name}\": {error}",
+  "@homeSyncFailed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "homeHabitsAllDone": "All done! 🎉",
+  "homeHabitsEmpty": "Build your first habit",
+  "homeHabitsStart": "Start",
+  "homeUnsyncedBanner": "Some changes haven't synced yet",
+  "authSignInWithGoogle": "Sign in with Google",
+  "authSignInFailed": "Sign in failed: {error}",
+  "@authSignInFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "journalTabTitle": "Journal",
+  "journalLoadFailed": "Couldn't load entries: {error}",
+  "@journalLoadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "journalSearchHint": "Search entries",
+  "journalEmpty": "No entries yet",
+  "journalPhotoCamera": "Camera",
+  "journalPhotoGallery": "Gallery",
+  "journalTitleHint": "Title...",
+  "journalBodyHint": "What's on your mind...",
+  "journalDeleteEntry": "Delete entry",
+  "journalAddSheetTitle": "What's going on",
+  "journalSaveEntry": "Save entry",
+  "journalDeleteConfirmTitle": "Delete entry?",
+  "journalDeleteConfirmBody": "This removes the entry and its photos from Supabase.",
+  "moneyAddEntryTitle": "What's going on",
+  "moneyEditEntryTitle": "Edit entry",
+  "moneyCategoryHeading": "Category",
+  "moneyNoteHint": "Add a note...",
+  "moneySaveChanges": "Save changes",
+  "moneyTypeToggleSpending": "💸 Spending",
+  "moneyTypeToggleIncome": "💰 Income",
+  "moneyDateChange": "Change",
+  "moneyTypeSpending": "Spending",
+  "moneyTypeIncome": "Income",
+  "moneyBudgetMonthly": "Monthly",
+  "moneyBudgetDaily": "Daily",
+  "moneyBudgetSettingsTitle": "Budget settings",
+  "moneyMonthlyBudget": "Monthly budget",
+  "moneyDailyBudget": "Daily budget",
+  "moneySaveMonthly": "Save monthly",
+  "moneySaveDaily": "Save daily",
+  "moneyDeleteEntryTitle": "Delete entry",
+  "moneyDeleteEntryBody": "\"{category}\" will be removed.",
+  "@moneyDeleteEntryBody": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "moneyTabTitle": "Cashflow",
+  "moneyAddSpending": "+ Spending",
+  "moneyAddIncome": "+ Income",
+  "moneyEmptyBudgetPrompt": "Set your budget to get started",
+  "moneySetBudget": "Set budget",
+  "moneySetMonthly": "Set Monthly",
+  "moneySetDaily": "Set Daily",
+  "moneyBudgetOf": "of {currency} {amount}",
+  "@moneyBudgetOf": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "moneyGaugeOver": "Over",
+  "moneyAmountLeft": "{currency} {amount} left",
+  "@moneyAmountLeft": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "moneyPeriodThisWeek": "This Week",
+  "moneyPeriodThisMonth": "This Month",
+  "moneyPeriodAll": "All",
+  "moneyNoEntriesInPeriod": "No entries in this period",
+  "moneyRecapTitle": "Recap",
+  "moneyRecapNoSpending": "No spending yet this period",
+  "moneyRecapNet": "Net",
+  "moneyRecapTopCategory": "Top category: {emoji} {category}",
+  "@moneyRecapTopCategory": {
+    "placeholders": {
+      "emoji": {
+        "type": "String"
+      },
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "moneyMonthlyRemaining": "Monthly remaining",
+  "moneyDailyRemaining": "Daily remaining",
+  "moneyCategoryFood": "Food",
+  "moneyCategoryTransport": "Transport",
+  "moneyCategoryShopping": "Shopping",
+  "moneyCategoryHealth": "Health",
+  "moneyCategoryEntertainment": "Entertainment",
+  "moneyCategoryBills": "Bills",
+  "moneyCategoryEducation": "Education",
+  "moneyCategoryTravel": "Travel",
+  "moneyCategoryOther": "Other",
+  "moneyCategorySalary": "Salary",
+  "moneyCategoryFreelance": "Freelance",
+  "moneyCategoryInvestment": "Investment",
+  "moneyCategoryGift": "Gift",
+  "settingsTitle": "Settings",
+  "settingsSignedInFallback": "Signed in",
+  "settingsSignedInAs": "Signed in as {name}",
+  "@settingsSignedInAs": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsSignOut": "Sign out",
+  "settingsMorningReminderTitle": "Morning journal reminder",
+  "settingsMorningReminderTime": "8:00 AM",
+  "settingsEveningReminderTitle": "Evening journal reminder",
+  "settingsEveningReminderTime": "10:00 PM",
+  "settingsRemindersLoadError": "Couldn't load reminders: {error}",
+  "@settingsRemindersLoadError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsDriveConnectError": "Could not connect Drive: {error}",
+  "@settingsDriveConnectError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsDriveDisconnectTitle": "Disconnect Drive?",
+  "settingsDriveDisconnectBody": "Backups already saved to Drive are left as-is. You can reconnect and back up again at any time.",
+  "settingsDriveDisconnect": "Disconnect",
+  "settingsBackupComplete": "Backup complete",
+  "settingsBackupFailed": "Backup failed: {error}",
+  "@settingsBackupFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsDriveBackupTitle": "Drive backup",
+  "settingsDriveStatusLoadError": "Couldn't load Drive status: {error}",
+  "@settingsDriveStatusLoadError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsConnectDrive": "Connect Google Drive",
+  "settingsNoBackupsYet": "No backups yet",
+  "settingsLastBackup": "Last backup: {date}",
+  "@settingsLastBackup": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsPendingRecords": "{count} record(s) not yet backed up",
+  "@settingsPendingRecords": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsBackUpNow": "Back up now",
+  "settingsDisconnectDrive": "Disconnect Drive",
+  "settingsAutoBackupTitle": "Auto-backup monthly",
+  "settingsAutoBackupSubtitle": "Runs silently on the 1st of each month",
+  "settingsListBackupsError": "Could not list backups: {error}",
+  "@settingsListBackupsError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsNoBackupsFound": "No backups found on Drive",
+  "settingsReadBackupError": "Could not read backup: {error}",
+  "@settingsReadBackupError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsImportTitle": "Import {month} backup?",
+  "@settingsImportTitle": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsImportBody": "{journals} journals, {habits} habits, {logs} logs, {tasks} tasks.\n\nThis will add data from the selected backup. Existing data will not be deleted or overwritten.",
+  "@settingsImportBody": {
+    "placeholders": {
+      "journals": {
+        "type": "int"
+      },
+      "habits": {
+        "type": "int"
+      },
+      "logs": {
+        "type": "int"
+      },
+      "tasks": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsImport": "Import",
+  "settingsImporting": "Importing…",
+  "settingsImportCompleteTitle": "Import complete",
+  "settingsImportCompleteBody": "Added {journals} journals, {habits} habits, {logs} logs, {tasks} tasks, {money} money entries.\nSkipped {skipped} already-existing record(s).",
+  "@settingsImportCompleteBody": {
+    "placeholders": {
+      "journals": {
+        "type": "int"
+      },
+      "habits": {
+        "type": "int"
+      },
+      "logs": {
+        "type": "int"
+      },
+      "tasks": {
+        "type": "int"
+      },
+      "money": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsImportFailed": "Import failed: {error}",
+  "@settingsImportFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsDriveRestoreTitle": "Drive restore",
+  "settingsImportFromDrive": "Import from Drive",
+  "settingsDebugTitle": "Debug",
+  "settingsDebugTestScheduled": "Test notification scheduled for {time}. Leave the app — you don't need to keep it open.",
+  "@settingsDebugTestScheduled": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsDebugTestError": "Could not schedule test notification: {error}",
+  "@settingsDebugTestError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsDebugScheduling": "Scheduling…",
+  "settingsDebugScheduleTest": "Schedule test notification (5 min)",
+  "navHome": "Home",
+  "navTasks": "Tasks",
+  "navHabits": "Habits",
+  "navJournal": "Journal",
+  "navMoney": "Money",
+  "navAi": "AI Lab",
+  "writeButtonLabel": "Write",
+  "writeNewJournalEntry": "New journal entry",
+  "writeNewTask": "New task",
+  "writeNewHabit": "New habit",
+  "writeNewMoneyEntry": "New money entry",
+  "sharedUnsyncedLabel": "Not synced yet",
+  "moneyAdviceButton": "✨ AI advice",
+  "moneyAdviceTitle": "AI spending advice",
+  "moneyAdviceLoading": "Looking at your spending...",
+  "moneyAdviceSummary": "Overview",
+  "moneyAdviceInsights": "Where your money goes",
+  "moneyAdviceTips": "How to save",
+  "moneyAdviceNoEntries": "Add some spending or income first to get advice.",
+  "moneyAdviceUnreadable": "Couldn't read the AI's advice. Try again.",
+  "moneyAdviceDisclaimer": "⚠ Experimental AI advice. Use as a guide only, not financial advice.",
+  "moneyAdvicePrompt": "You are a friendly personal finance advisor. Below is a summary of the user's recorded spending and income.\n\n{data}\n\nAnalyze where most of their spending comes from, and how they can save and optimize it.\nReply in English.\nRespond with a single JSON object only — no markdown, no explanation, no code blocks — with exactly these keys:\n\"summary\": a string of two or three sentences on the overall picture,\n\"spendingInsights\": an array of 2 to 4 strings, each about one top spending category, with its amount and share of total spending,\n\"savingTips\": an array of 3 to 5 strings, each a concrete, actionable tip to save or optimize spending, specific to this data.",
+  "@moneyAdvicePrompt": {
+    "placeholders": {
+      "data": {
+        "type": "String"
+      }
+    },
+    "description": "Gemini prompt (not shown to the user). Written in the app language so Gemini replies in it. {data} is the user's money summary."
+  },
+  "notifMoneyAdviceProgressTitle": "Preparing your spending advice…",
+  "notifMoneyAdviceProgressChannelName": "AI advice progress",
+  "notifMoneyAdviceProgressChannelDescription": "Shows while AI is working on your spending advice",
+  "notifMoneyAdviceFailedTitle": "Spending advice failed",
+  "notifMoneyAdviceResultChannelName": "AI advice result",
+  "notifMoneyAdviceResultChannelDescription": "Spending advice that failed after retrying",
+  "moneyAdviceInProgress": "Still working on your advice — you'll get a notification if it fails."
+}

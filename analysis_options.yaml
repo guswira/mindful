@@ -1,0 +1,36 @@
+analyzer:
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
+include: package:flutter_lints/flutter.yaml
+
+linter:
+  rules:
+    # const
+    - prefer_const_constructors
+    - prefer_const_literals_to_create_immutables
+    - prefer_const_declarations
+    - unnecessary_const
+
+    # simplicity
+    - avoid_unnecessary_containers
+    - sized_box_for_whitespace
+    - use_decorated_box
+
+    # null safety
+    - avoid_null_checks_in_equality_operators
+    - prefer_null_aware_operators
+
+    # performance
+    - avoid_function_literals_in_foreach_calls
+    - prefer_for_elements_to_map_fromIterable
+
+    # style
+    - prefer_single_quotes
+    - always_put_required_named_parameters_first
+    - sort_child_properties_last

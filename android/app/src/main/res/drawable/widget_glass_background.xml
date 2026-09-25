@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- RemoteViews can't apply a real backdrop blur (no BackdropFilter
+     equivalent), so this approximates frosted glass with a translucent
+     dark fill, a soft top-to-bottom sheen, and a hairline border. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/widget_glass_background" />
+            <corners android:radius="20dp" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:type="linear"
+                android:angle="270"
+                android:startColor="@color/widget_glass_sheen"
+                android:endColor="#00FFFFFF" />
+            <corners android:radius="20dp" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <corners android:radius="20dp" />
+            <stroke android:width="1dp" android:color="@color/widget_glass_border" />
+        </shape>
+    </item>
+</layer-list>
