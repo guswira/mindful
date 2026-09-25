@@ -1,0 +1,108 @@
+# Checks that the app analyzes, passes its tests, and builds for Android and
+# iOS from a clean checkout.
+#
+# No real secrets are used: `.env` is bundled into the app as an asset, so
+# CI builds it from `.env.example` (empty values). That keeps keys out of the
+# downloadable artifacts of this public repo. The builds are unsigned, for
+# verification only, and are not meant for distribution.
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_VERSION: 3.35.7 # keep in sync with .fvm/fvm_config.json
+
+jobs:
+  check:
+    name: Analyze & test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      # pubspec.yaml lists .env as an asset, so it must exist.
+      - run: cp .env.example .env
+
+      - run: flutter pub get
+      - run: flutter analyze --no-pub
+      - run: flutter test
+
+  android:
+    name: Android
+    needs: check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: gradle
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - run: cp .env.example .env
+      - run: flutter pub get
+      - run: flutter build apk --release
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: mindfull-android-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 7
+
+  ios:
+    name: iOS
+    needs: check
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      # Secrets.xcconfig (Google iOS client ID) is optional for the build —
+      # the xcconfigs use `#include?`, so it's simply left out here.
+      - run: cp .env.example .env
+
+      - run: flutter pub get
+
+      - name: Cache CocoaPods
+        uses: actions/cache@v6
+        with:
+          path: ios/Pods
+          key: pods-${{ runner.os }}-${{ hashFiles('ios/Podfile.lock') }}
+
+      - run: flutter build ios --release --no-codesign
+
+      - name: Package unsigned .app
+        run: |
+          cd build/ios/iphoneos
+          zip -qr ../../../mindfull-ios-unsigned.zip Runner.app
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: mindfull-ios-unsigned
+          path: mindfull-ios-unsigned.zip
+          retention-days: 7

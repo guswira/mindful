@@ -1,0 +1,81 @@
+# On a version tag (e.g. `v1.2.0`), builds a release APK and publishes it to
+# this repo's GitHub Releases page.
+#
+#   git tag v1.2.0 && git push origin v1.2.0
+#
+# The tag sets the app version: `v1.2.0` → versionName 1.2.0, and the
+# workflow run number becomes versionCode.
+#
+# `.env` is bundled into the APK, so anyone who downloads it can read its
+# values. If the repo secrets SUPABASE_URL / SUPABASE_ANON_KEY /
+# GEMINI_API_KEY / GOOGLE_SERVER_CLIENT_ID are set, they're used to build a
+# working app. Otherwise the APK is built with empty values from
+# `.env.example`, which installs and runs but can't sign in.
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write # create the release and upload the APK
+
+env:
+  FLUTTER_VERSION: 3.35.7 # keep in sync with .fvm/fvm_config.json
+
+jobs:
+  android-release:
+    name: Android APK release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: gradle
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Write .env
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GOOGLE_SERVER_CLIENT_ID: ${{ secrets.GOOGLE_SERVER_CLIENT_ID }}
+        run: |
+          {
+            echo "SUPABASE_URL=$SUPABASE_URL"
+            echo "SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY"
+            echo "GEMINI_API_KEY=$GEMINI_API_KEY"
+            echo "GOOGLE_SERVER_CLIENT_ID=$GOOGLE_SERVER_CLIENT_ID"
+          } > .env
+
+      - run: flutter pub get
+      - run: flutter analyze --no-pub
+      - run: flutter test
+
+      - name: Build APK
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          flutter build apk --release \
+            --build-name="$VERSION" \
+            --build-number="${{ github.run_number }}"
+          mv build/app/outputs/flutter-apk/app-release.apk "mindfull-$GITHUB_REF_NAME.apk"
+
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # A tag like v1.2.0-beta.1 is published as a pre-release.
+          PRERELEASE=""
+          [[ "$GITHUB_REF_NAME" == *-* ]] && PRERELEASE="--prerelease"
+          gh release create "$GITHUB_REF_NAME" "mindfull-$GITHUB_REF_NAME.apk" \
+            --title "Mindfull $GITHUB_REF_NAME" \
+            --generate-notes \
+            --verify-tag $PRERELEASE
