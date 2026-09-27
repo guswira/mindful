@@ -22,8 +22,10 @@ private data class HabitEntry(
  * Renders one row per habit for the medium widget's habits list — a name
  * and icon, plus either a checkmark (done) or up to 2 action pills. Tapping
  * a pill opens the app and logs that action (`navigateFromWidgetUri` on the
- * Dart side does the logging); a habit with no actions has no pill to tap,
- * so tapping its row opens the app to that habit's detail screen instead.
+ * Dart side does the logging). A habit with no actions shows an empty
+ * checkbox instead, and tapping it logs the habit as plain "done". Tapping
+ * a done habit's checkmark undoes it (`unlog-habit`). Tapping the rest of
+ * an actionless row opens that habit's detail screen.
  * See SPEC.md Home and Lock Screen Widgets.
  */
 class HabitWidgetFactory(
@@ -62,6 +64,21 @@ class HabitWidgetFactory(
 
     if (habit.isCompleted) {
       views.setViewVisibility(R.id.habit_check, View.VISIBLE)
+      views.setImageViewResource(R.id.habit_check, R.drawable.ic_widget_check_habit)
+      // Tapping the filled check undoes today's log (with or without
+      // actions) — the pills come back once the widget redraws.
+      val fillInIntent =
+          Intent().apply { data = Uri.parse("mindful://unlog-habit?habitId=${habit.id}") }
+      views.setOnClickFillInIntent(R.id.habit_check, fillInIntent)
+    } else if (habit.actions.isEmpty()) {
+      // No pill to log from — an empty checkbox logs it as plain "done"
+      // (a `log-habit` with no action_label). Its own fill-in intent takes
+      // precedence over the row's `open-habit` one for taps on it.
+      views.setViewVisibility(R.id.habit_check, View.VISIBLE)
+      views.setImageViewResource(R.id.habit_check, R.drawable.ic_widget_circle_habit_todo)
+      val fillInIntent =
+          Intent().apply { data = Uri.parse("mindful://log-habit?habitId=${habit.id}") }
+      views.setOnClickFillInIntent(R.id.habit_check, fillInIntent)
     } else {
       views.setViewVisibility(R.id.habit_check, View.GONE)
       for (action in habit.actions.take(2)) {

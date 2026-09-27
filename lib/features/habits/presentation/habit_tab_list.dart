@@ -71,15 +71,21 @@ class _HabitRow extends ConsumerWidget {
 
   final HabitTabItem item;
 
+  /// Toggles today's log: tapping the chip that's already selected undoes
+  /// it, any other chip logs (or switches to) that action.
   Future<void> _handleTap(
     BuildContext context,
     WidgetRef ref,
-    HabitAction? action,
-  ) async {
+    HabitAction? action, {
+    required bool selected,
+  }) async {
+    final controller = ref.read(habitTabControllerProvider.notifier);
     try {
-      await ref
-          .read(habitTabControllerProvider.notifier)
-          .logAction(item.habit, action);
+      if (selected) {
+        await controller.unlog(item.habit);
+      } else {
+        await controller.logAction(item.habit, action);
+      }
     } catch (error) {
       if (!context.mounted) {
         return;
@@ -227,6 +233,9 @@ class _HabitRow extends ConsumerWidget {
     await notificationService.forgetHabitReminder(habitId);
   }
 
+  bool _isActionSelected(HabitAction action) =>
+      item.todayLog?.completedActionId == action.id;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final habit = item.habit;
@@ -255,7 +264,8 @@ class _HabitRow extends ConsumerWidget {
                 _ActionChip(
                   label: context.l10n.commonDone,
                   selected: isDone,
-                  onSelected: () => _handleTap(context, ref, null),
+                  onSelected: () =>
+                      _handleTap(context, ref, null, selected: isDone),
                 )
               else
                 for (final action in habit.actions)
@@ -263,8 +273,13 @@ class _HabitRow extends ConsumerWidget {
                     padding: const EdgeInsets.only(left: Spacing.xs),
                     child: _ActionChip(
                       label: action.label,
-                      selected: item.todayLog?.completedActionId == action.id,
-                      onSelected: () => _handleTap(context, ref, action),
+                      selected: _isActionSelected(action),
+                      onSelected: () => _handleTap(
+                        context,
+                        ref,
+                        action,
+                        selected: _isActionSelected(action),
+                      ),
                     ),
                   ),
             ],

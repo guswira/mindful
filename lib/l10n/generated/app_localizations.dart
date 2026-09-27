@@ -1346,6 +1346,12 @@ abstract class AppLocalizations {
   /// **'💰 Income'**
   String get moneyTypeToggleIncome;
 
+  /// No description provided for @moneyKeypadBackspace.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get moneyKeypadBackspace;
+
   /// No description provided for @moneyDateChange.
   ///
   /// In en, this message translates to:

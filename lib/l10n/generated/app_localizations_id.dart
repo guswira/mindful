@@ -702,6 +702,9 @@ class AppLocalizationsId extends AppLocalizations {
   String get moneyTypeToggleIncome => '💰 Pemasukan';
 
   @override
+  String get moneyKeypadBackspace => 'Hapus';
+
+  @override
   String get moneyDateChange => 'Ganti';
 
   @override

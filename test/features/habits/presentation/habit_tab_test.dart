@@ -57,6 +57,18 @@ class _FakeHabitTabController extends HabitTabController {
           item,
     ]);
   }
+
+  @override
+  Future<void> unlog(Habit habit) async {
+    final current = state.value ?? const <HabitTabItem>[];
+    state = AsyncData([
+      for (final item in current)
+        if (item.habit.id == habit.id)
+          (habit: item.habit, todayLog: null)
+        else
+          item,
+    ]);
+  }
 }
 
 Widget _buildTab() => ProviderScope(
@@ -109,6 +121,55 @@ void main() {
       find.widgetWithText(ChoiceChip, 'Done'),
     );
     expect(chip.selected, isTrue);
+  });
+
+  testWidgets('tapping "Done" again undoes it', (tester) async {
+    await tester.pumpWidget(_buildTab());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.widgetWithText(ChoiceChip, 'Done'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(ChoiceChip, 'Done'));
+    await tester.pumpAndSettle();
+
+    final chip = tester.widget<ChoiceChip>(
+      find.widgetWithText(ChoiceChip, 'Done'),
+    );
+    expect(chip.selected, isFalse);
+  });
+
+  testWidgets('tapping the selected action again undoes it', (tester) async {
+    await tester.pumpWidget(_buildTab());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.widgetWithText(ChoiceChip, 'Gym'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(ChoiceChip, 'Gym'));
+    await tester.pumpAndSettle();
+
+    final gym = tester.widget<ChoiceChip>(
+      find.widgetWithText(ChoiceChip, 'Gym'),
+    );
+    expect(gym.selected, isFalse);
+  });
+
+  testWidgets('tapping another action switches to it', (tester) async {
+    await tester.pumpWidget(_buildTab());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.widgetWithText(ChoiceChip, 'Gym'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(ChoiceChip, 'Run'));
+    await tester.pumpAndSettle();
+
+    final gym = tester.widget<ChoiceChip>(
+      find.widgetWithText(ChoiceChip, 'Gym'),
+    );
+    final run = tester.widget<ChoiceChip>(
+      find.widgetWithText(ChoiceChip, 'Run'),
+    );
+    expect(gym.selected, isFalse);
+    expect(run.selected, isTrue);
   });
 
   testWidgets('long-pressing a habit row offers Edit, Archive and Delete', (

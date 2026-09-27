@@ -11,6 +11,7 @@ import 'package:mindful/features/money/data/money_repository.dart';
 import 'package:mindful/features/money/domain/entry_type.dart';
 import 'package:mindful/features/money/domain/money_entry.dart';
 import 'package:mindful/features/money/presentation/add_money_sheet.dart';
+import 'package:mindful/features/money/presentation/amount_keypad.dart';
 import 'package:mindful/shared/models/sync_status.dart';
 import 'package:mindful/shared/services/widget_service.dart';
 import 'package:mindful/shared/widgets/shake_widget.dart';
@@ -140,6 +141,26 @@ void main() {
     );
     expect(transform.transform.getTranslation().x, isNot(0));
   });
+
+  testWidgets(
+    'shows the keypad while the amount field is focused and hides it for '
+    'the note field',
+    (tester) async {
+      await tester.binding.setSurfaceSize(const Size(400, 1000));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      await tester.pumpWidget(buildSheet());
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AmountKeypad), findsOneWidget);
+      await tester.tap(find.text('5'));
+      await tester.tap(find.text('000'));
+      expect(find.text('5.000'), findsOneWidget);
+
+      await tester.tap(find.text('Add a note...'));
+      await tester.pumpAndSettle();
+      expect(find.byType(AmountKeypad), findsNothing);
+    },
+  );
 
   testWidgets('pre-fills fields and shows "Save changes" when editing', (
     tester,

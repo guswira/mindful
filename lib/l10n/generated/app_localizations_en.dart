@@ -698,6 +698,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get moneyTypeToggleIncome => '💰 Income';
 
   @override
+  String get moneyKeypadBackspace => 'Delete';
+
+  @override
   String get moneyDateChange => 'Change';
 
   @override

@@ -40,6 +40,11 @@ void navigateFromWidgetUri(Ref ref, GoRouter router, Uri? uri) {
           ),
         );
       }
+    case 'unlog-habit':
+      final habitId = uri.queryParameters['habitId'];
+      if (habitId != null) {
+        unawaited(_unlogHabitFromWidget(ref, habitId));
+      }
     case 'open-task':
       final taskId = uri.queryParameters['taskId'];
       if (taskId != null) {
@@ -78,14 +83,7 @@ Future<void> _logHabitFromWidget(
   String habitId,
   String? actionLabel,
 ) async {
-  final habitRepository = await ref.read(habitRepositoryProvider.future);
-  Habit? habit;
-  for (final candidate in habitRepository.getHabits()) {
-    if (candidate.id == habitId) {
-      habit = candidate;
-      break;
-    }
-  }
+  final habit = await _findHabit(ref, habitId);
   if (habit == null) {
     return;
   }
@@ -101,6 +99,33 @@ Future<void> _logHabitFromWidget(
   }
 
   await ref.read(habitTabControllerProvider.notifier).logAction(habit, action);
+}
+
+/// Undoes today's log for [habitId] — the widget's filled check. A
+/// separate URI from `log-habit` rather than a toggle, so a tap on a stale
+/// widget (not yet redrawn) can't flip the habit the wrong way.
+Future<void> _unlogHabitFromWidget(Ref ref, String habitId) async {
+  final habit = await _findHabit(ref, habitId);
+  if (habit == null) {
+    return;
+  }
+  try {
+    await ref.read(habitTabControllerProvider.notifier).unlog(habit);
+  } catch (error) {
+    // No BuildContext to show a SnackBar from; the cache is already
+    // updated and the widgets redrawn, only the Supabase delete failed.
+    debugPrint('Failed to sync habit unlog from widget: $error');
+  }
+}
+
+Future<Habit?> _findHabit(Ref ref, String habitId) async {
+  final habitRepository = await ref.read(habitRepositoryProvider.future);
+  for (final candidate in habitRepository.getHabits()) {
+    if (candidate.id == habitId) {
+      return candidate;
+    }
+  }
+  return null;
 }
 
 /// The current screen's [BuildContext], from [router]'s navigator — null

@@ -458,6 +458,7 @@ Tap card → JournalDetailSheet.
 
 HabitTab: today's habits, glass rows.
   each row: icon, name, action buttons (habitAccent), done checkmark
+  tapping the already-selected action (or "Done") undoes today's log
   long press → sheet: Edit / Archive / Delete
   "Add habit" → AddHabitSheet
 
@@ -555,6 +556,12 @@ widget_service.dart updates on every app open and after any write.
 
 Small 2×2: date, journal streak (teal), habits X/Y (habitAccent)
 Medium 4×2: above + up to 3 incomplete tasks due today
+Android habit (routine) rows: a habit with actions shows up to 2 action
+  pills (tap → log that action); a habit with no actions shows an empty
+  habitAccent checkbox (tap → `mindful://log-habit?habitId=…`, logged as
+  plain "done"); done → filled check (tap → `mindful://unlog-habit?habitId=…`,
+  deletes today's log so it's undone — same for habits with actions).
+  Tapping the rest of an actionless row opens /habits/:id.
 iOS lock screen: circular habit count (habitAccent)
 
 ---
@@ -1064,9 +1071,15 @@ title row:
 amount field:
   large centered TextField
   prefix: currency symbol 24px white45
-  amount: 32px bold white, keyboard: numberWithOptions(decimal:true)
+  amount: 36px bold white, whole numbers grouped with dots (4.000.000)
   autofocus: TRUE
-  no border, hint "0.00"
+  no border, hint "0"
+  system keyboard suppressed (TextInputType.none) — typed via the in-sheet
+    AmountKeypad (amount_keypad.dart) at the bottom of the sheet instead:
+    1–9 / 000 0 ⌫ (long-press ⌫ clears), max 10 digits. Neither iOS nor
+    Android lets an app add a "000" key to the system keyboard.
+    Shown only while the amount field is focused; the note field gets the
+    normal system keyboard.
 
 category picker:
   Wrap of category chips (glass pills)

@@ -387,6 +387,7 @@
   "moneySaveChanges": "Save changes",
   "moneyTypeToggleSpending": "💸 Spending",
   "moneyTypeToggleIncome": "💰 Income",
+  "moneyKeypadBackspace": "Delete",
   "moneyDateChange": "Change",
   "moneyTypeSpending": "Spending",
   "moneyTypeIncome": "Income",

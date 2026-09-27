@@ -75,6 +75,22 @@ class HabitTabController extends _$HabitTabController {
       () => ref.read(widgetServiceProvider.future),
     );
   }
+
+  /// Marks [habit] as not done today by deleting today's log. The list and
+  /// widgets are refreshed even if the Supabase delete throws, since the
+  /// cache has already dropped the log by then; the error is rethrown so
+  /// the caller can surface it.
+  Future<void> unlog(Habit habit) async {
+    final repository = await ref.read(habitRepositoryProvider.future);
+    try {
+      await repository.deleteLog(habit.id, DateTime.now());
+    } finally {
+      ref.invalidateSelf();
+      await refreshWidgetsBestEffort(
+        () => ref.read(widgetServiceProvider.future),
+      );
+    }
+  }
 }
 
 /// Today's active habits, each with its action buttons highlighted once

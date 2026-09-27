@@ -15,6 +15,7 @@ import '../domain/entry_type.dart';
 import '../domain/money_entry.dart';
 import 'add_money_sheet_widgets.dart';
 import 'amount_input_formatter.dart';
+import 'amount_keypad.dart';
 import 'money_providers.dart';
 
 /// Bottom sheet to create or edit a money entry: type, amount, category,
@@ -41,6 +42,7 @@ class _AddMoneySheetState extends ConsumerState<AddMoneySheet> {
   late EntryType _type;
   final _amountController = TextEditingController();
   final _amountShake = GlobalKey<ShakeWidgetState>();
+  final _amountFocus = FocusNode();
   final _noteController = TextEditingController();
   late String _selectedCategory;
   DateTime _selectedDate = DateTime.now();
@@ -62,6 +64,7 @@ class _AddMoneySheetState extends ConsumerState<AddMoneySheet> {
   @override
   void dispose() {
     _amountController.dispose();
+    _amountFocus.dispose();
     _noteController.dispose();
     super.dispose();
   }
@@ -175,6 +178,7 @@ class _AddMoneySheetState extends ConsumerState<AddMoneySheet> {
           AmountField(
             shakeKey: _amountShake,
             controller: _amountController,
+            focusNode: _amountFocus,
             currency: currency,
           ),
           const SizedBox(height: Spacing.md),
@@ -214,6 +218,10 @@ class _AddMoneySheetState extends ConsumerState<AddMoneySheet> {
                     color: activeColor,
                     onTap: _save,
                   ),
+          ),
+          FocusedAmountKeypad(
+            focusNode: _amountFocus,
+            controller: _amountController,
           ),
         ],
       ),

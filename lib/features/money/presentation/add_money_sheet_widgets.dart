@@ -8,6 +8,7 @@ import '../../../shared/widgets/shake_widget.dart';
 import '../domain/entry_type.dart';
 import '../domain/money_entry.dart';
 import 'amount_input_formatter.dart';
+import 'amount_keypad.dart';
 import 'money_labels.dart';
 
 /// The spending/income segmented toggle at the top of [AddMoneySheet].
@@ -92,16 +93,22 @@ class _TypePill extends StatelessWidget {
 /// The large centered amount input on [AddMoneySheet], prefixed with the
 /// budget's currency code (e.g. "IDR") — falls back to 'IDR' the same as
 /// [BudgetSettingsSheet] when no budget has been set yet.
+///
+/// The system keyboard is suppressed ([TextInputType.none]) — typing goes
+/// through the sheet's [AmountKeypad] instead, which has a "000" key.
+/// Focus, the cursor and hardware keyboards still work as normal.
 class AmountField extends StatelessWidget {
   const AmountField({
     required this.shakeKey,
     required this.controller,
+    required this.focusNode,
     this.currency = 'IDR',
     super.key,
   });
 
   final GlobalKey<ShakeWidgetState> shakeKey;
   final TextEditingController controller;
+  final FocusNode focusNode;
   final String currency;
 
   @override
@@ -120,14 +127,16 @@ class AmountField extends StatelessWidget {
           IntrinsicWidth(
             child: TextField(
               controller: controller,
+              focusNode: focusNode,
               autofocus: true,
+              showCursor: true,
               textAlign: TextAlign.center,
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 36,
                 fontWeight: FontWeight.bold,
               ),
-              keyboardType: TextInputType.number,
+              keyboardType: TextInputType.none,
               inputFormatters: const [ThousandsInputFormatter()],
               decoration: InputDecoration(
                 hintText: '0',
