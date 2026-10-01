@@ -7,7 +7,7 @@ part of 'habit_tab.dart';
 // **************************************************************************
 
 String _$habitTabControllerHash() =>
-    r'8384dc85d2ffd35873897608c3ef0315de914795';
+    r'42a014ece9fbd287ee98438f14976e31919164f0';
 
 /// Loads today's active habits and their completion status, and logs new
 /// completions to the cache (then Supabase, best-effort).

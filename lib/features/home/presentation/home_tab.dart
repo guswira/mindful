@@ -5,6 +5,7 @@ import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/glass_theme.dart';
 import '../../../shared/widgets/blob_background.dart';
 import '../../money/presentation/widgets/remaining_budget_widget.dart';
+import '../../recap/presentation/widgets/monthly_recap_banner.dart';
 import 'widgets/greeting_header.dart';
 import 'widgets/journal_section.dart';
 import 'widgets/streak_row.dart';
@@ -36,6 +37,7 @@ class HomeTab extends StatelessWidget {
                       const GreetingHeader(),
                       const SizedBox(height: 16),
                       const UnsyncedBanner(),
+                      const MonthlyRecapHomeBanner(),
                       const StreakRow(),
                       const SizedBox(height: 16),
                       const RemainingBudgetWidget(),
@@ -48,7 +50,7 @@ class HomeTab extends StatelessWidget {
                       const SizedBox(height: 24),
                       _SectionHeader(
                         title: l10n.homeSectionHabits,
-                        viewAllPath: '/home/habits',
+                        viewAllPath: '/home/tasks',
                       ),
                       const UpcomingHabitsStrip(),
                       const SizedBox(height: 24),

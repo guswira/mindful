@@ -6,8 +6,8 @@ import '../../core/l10n/l10n.dart';
 import '../../core/theme/glass_theme.dart';
 import 'floating_nav_write_button.dart';
 
-/// Island nav bar (4 tabs) + write button, replacing the standard bottom
-/// nav bar entirely. See SPEC.md Floating Island Nav Bar.
+/// Island nav bar (5 tabs: Home, Tasks & Routines, Journal, Money, AI) +
+/// write button, replacing the standard bottom nav bar entirely. See SPEC.md Floating Island Nav Bar.
 class FloatingNavBar extends StatelessWidget {
   const FloatingNavBar({
     required this.currentIndex,
@@ -86,38 +86,29 @@ class _NavIsland extends StatelessWidget {
               ),
               Expanded(
                 child: _NavItem(
-                  icon: Icons.calendar_month_outlined,
-                  label: l10n.navHabits,
-                  active: currentIndex == 2,
-                  activeColor: glass.habitAccent,
-                  onTap: () => onTabChanged(2),
-                ),
-              ),
-              Expanded(
-                child: _NavItem(
                   icon: Icons.menu_book_outlined,
                   label: l10n.navJournal,
-                  active: currentIndex == 3,
+                  active: currentIndex == 2,
                   activeColor: glass.journalAccent,
-                  onTap: () => onTabChanged(3),
+                  onTap: () => onTabChanged(2),
                 ),
               ),
               Expanded(
                 child: _NavItem(
                   icon: Icons.account_balance_wallet_outlined,
                   label: l10n.navMoney,
-                  active: currentIndex == 4,
+                  active: currentIndex == 3,
                   activeColor: glass.moneyAccent,
-                  onTap: () => onTabChanged(4),
+                  onTap: () => onTabChanged(3),
                 ),
               ),
               Expanded(
                 child: _NavItem(
                   icon: Icons.auto_awesome_outlined,
                   label: l10n.navAi,
-                  active: currentIndex == 5,
+                  active: currentIndex == 4,
                   activeColor: glass.aiAccent,
-                  onTap: () => onTabChanged(5),
+                  onTap: () => onTabChanged(4),
                 ),
               ),
             ],

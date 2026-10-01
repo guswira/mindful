@@ -13,16 +13,17 @@ import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/splash_screen.dart';
 import '../../features/habits/data/habit_reminders_controller.dart';
 import '../../features/habits/presentation/habit_detail_screen.dart';
-import '../../features/habits/presentation/habit_tab.dart';
 import '../../features/home/presentation/home_screen.dart';
 import '../../features/home/presentation/home_tab.dart';
 import '../../features/journal/presentation/journal_editor_screen.dart';
 import '../../features/journal/presentation/journal_tab.dart';
 import '../../features/money/presentation/money_tab.dart';
+import '../../features/plan/presentation/plan_tab.dart';
+import '../../features/recap/domain/recap_window.dart';
+import '../../features/recap/presentation/monthly_recap_screen.dart';
 import '../../features/settings/data/journal_reminders_controller.dart';
 import '../../features/settings/presentation/settings_screen.dart';
 import '../../features/tasks/data/task_reminders_controller.dart';
-import '../../features/tasks/presentation/task_tab.dart';
 import '../../shared/services/notification_service.dart';
 import 'sheet_navigation.dart';
 
@@ -103,15 +104,7 @@ GoRouter appRouter(Ref ref) {
             routes: [
               GoRoute(
                 path: '/home/tasks',
-                builder: (context, state) => const TaskTab(),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: '/home/habits',
-                builder: (context, state) => const HabitTab(),
+                builder: (context, state) => const PlanTab(),
               ),
             ],
           ),
@@ -155,6 +148,14 @@ GoRouter appRouter(Ref ref) {
         path: '/settings',
         builder: (context, state) => const SettingsScreen(),
       ),
+      GoRoute(
+        path: '/recap/:month',
+        builder: (context, state) => MonthlyRecapScreen(
+          month:
+              parseRecapMonthKey(state.pathParameters['month']) ??
+              previousMonth(DateTime.now()),
+        ),
+      ),
     ],
   );
 
@@ -188,7 +189,8 @@ GoRouter appRouter(Ref ref) {
 
   // Home/lock screen widget taps: `mindful://open-write-sheet`,
   // `mindful://log-habit`, `mindful://open-task`, `mindful://home/tasks`
-  // and `mindful://home/habits`, set by the native widget providers. See
+  // and `mindful://home/habits` (both land on the Tasks & Routines tab),
+  // set by the native widget providers. See
   // SPEC.md Home and Lock Screen Widgets.
   unawaited(
     HomeWidget.initiallyLaunchedFromHomeWidget().then(

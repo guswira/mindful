@@ -7,18 +7,44 @@ import '../../../core/constants/spacing.dart';
 import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/glass_theme.dart';
 import '../../../shared/services/widget_service.dart';
+import '../../../shared/widgets/glass_bottom_sheet.dart';
 import '../../../shared/widgets/tinted_pill.dart';
+import '../../habits/presentation/add_habit_sheet.dart';
 import '../data/task_repository.dart';
 import '../domain/task.dart';
 import '../domain/task_checkbox.dart';
+import 'add_task_sheet.dart';
 import 'task_detail_sheet_actions.dart';
 import 'task_detail_sheet_checklist.dart';
 import 'task_providers.dart';
 
-export 'task_detail_sheet_actions.dart' show TaskDetailOutcome;
+export 'task_detail_sheet_actions.dart'
+    show TaskDetailOutcome, TaskDetailResult;
+
+/// Shows [TaskDetailSheet] for [taskId] over [context], then whichever
+/// follow-up sheet its overflow menu asked for (edit, or convert to a
+/// routine) — used everywhere a task row or reminder opens a task.
+Future<void> showTaskDetailSheet(BuildContext context, String taskId) async {
+  final result = await showGlassBottomSheet<TaskDetailResult>(
+    context: context,
+    builder: (_) => TaskDetailSheet(taskId: taskId),
+  );
+  if (result == null || !context.mounted) {
+    return;
+  }
+  await showGlassBottomSheet<void>(
+    context: context,
+    builder: (_) => switch (result.outcome) {
+      TaskDetailOutcome.edit => AddTaskSheet(task: result.task),
+      TaskDetailOutcome.convertToRoutine => AddHabitSheet(
+        fromTask: result.task,
+      ),
+    },
+  );
+}
 
 /// Bottom sheet showing a task's due date, reminder and subtasks, with
-/// edit/delete via the overflow menu and a "Mark as done" action. See
+/// edit/convert-to-routine/delete via the overflow menu and a "Mark as done" action. See
 /// SPEC.md Task Manager and the bottom-sheet design rules.
 class TaskDetailSheet extends ConsumerWidget {
   const TaskDetailSheet({required this.taskId, super.key});

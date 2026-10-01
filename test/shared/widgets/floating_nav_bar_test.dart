@@ -19,12 +19,12 @@ void main() {
         ),
       );
 
-  testWidgets('shows the 6 tab icons and the write button', (tester) async {
+  testWidgets('shows the 5 tab icons and the write button', (tester) async {
     await tester.pumpWidget(buildBar(0, (_) {}));
 
     expect(find.byIcon(Icons.home_outlined), findsOneWidget);
     expect(find.byIcon(Icons.checklist_outlined), findsOneWidget);
-    expect(find.byIcon(Icons.calendar_month_outlined), findsOneWidget);
+    expect(find.byIcon(Icons.calendar_month_outlined), findsNothing);
     expect(find.byIcon(Icons.menu_book_outlined), findsOneWidget);
     expect(find.byIcon(Icons.account_balance_wallet_outlined), findsOneWidget);
     expect(find.byIcon(Icons.auto_awesome_outlined), findsOneWidget);
@@ -41,23 +41,23 @@ void main() {
     expect(tapped, 1);
   });
 
-  testWidgets('tapping the money tab icon reports index 4', (tester) async {
+  testWidgets('tapping the money tab icon reports index 3', (tester) async {
     int? tapped;
     await tester.pumpWidget(buildBar(0, (index) => tapped = index));
 
     await tester.tap(find.byIcon(Icons.account_balance_wallet_outlined));
     await tester.pump();
 
-    expect(tapped, 4);
+    expect(tapped, 3);
   });
 
-  testWidgets('tapping the AI tab icon reports index 5', (tester) async {
+  testWidgets('tapping the AI tab icon reports index 4', (tester) async {
     int? tapped;
     await tester.pumpWidget(buildBar(0, (index) => tapped = index));
 
     await tester.tap(find.byIcon(Icons.auto_awesome_outlined));
     await tester.pump();
 
-    expect(tapped, 5);
+    expect(tapped, 4);
   });
 }

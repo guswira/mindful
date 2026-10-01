@@ -47,6 +47,13 @@ class FoodScanRepository {
   Future<List<FoodScan>> getRecentScans({int limit = 10}) =>
       _datasource.getRecentScans(limit: limit);
 
+  /// Every scan in [month] (local time), newest first.
+  Future<List<FoodScan>> getScansInMonth(DateTime month) =>
+      _datasource.getScansBetween(
+        DateTime(month.year, month.month),
+        DateTime(month.year, month.month + 1),
+      );
+
   /// Deletes the scan with [id].
   Future<void> deleteScan(String id) => _datasource.deleteScan(id);
 }

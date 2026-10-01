@@ -221,6 +221,19 @@
     }
   },
   "habitAddAction": "+ Add action",
+  "planTabTitle": "Tasks & Routines",
+  "planAdd": "Add task or habit",
+  "taskConvertToRoutine": "Convert to routine",
+  "habitConvertTitle": "Convert to routine",
+  "habitConvertHint": "\"{name}\" will be removed from your tasks once this routine is saved.",
+  "@habitConvertHint": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "habitConvertSave": "Save routine",
   "taskGroupUpcoming": "Upcoming",
   "taskGroupNoDate": "No date",
   "taskEmptyList": "No tasks yet",
@@ -642,8 +655,7 @@
   "settingsDebugScheduling": "Scheduling…",
   "settingsDebugScheduleTest": "Schedule test notification (5 min)",
   "navHome": "Home",
-  "navTasks": "Tasks",
-  "navHabits": "Habits",
+  "navTasks": "Tasks & Routines",
   "navJournal": "Journal",
   "navMoney": "Money",
   "navAi": "AI Lab",
@@ -677,5 +689,129 @@
   "notifMoneyAdviceFailedTitle": "Spending advice failed",
   "notifMoneyAdviceResultChannelName": "AI advice result",
   "notifMoneyAdviceResultChannelDescription": "Spending advice that failed after retrying",
-  "moneyAdviceInProgress": "Still working on your advice — you'll get a notification if it fails."
+  "moneyAdviceInProgress": "Still working on your advice — you'll get a notification if it fails.",
+  "recapBannerTitle": "Your {month} recap is ready",
+  "@recapBannerTitle": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "recapBannerTitleSoFar": "{month} is almost over — see your recap",
+  "@recapBannerTitleSoFar": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "recapBannerSubtitle": "Routines, tasks, cashflow and AI at a glance",
+  "recapClose": "Close recap",
+  "recapLoadError": "Couldn't load your recap. Try again later.",
+  "recapDone": "Done",
+  "recapIntroTitle": "Your {month}",
+  "@recapIntroTitle": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "recapIntroSoFarTitle": "Your {month} so far",
+  "@recapIntroSoFarTitle": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "recapIntroLabel": "monthly recap",
+  "recapIntroMotivation": "Every small step you took this month counted. Let's look back at them together.",
+  "recapTapHint": "Tap to continue",
+  "recapRoutinesTitle": "Routines",
+  "recapRoutinesHeroLabel": "routine check-ins",
+  "recapStatCompletion": "Completion",
+  "recapStatPerfectDays": "Perfect days",
+  "recapStatLongestStreak": "Longest streak",
+  "recapStatTopRoutine": "Top routine",
+  "recapPercent": "{percent}%",
+  "@recapPercent": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "recapDays": "{count, plural, =1{1 day} other{{count} days}}",
+  "@recapDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recapRoutinesGreat": "Incredible consistency! You're building routines that last — keep the chain going.",
+  "recapRoutinesGood": "Solid month! You showed up more often than not. One more push and next month is your best yet.",
+  "recapRoutinesStarting": "Every check-in counts. Pick one routine to focus on and watch it grow.",
+  "recapRoutinesEmpty": "No routines yet. Start one tiny habit next month — two minutes a day is enough.",
+  "recapTasksTitle": "Tasks",
+  "recapTasksHeroLabel": "tasks completed",
+  "recapStatAdded": "Added",
+  "recapStatStillOpen": "Still open",
+  "recapTasksGreat": "You crushed your to-do list! That momentum is yours to keep.",
+  "recapTasksGood": "Great progress — you got most things done. Keep that rhythm going.",
+  "recapTasksStarting": "Some tasks slipped, and that's okay. Start next month with just one thing a day.",
+  "recapTasksEmpty": "A fresh list awaits. Jot down one thing you want to get done next month.",
+  "recapMoneyTitle": "Cashflow",
+  "recapMoneyHeroLabel": "spent",
+  "recapStatIncome": "Income",
+  "recapStatNet": "Net",
+  "recapStatNoSpendDays": "No-spend days",
+  "recapStatTopCategory": "Top spending",
+  "recapStatBudgetUsed": "Budget used",
+  "recapMoneyGreat": "Nicely done — you kept your spending in check. Future you says thanks!",
+  "recapMoneyGood": "You earned more than you spent. Keep tracking and the savings will follow.",
+  "recapMoneyStarting": "Spending ran ahead this month. Noticing is the first step — and you're already tracking it.",
+  "recapMoneyEmpty": "Nothing logged yet. Try tracking every spend next month — it's eye-opening.",
+  "recapAiTitle": "AI Lab",
+  "recapAiHeroLabel": "food scans",
+  "recapStatAvgCalories": "Avg. per scan",
+  "recapStatTotalCalories": "Total",
+  "recapStatTopFood": "Most scanned",
+  "recapKcal": "{count} kcal",
+  "@recapKcal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recapAiGreat": "You're a mindful eater! Knowing what's on your plate is a superpower.",
+  "recapAiGood": "Nice curiosity! Keep scanning to learn more about what fuels you.",
+  "recapAiStarting": "A great start. Try scanning a meal a day to spot your patterns.",
+  "recapAiEmpty": "Haven't tried the AI Lab yet? Snap your next meal and see what's inside.",
+  "recapAiUnavailable": "Couldn't load your AI scans — check your connection and open the recap again.",
+  "recapOutroTitle": "Keep going!",
+  "recapOutroLabel": "you've got this",
+  "recapOutroBody": "Small steps every day add up to big changes. Here's to an even better {month}.",
+  "@recapOutroBody": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "recapOutroSoFarBody": "There's still time left this month — finish strong, one small step at a time.",
+  "settingsRecapRevisit": "Revisit a monthly recap",
+  "settingsRecapRevisitSubtitle": "Replay any of the last 12 months",
+  "settingsRecapPickerTitle": "Pick a month",
+  "settingsRecapSoFar": "{month} (so far)",
+  "@settingsRecapSoFar": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  }
 }

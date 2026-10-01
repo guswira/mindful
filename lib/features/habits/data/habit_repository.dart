@@ -159,6 +159,26 @@ class HabitRepository {
     return logs.where((log) => log.habitId == habitId).toList();
   }
 
+  /// Every habit's logs in [month] — fetched fresh from Supabase and merged
+  /// into the cache, falling back to whatever's cached when offline. Used
+  /// by the monthly recap, which can cover a month [refreshFromSupabase]
+  /// (current month only) no longer caches.
+  Future<List<HabitLog>> logsInMonth(DateTime month) async {
+    try {
+      final logs = await _datasource.fetchLogs(month);
+      for (final log in logs) {
+        await _habitLogsBox.put(_logKey(log.habitId, log.date), log.toJson());
+      }
+    } catch (error) {
+      debugPrint('Using cached habit logs for $month: $error');
+    }
+    return getAllLogs()
+        .where(
+          (log) => log.date.year == month.year && log.date.month == month.month,
+        )
+        .toList();
+  }
+
   /// Retries every habit log still marked [SyncStatus.pending]. Skips any
   /// record that fails to decode — see [getHabits].
   Future<void> retryPendingLogs() async {

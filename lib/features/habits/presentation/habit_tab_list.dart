@@ -9,46 +9,59 @@ import '../../../shared/services/notification_service.dart';
 import '../../../shared/services/widget_service.dart';
 import '../../../shared/widgets/glass_bottom_sheet.dart';
 import '../../../shared/widgets/glass_card.dart';
+import '../../../shared/widgets/group_label.dart';
 import '../data/habit_repository.dart';
 import '../domain/habit.dart';
 import '../domain/habit_action.dart';
 import 'add_habit_sheet.dart';
 import 'habit_tab.dart';
 
-/// [items]' active habits as glass rows, each with its action pills. See
-/// SPEC.md Habit Tracker.
-class HabitList extends StatelessWidget {
-  const HabitList({required this.items, super.key});
+/// The Tasks & Routines tab's routines section: a label plus [items]'
+/// active habits as glass rows, each with its action pills. Not scrollable
+/// itself — it's one section of the tab's list. See SPEC.md Tasks &
+/// Routines.
+class RoutineSection extends StatelessWidget {
+  const RoutineSection({required this.items, super.key});
 
   final List<HabitTabItem> items;
 
   @override
   Widget build(BuildContext context) {
-    final glass = Theme.of(context).extension<GlassTheme>()!;
-    if (items.isEmpty) {
-      return Center(
-        child: Text(
-          context.l10n.habitEmptyList,
-          style: TextStyle(color: glass.textMuted),
-        ),
-      );
-    }
-
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 4, 20, 88),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        GroupLabel(context.l10n.habitTabTitle),
+        const SizedBox(height: Spacing.sm),
         GlassCard(
           padding: EdgeInsets.zero,
-          child: Column(
-            children: [
-              for (var i = 0; i < items.length; i++) ...[
-                if (i > 0) const _RowDivider(),
-                _HabitRow(item: items[i]),
-              ],
-            ],
-          ),
+          child: items.isEmpty
+              ? const _EmptyRoutines()
+              : Column(
+                  children: [
+                    for (var i = 0; i < items.length; i++) ...[
+                      if (i > 0) const _RowDivider(),
+                      _HabitRow(item: items[i]),
+                    ],
+                  ],
+                ),
         ),
       ],
+    );
+  }
+}
+
+class _EmptyRoutines extends StatelessWidget {
+  const _EmptyRoutines();
+
+  @override
+  Widget build(BuildContext context) {
+    final glass = Theme.of(context).extension<GlassTheme>()!;
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Text(
+        context.l10n.habitEmptyList,
+        style: TextStyle(color: glass.textMuted, fontSize: 14),
+      ),
     );
   }
 }

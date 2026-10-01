@@ -10,6 +10,9 @@ import '../../../shared/widgets/shake_widget.dart';
 import '../../../shared/widgets/sheet_header.dart';
 import '../../../shared/widgets/tinted_pill.dart';
 import '../../auth/domain/auth_state.dart';
+import '../../tasks/data/task_repository.dart';
+import '../../tasks/domain/task.dart';
+import '../../tasks/presentation/task_tab.dart';
 import '../data/habit_repository.dart';
 import '../domain/habit.dart';
 import '../domain/habit_action.dart';
@@ -17,6 +20,7 @@ import 'add_habit_sheet_actions.dart';
 import 'add_habit_sheet_icon_color.dart';
 import 'add_habit_sheet_name_field.dart';
 import 'add_habit_sheet_reminder.dart';
+import 'habit_tab.dart';
 import 'habit_form.dart' show generateHabitFormId;
 
 /// Bottom sheet to create or edit a habit: name, icon, color, reminder and
@@ -26,10 +30,16 @@ import 'habit_form.dart' show generateHabitFormId;
 /// Passing [habit] pre-fills the form and switches saving to an update —
 /// used by the habit row's long-press options and by the detail screen's
 /// edit button.
+///
+/// Passing [fromTask] instead converts that task into a new routine: the
+/// name (and reminder time, if it had one) are pre-filled, and the task is
+/// deleted once the routine is saved. See SPEC.md Tasks & Routines.
 class AddHabitSheet extends ConsumerStatefulWidget {
-  const AddHabitSheet({this.habit, super.key});
+  const AddHabitSheet({this.habit, this.fromTask, super.key})
+    : assert(habit == null || fromTask == null);
 
   final Habit? habit;
+  final Task? fromTask;
 
   @override
   ConsumerState<AddHabitSheet> createState() => _AddHabitSheetState();
@@ -61,6 +71,15 @@ class _AddHabitSheetState extends ConsumerState<AddHabitSheet> {
       _reminderEnabled = habit.reminderDays.isNotEmpty;
       _reminderDays = habit.reminderDays;
       _reminderTime = habit.reminderTime;
+    }
+    final task = widget.fromTask;
+    if (task != null) {
+      _nameController.text = task.name;
+      if (task.reminderAt case final reminderAt?) {
+        _reminderEnabled = true;
+        _reminderDays = _defaultReminderDays;
+        _reminderTime = TimeOfDay.fromDateTime(reminderAt);
+      }
     }
   }
 
@@ -140,6 +159,10 @@ class _AddHabitSheetState extends ConsumerState<AddHabitSheet> {
     final repository = await ref.read(habitRepositoryProvider.future);
     await _saveHabit(repository, habit);
     await _scheduleReminder(habit);
+    if (widget.fromTask case final task?) {
+      await _deleteConvertedTask(task);
+    }
+    ref.invalidate(habitTabControllerProvider);
     await refreshWidgetsBestEffort(
       () => ref.read(widgetServiceProvider.future),
     );
@@ -165,6 +188,30 @@ class _AddHabitSheetState extends ConsumerState<AddHabitSheet> {
     }
   }
 
+  /// Removes the task this routine was converted from, reminder included.
+  /// A failed Supabase delete is only reported — the routine is already
+  /// saved and the task is already gone from the cache by then.
+  Future<void> _deleteConvertedTask(Task task) async {
+    try {
+      final notificationService = await ref.read(
+        notificationServiceProvider.future,
+      );
+      await notificationService.forgetTaskReminder(task.id);
+      final repository = await ref.read(taskRepositoryProvider.future);
+      await repository.delete(task.id);
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.l10n.taskSyncFailed(task.name, '$error')),
+          ),
+        );
+      }
+    } finally {
+      ref.invalidate(taskTabControllerProvider);
+    }
+  }
+
   /// Best-effort: a scheduling failure (e.g. a platform-channel hiccup)
   /// shouldn't leave this sheet stuck open with the habit already saved.
   Future<void> _scheduleReminder(Habit habit) async {
@@ -184,15 +231,27 @@ class _AddHabitSheetState extends ConsumerState<AddHabitSheet> {
     final glass = Theme.of(context).extension<GlassTheme>()!;
     final l10n = context.l10n;
     final isEditing = widget.habit != null;
+    final convertingTask = widget.fromTask;
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
           SheetHeader(
-            title: isEditing ? l10n.habitEditTitle : l10n.habitBuildNewTitle,
+            title: switch ((isEditing, convertingTask)) {
+              (true, _) => l10n.habitEditTitle,
+              (false, Task()) => l10n.habitConvertTitle,
+              (false, null) => l10n.habitBuildNewTitle,
+            },
             onClose: () => Navigator.pop(context),
           ),
+          if (convertingTask != null) ...[
+            const SizedBox(height: Spacing.xs),
+            Text(
+              l10n.habitConvertHint(convertingTask.name),
+              style: TextStyle(color: glass.textMuted, fontSize: 12),
+            ),
+          ],
           const SizedBox(height: Spacing.md),
           HabitNameField(shakeKey: _nameShake, controller: _nameController),
           const SizedBox(height: 20),
@@ -241,7 +300,11 @@ class _AddHabitSheetState extends ConsumerState<AddHabitSheet> {
           SizedBox(
             width: double.infinity,
             child: TintedPill(
-              label: isEditing ? l10n.habitSaveChanges : l10n.habitAddHabit,
+              label: switch ((isEditing, convertingTask)) {
+                (true, _) => l10n.habitSaveChanges,
+                (false, Task()) => l10n.habitConvertSave,
+                (false, null) => l10n.habitAddHabit,
+              },
               color: glass.habitAccent,
               onTap: _saving ? null : _save,
             ),

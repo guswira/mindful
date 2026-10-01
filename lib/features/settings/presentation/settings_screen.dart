@@ -11,9 +11,10 @@ import '../../auth/domain/auth_state.dart';
 import '../data/journal_reminders_controller.dart';
 import 'backup_settings_controller.dart';
 import 'debug_section.dart';
+import 'monthly_recap_section.dart';
 
-/// Account/sign-out, language, notification toggles, and Drive
-/// backup/restore.
+/// Account/sign-out, language, notification toggles, monthly recap, and
+/// Drive backup/restore.
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
@@ -28,6 +29,8 @@ class SettingsScreen extends ConsumerWidget {
           _LanguageSection(),
           Divider(height: 1),
           _NotificationsSection(),
+          Divider(height: 1),
+          MonthlyRecapSection(),
           Divider(height: 1),
           _DriveBackupSection(),
           Divider(height: 1),
@@ -199,7 +202,9 @@ class _DriveBackupSection extends ConsumerWidget {
     } catch (error) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.settingsDriveConnectError('$error'))),
+        SnackBar(
+          content: Text(context.l10n.settingsDriveConnectError('$error')),
+        ),
       );
     }
   }
@@ -230,16 +235,12 @@ class _DriveBackupSection extends ConsumerWidget {
     try {
       await ref.read(backupSettingsProvider.notifier).backupNow();
       if (!context.mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(context.l10n.settingsBackupComplete)),
       );
     } catch (error) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(context.l10n.settingsBackupFailed('$error'))),
       );
     }
@@ -357,9 +358,7 @@ class _DriveRestoreSection extends ConsumerWidget {
       months = await controller.listBackups();
     } catch (error) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(context.l10n.settingsListBackupsError('$error')),
         ),
@@ -405,9 +404,7 @@ class _DriveRestoreSection extends ConsumerWidget {
       contents = await controller.previewBackup(month);
     } catch (error) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(context.l10n.settingsReadBackupError('$error'))),
       );
       return;
@@ -487,9 +484,7 @@ class _DriveRestoreSection extends ConsumerWidget {
     } catch (error) {
       if (!context.mounted) return;
       Navigator.pop(context);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(context.l10n.settingsImportFailed('$error'))),
       );
     }

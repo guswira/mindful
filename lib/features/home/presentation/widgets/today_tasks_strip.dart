@@ -125,7 +125,9 @@ class _TaskRow extends ConsumerWidget {
         return;
       }
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.homeSyncFailed(task.name, '$error'))),
+        SnackBar(
+          content: Text(context.l10n.homeSyncFailed(task.name, '$error')),
+        ),
       );
     }
   }
@@ -135,10 +137,7 @@ class _TaskRow extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: GestureDetector(
-        onTap: () => showGlassBottomSheet(
-          context: context,
-          builder: (_) => TaskDetailSheet(taskId: task.id),
-        ),
+        onTap: () => showTaskDetailSheet(context, task.id),
         child: Row(
           children: [
             TaskCompleteCheckbox(

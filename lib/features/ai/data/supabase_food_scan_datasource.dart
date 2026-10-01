@@ -30,6 +30,17 @@ class SupabaseFoodScanDatasource {
     return [for (final row in rows) FoodScan.fromJson(row)];
   }
 
+  /// The signed-in user's scans with `scanned_at` in [start, end).
+  Future<List<FoodScan>> getScansBetween(DateTime start, DateTime end) async {
+    final rows = await _client
+        .from(SupabaseConstants.foodScansTable)
+        .select()
+        .gte('scanned_at', start.toUtc().toIso8601String())
+        .lt('scanned_at', end.toUtc().toIso8601String())
+        .order('scanned_at', ascending: false);
+    return [for (final row in rows) FoodScan.fromJson(row)];
+  }
+
   /// Deletes the food scan with [id].
   Future<void> deleteScan(String id) async {
     await _client.from(SupabaseConstants.foodScansTable).delete().eq('id', id);

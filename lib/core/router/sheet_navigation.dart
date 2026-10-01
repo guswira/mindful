@@ -63,13 +63,15 @@ void navigateFromWidgetUri(Ref ref, GoRouter router, Uri? uri) {
         // Unlike a task, a habit's detail view is a real pushed route (the
         // calendar screen), not a sheet — no BuildContext/extra frame
         // needed, `push` is just another go_router navigation.
-        router.go('/home/habits');
+        router.go('/home/tasks');
         router.push('/habits/$habitId');
       }
     case 'home/tasks':
       router.go('/home/tasks');
+    // Routines live on the Tasks & Routines tab now; the native widgets
+    // still send their own routines link.
     case 'home/habits':
-      router.go('/home/habits');
+      router.go('/home/tasks');
   }
 }
 
@@ -147,7 +149,7 @@ void openWriteOptionsSheet(GoRouter router) {
   showWriteOptionsSheet(context);
 }
 
-/// Opens [TaskDetailSheet] as a modal over whatever's currently on
+/// Opens [TaskDetailSheet] (and its edit/convert follow-ups) as a modal over whatever's currently on
 /// screen — there's no `/tasks/:id` route to push to any more, since task
 /// detail is a bottom sheet, not a page. Used by task reminder taps and
 /// home widget taps.
@@ -156,10 +158,7 @@ void openTaskDetailSheet(GoRouter router, String taskId) {
   if (context == null) {
     return;
   }
-  showGlassBottomSheet(
-    context: context,
-    builder: (_) => TaskDetailSheet(taskId: taskId),
-  );
+  unawaited(showTaskDetailSheet(context, taskId));
 }
 
 /// Opens [AddTaskSheet] as a modal over whatever's currently on screen —

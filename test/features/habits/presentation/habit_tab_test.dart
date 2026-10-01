@@ -3,10 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:mindful/core/theme/glass_theme.dart';
+import 'package:mindful/features/tasks/presentation/task_tab.dart';
+import 'package:mindful/features/plan/presentation/plan_tab.dart';
 import 'package:mindful/features/habits/domain/habit.dart';
 import 'package:mindful/features/habits/domain/habit_action.dart';
 import 'package:mindful/features/habits/domain/habit_log.dart';
 import 'package:mindful/features/habits/presentation/habit_tab.dart';
+import 'package:mindful/features/tasks/domain/task.dart';
 
 final _habitWithActions = Habit(
   id: 'h1',
@@ -71,13 +74,19 @@ class _FakeHabitTabController extends HabitTabController {
   }
 }
 
+class _NoTasksController extends TaskTabController {
+  @override
+  Future<List<Task>> build() async => const [];
+}
+
 Widget _buildTab() => ProviderScope(
   overrides: [
     habitTabControllerProvider.overrideWith(_FakeHabitTabController.new),
+    taskTabControllerProvider.overrideWith(_NoTasksController.new),
   ],
   child: MaterialApp(
     theme: ThemeData(extensions: [GlassTheme.dark()]),
-    home: const HabitTab(),
+    home: const PlanTab(),
   ),
 );
 

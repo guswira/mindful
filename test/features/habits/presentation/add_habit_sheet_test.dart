@@ -7,6 +7,7 @@ import 'package:mindful/features/habits/domain/habit.dart';
 import 'package:mindful/features/habits/domain/habit_action.dart';
 import 'package:mindful/features/habits/presentation/add_habit_sheet.dart';
 import 'package:mindful/features/habits/presentation/add_habit_sheet_actions.dart';
+import 'package:mindful/features/tasks/domain/task.dart';
 import 'package:mindful/shared/widgets/shake_widget.dart';
 import 'package:mindful/shared/widgets/tinted_pill.dart';
 
@@ -21,12 +22,41 @@ final _habit = Habit(
 );
 
 void main() {
-  Widget buildSheet({Habit? habit}) => ProviderScope(
+  Widget buildSheet({Habit? habit, Task? fromTask}) => ProviderScope(
     child: MaterialApp(
       theme: AppTheme.dark,
-      home: Scaffold(body: AddHabitSheet(habit: habit)),
+      home: Scaffold(
+        body: AddHabitSheet(habit: habit, fromTask: fromTask),
+      ),
     ),
   );
+
+  testWidgets('converting a task pre-fills its name and reminder time', (
+    tester,
+  ) async {
+    final task = Task(
+      id: 't1',
+      userId: 'u1',
+      name: 'Stretch',
+      createdAt: DateTime(2026, 1, 1),
+      updatedAt: DateTime(2026, 1, 1),
+      dueDate: DateTime(2026, 1, 2),
+      reminderAt: DateTime(2026, 1, 2, 7, 30),
+    );
+    await tester.pumpWidget(buildSheet(fromTask: task));
+
+    expect(find.text('Convert to routine'), findsOneWidget);
+    expect(
+      find.text(
+        '"Stretch" will be removed from your tasks once this routine is '
+        'saved.',
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('Stretch'), findsOneWidget);
+    expect(find.text('Repeat on'), findsOneWidget);
+    expect(find.widgetWithText(TintedPill, 'Save routine'), findsOneWidget);
+  });
 
   testWidgets('shows the name field, sections and "Add habit" pill', (
     tester,

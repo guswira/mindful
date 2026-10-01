@@ -52,7 +52,9 @@ void main() {
     expect(find.widgetWithText(TintedPill, 'Mark as done'), findsNothing);
   });
 
-  testWidgets('the overflow menu offers Edit and Delete', (tester) async {
+  testWidgets('the overflow menu offers Edit, Convert to routine and Delete', (
+    tester,
+  ) async {
     await tester.pumpWidget(buildSheet(_task));
     await tester.pumpAndSettle();
 
@@ -60,6 +62,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Edit'), findsOneWidget);
+    expect(find.text('Convert to routine'), findsOneWidget);
     expect(find.text('Delete'), findsOneWidget);
   });
 

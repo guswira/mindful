@@ -6,6 +6,8 @@ import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/glass_theme.dart';
 import '../../../shared/widgets/glass_bottom_sheet.dart';
 import '../../../shared/widgets/glass_card.dart';
+import '../../../shared/widgets/group_label.dart';
+import '../../habits/presentation/add_habit_sheet.dart';
 import '../domain/task.dart';
 import 'add_task_sheet.dart';
 import 'task_complete_checkbox.dart';
@@ -25,10 +27,32 @@ _TaskGroup _groupOf(Task task, DateTime today) {
   return due.isAfter(today) ? _TaskGroup.upcoming : _TaskGroup.today;
 }
 
-/// [tasks] grouped into glass cards: Today, Upcoming, No date, and a
-/// collapsed Completed section. See SPEC.md Task Manager.
-class TaskGroupedList extends StatelessWidget {
-  const TaskGroupedList({required this.tasks, super.key});
+/// [tasks] split into the open groups (in display order, empty ones
+/// dropped) and the completed ones.
+({Map<_TaskGroup, List<Task>> open, List<Task> completed}) _groupTasks(
+  List<Task> tasks,
+) {
+  final now = DateTime.now();
+  final today = DateTime(now.year, now.month, now.day);
+  final completed = <Task>[];
+  final open = {for (final group in _TaskGroup.values) group: <Task>[]};
+  for (final task in tasks) {
+    if (task.isCompleted) {
+      completed.add(task);
+    } else {
+      open[_groupOf(task, today)]!.add(task);
+    }
+  }
+  open.removeWhere((_, groupTasks) => groupTasks.isEmpty);
+  return (open: open, completed: completed);
+}
+
+/// The Tasks & Routines tab's task sections: [tasks] grouped into glass
+/// cards — Today, Upcoming, No date, and a collapsed Completed section. Not
+/// scrollable itself — it's one part of the tab's list. See SPEC.md Tasks
+/// & Routines.
+class TaskSections extends StatelessWidget {
+  const TaskSections({required this.tasks, super.key});
 
   final List<Task> tasks;
 
@@ -42,58 +66,43 @@ class TaskGroupedList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (tasks.isEmpty) {
-      final glass = Theme.of(context).extension<GlassTheme>()!;
-      return Center(
-        child: Text(
-          context.l10n.taskEmptyList,
-          style: TextStyle(color: glass.textMuted),
-        ),
-      );
+      return const _EmptyTasks();
     }
 
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final completed = <Task>[];
-    final grouped = {for (final group in _TaskGroup.values) group: <Task>[]};
-    for (final task in tasks) {
-      if (task.isCompleted) {
-        completed.add(task);
-      } else {
-        grouped[_groupOf(task, today)]!.add(task);
-      }
-    }
-
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 4, 20, 88),
+    final (:open, :completed) = _groupTasks(tasks);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        for (final group in _TaskGroup.values)
-          if (grouped[group]!.isNotEmpty) ...[
-            _GroupLabel(_groupLabel(context.l10n, group)),
-            const SizedBox(height: Spacing.sm),
-            _TaskGroupCard(tasks: grouped[group]!),
-            const SizedBox(height: Spacing.lg),
-          ],
+        for (final MapEntry(key: group, value: groupTasks) in open.entries) ...[
+          GroupLabel(_groupLabel(context.l10n, group)),
+          const SizedBox(height: Spacing.sm),
+          _TaskGroupCard(tasks: groupTasks),
+          const SizedBox(height: Spacing.lg),
+        ],
         if (completed.isNotEmpty) _CompletedSection(tasks: completed),
       ],
     );
   }
 }
 
-class _GroupLabel extends StatelessWidget {
-  const _GroupLabel(this.label);
-
-  final String label;
+class _EmptyTasks extends StatelessWidget {
+  const _EmptyTasks();
 
   @override
   Widget build(BuildContext context) {
     final glass = Theme.of(context).extension<GlassTheme>()!;
-    return Text(
-      label,
-      style: TextStyle(
-        fontSize: 13,
-        fontWeight: FontWeight.w600,
-        color: glass.textMuted,
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        GroupLabel(context.l10n.taskTabTitle),
+        const SizedBox(height: Spacing.sm),
+        GlassCard(
+          child: Text(
+            context.l10n.taskEmptyList,
+            style: TextStyle(color: glass.textMuted, fontSize: 14),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -239,6 +248,12 @@ class _TaskRow extends ConsumerWidget {
               onTap: () => Navigator.pop(context, _TaskRowAction.edit),
             ),
             ListTile(
+              leading: const Icon(Icons.repeat),
+              title: Text(context.l10n.taskConvertToRoutine),
+              onTap: () =>
+                  Navigator.pop(context, _TaskRowAction.convertToRoutine),
+            ),
+            ListTile(
               leading: const Icon(Icons.delete_outline),
               title: Text(context.l10n.commonDelete),
               onTap: () => Navigator.pop(context, _TaskRowAction.delete),
@@ -256,6 +271,11 @@ class _TaskRow extends ConsumerWidget {
         showGlassBottomSheet(
           context: context,
           builder: (_) => AddTaskSheet(task: task),
+        );
+      case _TaskRowAction.convertToRoutine:
+        showGlassBottomSheet(
+          context: context,
+          builder: (_) => AddHabitSheet(fromTask: task),
         );
       case _TaskRowAction.delete:
         await _delete(context, ref);
@@ -277,26 +297,13 @@ class _TaskRow extends ConsumerWidget {
     }
   }
 
-  Future<void> _openDetail(BuildContext context) async {
-    final outcome = await showGlassBottomSheet<TaskDetailOutcome>(
-      context: context,
-      builder: (_) => TaskDetailSheet(taskId: task.id),
-    );
-    if (outcome == TaskDetailOutcome.edit && context.mounted) {
-      await showGlassBottomSheet(
-        context: context,
-        builder: (_) => AddTaskSheet(task: task),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final glass = Theme.of(context).extension<GlassTheme>()!;
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () => _openDetail(context),
+        onTap: () => showTaskDetailSheet(context, task.id),
         onLongPress: () => _showActions(context, ref),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -336,4 +343,4 @@ class _TaskRow extends ConsumerWidget {
   }
 }
 
-enum _TaskRowAction { edit, delete }
+enum _TaskRowAction { edit, convertToRoutine, delete }

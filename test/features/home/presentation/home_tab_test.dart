@@ -9,6 +9,7 @@ import 'package:mindful/features/home/presentation/widgets/unsynced_banner.dart'
 import 'package:mindful/features/journal/data/journal_entries_controller.dart';
 import 'package:mindful/features/journal/domain/journal_entry.dart';
 import 'package:mindful/features/money/presentation/money_providers.dart';
+import 'package:mindful/features/recap/presentation/monthly_recap_providers.dart';
 import 'package:mindful/features/tasks/domain/task.dart';
 import 'package:mindful/features/tasks/presentation/task_tab.dart';
 
@@ -46,6 +47,7 @@ void main() {
           habitTabControllerProvider.overrideWith(_EmptyHabitTabController.new),
           journalEntriesProvider.overrideWith(_EmptyJournalEntries.new),
           hasStalePendingWritesProvider.overrideWith((ref) async => false),
+          monthlyRecapBannerMonthProvider.overrideWith((ref) => null),
           // No budget set — RemainingBudgetWidget renders nothing, and
           // this keeps the test from touching MoneyRepository's Hive
           // boxes, which aren't initialized here.

@@ -43,9 +43,7 @@ class _DebugSectionState extends ConsumerState<DebugSection> {
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.l10n.settingsDebugTestError('$error')),
-        ),
+        SnackBar(content: Text(context.l10n.settingsDebugTestError('$error'))),
       );
     } finally {
       if (mounted) setState(() => _scheduling = false);

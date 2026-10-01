@@ -908,6 +908,42 @@ abstract class AppLocalizations {
   /// **'+ Add action'**
   String get habitAddAction;
 
+  /// No description provided for @planTabTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tasks & Routines'**
+  String get planTabTitle;
+
+  /// No description provided for @planAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add task or habit'**
+  String get planAdd;
+
+  /// No description provided for @taskConvertToRoutine.
+  ///
+  /// In en, this message translates to:
+  /// **'Convert to routine'**
+  String get taskConvertToRoutine;
+
+  /// No description provided for @habitConvertTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Convert to routine'**
+  String get habitConvertTitle;
+
+  /// No description provided for @habitConvertHint.
+  ///
+  /// In en, this message translates to:
+  /// **'\"{name}\" will be removed from your tasks once this routine is saved.'**
+  String habitConvertHint(String name);
+
+  /// No description provided for @habitConvertSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save routine'**
+  String get habitConvertSave;
+
   /// No description provided for @taskGroupUpcoming.
   ///
   /// In en, this message translates to:
@@ -1890,14 +1926,8 @@ abstract class AppLocalizations {
   /// No description provided for @navTasks.
   ///
   /// In en, this message translates to:
-  /// **'Tasks'**
+  /// **'Tasks & Routines'**
   String get navTasks;
-
-  /// No description provided for @navHabits.
-  ///
-  /// In en, this message translates to:
-  /// **'Habits'**
-  String get navHabits;
 
   /// No description provided for @navJournal.
   ///
@@ -2054,6 +2084,372 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Still working on your advice — you\'ll get a notification if it fails.'**
   String get moneyAdviceInProgress;
+
+  /// No description provided for @recapBannerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your {month} recap is ready'**
+  String recapBannerTitle(String month);
+
+  /// No description provided for @recapBannerTitleSoFar.
+  ///
+  /// In en, this message translates to:
+  /// **'{month} is almost over — see your recap'**
+  String recapBannerTitleSoFar(String month);
+
+  /// No description provided for @recapBannerSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Routines, tasks, cashflow and AI at a glance'**
+  String get recapBannerSubtitle;
+
+  /// No description provided for @recapClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close recap'**
+  String get recapClose;
+
+  /// No description provided for @recapLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load your recap. Try again later.'**
+  String get recapLoadError;
+
+  /// No description provided for @recapDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get recapDone;
+
+  /// No description provided for @recapIntroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your {month}'**
+  String recapIntroTitle(String month);
+
+  /// No description provided for @recapIntroSoFarTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your {month} so far'**
+  String recapIntroSoFarTitle(String month);
+
+  /// No description provided for @recapIntroLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'monthly recap'**
+  String get recapIntroLabel;
+
+  /// No description provided for @recapIntroMotivation.
+  ///
+  /// In en, this message translates to:
+  /// **'Every small step you took this month counted. Let\'s look back at them together.'**
+  String get recapIntroMotivation;
+
+  /// No description provided for @recapTapHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to continue'**
+  String get recapTapHint;
+
+  /// No description provided for @recapRoutinesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Routines'**
+  String get recapRoutinesTitle;
+
+  /// No description provided for @recapRoutinesHeroLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'routine check-ins'**
+  String get recapRoutinesHeroLabel;
+
+  /// No description provided for @recapStatCompletion.
+  ///
+  /// In en, this message translates to:
+  /// **'Completion'**
+  String get recapStatCompletion;
+
+  /// No description provided for @recapStatPerfectDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Perfect days'**
+  String get recapStatPerfectDays;
+
+  /// No description provided for @recapStatLongestStreak.
+  ///
+  /// In en, this message translates to:
+  /// **'Longest streak'**
+  String get recapStatLongestStreak;
+
+  /// No description provided for @recapStatTopRoutine.
+  ///
+  /// In en, this message translates to:
+  /// **'Top routine'**
+  String get recapStatTopRoutine;
+
+  /// No description provided for @recapPercent.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}%'**
+  String recapPercent(int percent);
+
+  /// No description provided for @recapDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 day} other{{count} days}}'**
+  String recapDays(int count);
+
+  /// No description provided for @recapRoutinesGreat.
+  ///
+  /// In en, this message translates to:
+  /// **'Incredible consistency! You\'re building routines that last — keep the chain going.'**
+  String get recapRoutinesGreat;
+
+  /// No description provided for @recapRoutinesGood.
+  ///
+  /// In en, this message translates to:
+  /// **'Solid month! You showed up more often than not. One more push and next month is your best yet.'**
+  String get recapRoutinesGood;
+
+  /// No description provided for @recapRoutinesStarting.
+  ///
+  /// In en, this message translates to:
+  /// **'Every check-in counts. Pick one routine to focus on and watch it grow.'**
+  String get recapRoutinesStarting;
+
+  /// No description provided for @recapRoutinesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No routines yet. Start one tiny habit next month — two minutes a day is enough.'**
+  String get recapRoutinesEmpty;
+
+  /// No description provided for @recapTasksTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tasks'**
+  String get recapTasksTitle;
+
+  /// No description provided for @recapTasksHeroLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'tasks completed'**
+  String get recapTasksHeroLabel;
+
+  /// No description provided for @recapStatAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Added'**
+  String get recapStatAdded;
+
+  /// No description provided for @recapStatStillOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Still open'**
+  String get recapStatStillOpen;
+
+  /// No description provided for @recapTasksGreat.
+  ///
+  /// In en, this message translates to:
+  /// **'You crushed your to-do list! That momentum is yours to keep.'**
+  String get recapTasksGreat;
+
+  /// No description provided for @recapTasksGood.
+  ///
+  /// In en, this message translates to:
+  /// **'Great progress — you got most things done. Keep that rhythm going.'**
+  String get recapTasksGood;
+
+  /// No description provided for @recapTasksStarting.
+  ///
+  /// In en, this message translates to:
+  /// **'Some tasks slipped, and that\'s okay. Start next month with just one thing a day.'**
+  String get recapTasksStarting;
+
+  /// No description provided for @recapTasksEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'A fresh list awaits. Jot down one thing you want to get done next month.'**
+  String get recapTasksEmpty;
+
+  /// No description provided for @recapMoneyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cashflow'**
+  String get recapMoneyTitle;
+
+  /// No description provided for @recapMoneyHeroLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'spent'**
+  String get recapMoneyHeroLabel;
+
+  /// No description provided for @recapStatIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get recapStatIncome;
+
+  /// No description provided for @recapStatNet.
+  ///
+  /// In en, this message translates to:
+  /// **'Net'**
+  String get recapStatNet;
+
+  /// No description provided for @recapStatNoSpendDays.
+  ///
+  /// In en, this message translates to:
+  /// **'No-spend days'**
+  String get recapStatNoSpendDays;
+
+  /// No description provided for @recapStatTopCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Top spending'**
+  String get recapStatTopCategory;
+
+  /// No description provided for @recapStatBudgetUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget used'**
+  String get recapStatBudgetUsed;
+
+  /// No description provided for @recapMoneyGreat.
+  ///
+  /// In en, this message translates to:
+  /// **'Nicely done — you kept your spending in check. Future you says thanks!'**
+  String get recapMoneyGreat;
+
+  /// No description provided for @recapMoneyGood.
+  ///
+  /// In en, this message translates to:
+  /// **'You earned more than you spent. Keep tracking and the savings will follow.'**
+  String get recapMoneyGood;
+
+  /// No description provided for @recapMoneyStarting.
+  ///
+  /// In en, this message translates to:
+  /// **'Spending ran ahead this month. Noticing is the first step — and you\'re already tracking it.'**
+  String get recapMoneyStarting;
+
+  /// No description provided for @recapMoneyEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing logged yet. Try tracking every spend next month — it\'s eye-opening.'**
+  String get recapMoneyEmpty;
+
+  /// No description provided for @recapAiTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Lab'**
+  String get recapAiTitle;
+
+  /// No description provided for @recapAiHeroLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'food scans'**
+  String get recapAiHeroLabel;
+
+  /// No description provided for @recapStatAvgCalories.
+  ///
+  /// In en, this message translates to:
+  /// **'Avg. per scan'**
+  String get recapStatAvgCalories;
+
+  /// No description provided for @recapStatTotalCalories.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get recapStatTotalCalories;
+
+  /// No description provided for @recapStatTopFood.
+  ///
+  /// In en, this message translates to:
+  /// **'Most scanned'**
+  String get recapStatTopFood;
+
+  /// No description provided for @recapKcal.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} kcal'**
+  String recapKcal(int count);
+
+  /// No description provided for @recapAiGreat.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re a mindful eater! Knowing what\'s on your plate is a superpower.'**
+  String get recapAiGreat;
+
+  /// No description provided for @recapAiGood.
+  ///
+  /// In en, this message translates to:
+  /// **'Nice curiosity! Keep scanning to learn more about what fuels you.'**
+  String get recapAiGood;
+
+  /// No description provided for @recapAiStarting.
+  ///
+  /// In en, this message translates to:
+  /// **'A great start. Try scanning a meal a day to spot your patterns.'**
+  String get recapAiStarting;
+
+  /// No description provided for @recapAiEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Haven\'t tried the AI Lab yet? Snap your next meal and see what\'s inside.'**
+  String get recapAiEmpty;
+
+  /// No description provided for @recapAiUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load your AI scans — check your connection and open the recap again.'**
+  String get recapAiUnavailable;
+
+  /// No description provided for @recapOutroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep going!'**
+  String get recapOutroTitle;
+
+  /// No description provided for @recapOutroLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'you\'ve got this'**
+  String get recapOutroLabel;
+
+  /// No description provided for @recapOutroBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Small steps every day add up to big changes. Here\'s to an even better {month}.'**
+  String recapOutroBody(String month);
+
+  /// No description provided for @recapOutroSoFarBody.
+  ///
+  /// In en, this message translates to:
+  /// **'There\'s still time left this month — finish strong, one small step at a time.'**
+  String get recapOutroSoFarBody;
+
+  /// No description provided for @settingsRecapRevisit.
+  ///
+  /// In en, this message translates to:
+  /// **'Revisit a monthly recap'**
+  String get settingsRecapRevisit;
+
+  /// No description provided for @settingsRecapRevisitSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Replay any of the last 12 months'**
+  String get settingsRecapRevisitSubtitle;
+
+  /// No description provided for @settingsRecapPickerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a month'**
+  String get settingsRecapPickerTitle;
+
+  /// No description provided for @settingsRecapSoFar.
+  ///
+  /// In en, this message translates to:
+  /// **'{month} (so far)'**
+  String settingsRecapSoFar(String month);
 }
 
 class _AppLocalizationsDelegate

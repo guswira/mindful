@@ -280,7 +280,7 @@ TODAY'S TASKS SECTION:
     "Add task" tap → AddTaskSheet bottom sheet
 
 HABITS SECTION:
-  header: "Habits" + "view all" → /home/habits
+  header: "Habits" + "view all" → /home/tasks (Tasks & Routines tab)
   empty: GlassCard row — fire icon (habitAccent glass square) +
     "Build your first habit" + TintedPill("Start", habitAccent)
   with data: habit rows with inline action buttons (habitAccent)
@@ -302,6 +302,9 @@ UNSYNCED BANNER (AnimatedSwitcher, only when pending > 24h):
   subtle glass strip: "Some data hasn't synced. Tap to retry."
   tap → sync_service.retryPending()
 
+MONTHLY RECAP BANNER (below the unsynced banner, above the streak row —
+  see Monthly Recap): last 3 days of a month through the 3rd of the next.
+
 ---
 
 ### 4. Floating Island Nav Bar (shared/widgets/floating_nav_bar.dart)
@@ -317,7 +320,7 @@ Row:
     borderRadius: 28px  ← more rounded
     padding: EdgeInsets.symmetric(horizontal:10, vertical:13)
     BackdropFilter blur(24)
-    Row 4 _NavItem widgets (equal flex)
+    Row _NavItem widgets (equal flex, one per tab — see Nav bar update)
 
   SizedBox(width:10)
 
@@ -333,20 +336,19 @@ _NavItem widget:
   Column: icon (22px) + AnimatedContainer dot
   NO text labels — icon + dot only
   active icon color (per tab):
-    index 0 Home:    homeAccent    Color(0xFFFFFFFF) white
-    index 1 Tasks:   taskAccent    Color(0xFF60A5FA) blue
-    index 2 Habits:  habitAccent   Color(0xFFA78BFA) purple
-    index 3 Journal: journalAccent Color(0xFFFCD34D) yellow
+    index 0 Home:              homeAccent    Color(0xFFFFFFFF) white
+    index 1 Tasks & Routines:  taskAccent    Color(0xFF60A5FA) blue
+    index 2 Journal:           journalAccent Color(0xFFFCD34D) yellow
+    (+ Money, AI — see Money Flow / AI Lab)
   inactive icon: Colors.white.withOpacity(0.28)
   active dot: AnimatedContainer width 16, height 4, borderRadius 2,
               color = tab accent color
   inactive dot: width 4, transparent
 
-4 tab icons (outline style):
-  Home:    Icons.home_outlined
-  Tasks:   Icons.checklist_outlined
-  Habits:  Icons.calendar_month_outlined
-  Journal: Icons.menu_book_outlined
+Tab icons (outline style):
+  Home:             Icons.home_outlined
+  Tasks & Routines: Icons.checklist_outlined
+  Journal:          Icons.menu_book_outlined
 
 Shell Scaffold body: Stack [ child, Positioned bottom:0 FloatingNavBar ]
 All tab screens: add bottom padding ≥ 88px so content clears the nav.
@@ -454,32 +456,57 @@ Tap card → JournalDetailSheet.
 
 ---
 
-### 8. Habit Tracker (/home/habits)
+### 8. Tasks & Routines (/home/tasks)
 
-HabitTab: today's habits, glass rows.
-  each row: icon, name, action buttons (habitAccent), done checkmark
-  tapping the already-selected action (or "Done") undoes today's log
-  long press → sheet: Edit / Archive / Delete
-  "Add habit" → AddHabitSheet
+Tasks and routines (habits) share ONE tab — PlanTab
+(lib/features/plan/presentation/plan_tab.dart). There is no separate
+habits tab and no /home/habits route any more. Home screen sections and
+the home/lock screen widgets still show tasks and routines separately
+(see Home Screen and the widgets section) — both "view all" links and the
+widgets' routines link (`mindful://home/habits`) land on this tab.
+
+Header: "Tasks & Routines" title + glass "+" button → small sheet:
+  "Add task" → AddTaskSheet, "Add habit" → AddHabitSheet
+
+Body (one ListView, bottom padding 88):
+  ROUTINES section (first — they repeat every day):
+    "Routines" group label + GlassCard of today's active habit rows
+    (RoutineSection, habit_tab_list.dart); empty: "No habits yet"
+    each row: icon, name, action buttons (habitAccent), done checkmark
+    tapping the already-selected action (or "Done") undoes today's log
+    tap row → HabitDetailScreen; long press → sheet: Edit / Archive / Delete
+  TASK sections (TaskSections, task_tab_list.dart):
+    grouped Today / Upcoming / No date / Completed (collapsed)
+    empty: "Todo" label + GlassCard "No tasks yet"
+    glass rows: checkbox (taskAccent fill when checked) + name + due chip
+    tap row → TaskDetailSheet
+    long press → sheet: Edit / Convert to routine / Delete
+  Each half loads on its own (HabitTabController / TaskTabController) —
+  one failing or loading never hides the other.
+
+Convert task → routine:
+  From the task row's long-press sheet, or TaskDetailSheet's "⋯" menu
+  (pops with TaskDetailResult; showTaskDetailSheet opens the follow-up).
+  Opens AddHabitSheet(fromTask: task):
+    title "Convert to routine", hint "\"<name>\" will be removed from
+      your tasks once this routine is saved."
+    pre-fills: name; if the task had a reminder → reminder on, at that
+      time of day, on the default days (Mon–Fri)
+    due date and subtasks are not carried over (a routine has neither)
+    button TintedPill("Save routine", habitAccent)
+  On save: habit saved + reminder scheduled, THEN the task is deleted
+    (forgetTaskReminder + TaskRepository.delete). A failed Supabase delete
+    only shows a SnackBar — the routine is already saved by then.
+  Closing the sheet without saving keeps the task untouched.
 
 HabitDetailScreen (/habits/:id — full page):
   monthly calendar, habitAccent dots, streak count, swipe months.
 
 AddHabitSheet / edit: uses bottom sheet (see Add Sheets above).
 
-Notifications: per-habit, habitAccent action buttons, fires on selected days.
-
----
-
-### 9. Task Manager (/home/tasks)
-
-TaskTab: grouped Today / Upcoming / No date / Completed (collapsed).
-  glass rows: checkbox (taskAccent fill when checked) + name + due chip
-  tap row → TaskDetailSheet
-  long press → sheet: Edit / Delete
-  "Add task" → AddTaskSheet
-
-Notifications: per-task at reminderAt, "Mark done" action button (taskAccent).
+Notifications:
+  habits: per-habit, habitAccent action buttons, fires on selected days.
+  tasks: per-task at reminderAt, "Mark done" action button (taskAccent).
 
 ---
 
@@ -495,6 +522,8 @@ Drive Backup: connect/disconnect, last backup date, pending count,
 Drive Restore (Drive connected): import from Drive, month picker,
   preview, warning dialog, skip-existing import.
 Notifications: journal 8am toggle, journal 10pm toggle.
+Monthly recap (monthly_recap_section.dart — see Monthly Recap):
+  "Revisit a monthly recap" → month picker sheet → recap slideshow.
 Account: Google photo + name + email, sign out.
 Debug (kDebugMode only): "Reset onboarding" → clearOnboardingSeen().
   "Schedule test notification (5 min)" (lib/features/settings/presentation/
@@ -553,6 +582,10 @@ labels — out of scope for the Dart ARB files.
 
 
 widget_service.dart updates on every app open and after any write.
+Tasks and routines stay separate on the widgets (unlike the in-app
+Tasks & Routines tab); `mindful://home/tasks` and `mindful://home/habits`
+both open that one tab, `mindful://open-habit` opens it then pushes
+/habits/:id.
 
 Small 2×2: date, journal streak (teal), habits X/Y (habitAccent)
 Medium 4×2: above + up to 3 incomplete tasks due today
@@ -622,19 +655,22 @@ and are out of scope for the Dart ARB files.
 /splash            → SplashScreen
 /onboarding        → OnboardingScreen  (no auth redirect)
 /login             → LoginScreen
-/home              → HomeScreen shell (FloatingNavBar, 4 tabs)
+/home              → HomeScreen shell (FloatingNavBar, 5 tabs)
   /home/today      → HomeTab  (default)
-  /home/tasks      → TaskTab
-  /home/habits     → HabitTab
+  /home/tasks      → PlanTab  (tasks + routines)
   /home/journal    → JournalTab
+  /home/money      → MoneyTab
+  /home/ai         → AITab
 /journal/:id/edit  → JournalEditorScreen  (edit only, full page)
 /habits/:id        → HabitDetailScreen    (calendar, full page)
 /settings          → SettingsScreen
+/recap/:month      → MonthlyRecapScreen  (slideshow, full page; month = yyyy-MM)
 ```
 
 REMOVED routes (replaced by bottom sheets):
   /journal/new, /journal/:id, /habits/new, /habits/:id/edit,
   /tasks/new, /tasks/:id, /tasks/:id/edit
+REMOVED: /home/habits (merged into /home/tasks — see Tasks & Routines)
 
 Redirects:
   unauthenticated → /login (except /onboarding)
@@ -644,7 +680,7 @@ Redirects:
 
 ## UI conventions
 
-- Floating island nav bar — 4 tabs, NO profile tab, NO labels
+- Floating island nav bar — 5 tabs, NO profile tab, NO labels
 - Settings accessed via gear icon top-right of HomeScreen only
 - Each tab has its own accent color (see Feature accent colors)
 - Write button bottom-right of nav row — always teal gradient
@@ -660,6 +696,8 @@ Redirects:
 - RepaintBoundary wrapping all screens (Android BackdropFilter fix)
 - Unsynced dot: small subtle, never disruptive
 - Write button long press: radial arc overlay for quick access
+- Full-page exceptions to "detail views are sheets": habit calendar and
+  the monthly recap slideshow
 - ShakeWidget on empty required field submit attempt
 
 ---
@@ -736,7 +774,8 @@ lib/
 │   │   │   ├── habit_action.dart
 │   │   │   └── habit_log.dart
 │   │   └── presentation/
-│   │       ├── habit_tab.dart
+│   │       ├── habit_tab.dart          ← HabitTabController (today's habits)
+│   │       ├── habit_tab_list.dart     ← RoutineSection (used by PlanTab)
 │   │       ├── habit_detail_screen.dart    ← full page calendar
 │   │       └── add_habit_sheet.dart        ← bottom sheet add + edit
 │   ├── tasks/
@@ -747,11 +786,18 @@ lib/
 │   │   │   ├── task.dart
 │   │   │   └── task_checkbox.dart
 │   │   └── presentation/
-│   │       ├── task_tab.dart
+│   │       ├── task_tab.dart           ← TaskTabController
+│   │       ├── task_tab_list.dart      ← TaskSections (used by PlanTab)
 │   │       ├── task_detail_sheet.dart      ← bottom sheet
 │   │       └── add_task_sheet.dart         ← bottom sheet
+│   ├── plan/
+│   │   └── presentation/
+│   │       └── plan_tab.dart           ← Tasks & Routines tab
+│   ├── recap/                          ← Monthly Recap (see section 15)
 │   └── settings/
-│       └── presentation/settings_screen.dart
+│       └── presentation/
+│           ├── settings_screen.dart
+│           └── monthly_recap_section.dart
 └── shared/
     ├── widgets/
     │   ├── glass_card.dart
@@ -920,12 +966,12 @@ Income categories:
 
 ### Money Flow Tab (/home/money)
 
-Add to floating nav bar as 5th tab:
-  index 4 Money: Icons.account_balance_wallet_outlined
+Add to floating nav bar as 4th tab:
+  index 3 Money: Icons.account_balance_wallet_outlined
   activeColor: moneyAccent Color(0xFF34D399) emerald green
 
-Update shell route to 5 tabs:
-  /home/today, /home/tasks, /home/habits, /home/journal, /home/money
+Shell route tabs:
+  /home/today, /home/tasks, /home/journal, /home/money
 
 MoneyTab layout (BlobBackground, CustomScrollView):
 
@@ -1352,13 +1398,12 @@ Add to pubspec.yaml:
 
 lib/features/ai/presentation/ai_tab.dart
 
-Add to floating nav bar as 6th tab:
-  index 5 AI: Icons.auto_awesome_outlined
+Add to floating nav bar as 5th tab:
+  index 4 AI: Icons.auto_awesome_outlined
   activeColor: aiAccent Color(0xFF818CF8) indigo
 
-Update shell route to 6 tabs:
-  /home/today, /home/tasks, /home/habits,
-  /home/journal, /home/money, /home/ai
+Shell route tabs (5):
+  /home/today, /home/tasks, /home/journal, /home/money, /home/ai
 
 AITab layout (BlobBackground, SingleChildScrollView):
 
@@ -1602,15 +1647,14 @@ Add to glass_theme.dart:
 
 ### Nav bar update
 
-6 tabs total:
-  0 Home    white
-  1 Tasks   taskAccent blue
-  2 Habits  habitAccent purple
-  3 Journal journalAccent yellow
-  4 Money   moneyAccent green
-  5 AI      aiAccent indigo
+5 tabs total:
+  0 Home              white
+  1 Tasks & Routines  taskAccent blue   (routine rows inside keep habitAccent)
+  2 Journal           journalAccent yellow
+  3 Money             moneyAccent green
+  4 AI                aiAccent indigo
 
-Island may need icon size reduced to 20px to fit 6 tabs comfortably.
+Icon size 20px.
 
 ### Error handling
 
@@ -1647,3 +1691,113 @@ message:
 - Not meal planning in v1
 - No barcode scanning in v1
 - Accuracy not guaranteed — experimental only
+
+
+---
+
+## 15. Monthly Recap
+
+A story-style look back at one month — routines, tasks, cashflow and AI
+usage — where every slide ends on a line that motivates the user to keep
+going. Transient: computed on demand from the existing data, never stored.
+
+### Entry points
+
+Home banner (MonthlyRecapHomeBanner, recap/presentation/widgets/
+monthly_recap_banner.dart), shown under the unsynced banner:
+  window (recap/domain/recap_window.dart — recapMonthForBanner):
+    last 3 days of a month → that month, "<Month> is almost over — see
+      your recap"
+    1st–3rd of a month → the previous month, "Your <Month> recap is
+      ready"
+    any other day → hidden
+  always shown every day of the window — no dismiss button, no "seen"
+    state, no Settings toggle; it can be opened as often as the user likes
+  strong GlassCard, gradient icon (writeAccent → aiAccent), title +
+    "Routines, tasks, cashflow and AI at a glance", chevron
+  tap → opens the slideshow
+
+Settings → "Revisit a monthly recap" (any time): opens a month picker
+  sheet — this month "(so far)" + the 11 months before it, newest first
+  (recapRevisitableMonths) — and tapping one opens its slideshow.
+
+### Data (MonthlyRecap — recap/domain/monthly_recap.dart)
+
+monthlyRecapProvider(month) gathers, buildMonthlyRecap (pure, unit
+tested) computes. For a month still in progress only days up to today
+count, and the copy says "so far".
+
+  RoutineRecap: active (non-archived) habits, check-ins vs possible
+    check-ins (one per habit per day since it was created), completion %,
+    perfect days (every existing habit done), longest single-habit
+    streak, top routine. Logs come from HabitRepository.logsInMonth
+    (Supabase fetch merged into Hive, cache fallback offline).
+  TaskRecap: completed (completed tasks with updated_at in the month —
+    tasks have no completion timestamp), added (created_at in the month),
+    still open (unfinished, due by month end / today), done rate.
+  CashflowRecap: spending, income, net, % of monthly budget (if set),
+    no-spend days, top spending category — from the Hive money cache, in
+    the budget currency.
+  AiRecap: food scans in the month, total + average kcal, most-scanned
+    food — FoodScanRepository.getScansInMonth (Supabase only, 10s
+    timeout); null when unreachable → the AI slide says it couldn't load.
+  Money AI advice isn't stored, so it isn't counted.
+
+Each section has a RecapTone (great / good / starting / empty) that picks
+its motivation line — a quiet month gets encouragement, never a scolding:
+  routines / tasks: ≥ 80% great, ≥ 50% good, else starting; nothing to
+    count → empty
+  cashflow: under budget (or no budget and net ≥ 0) great, net ≥ 0 good,
+    else starting; no entries → empty
+  AI: ≥ 10 scans great, ≥ 4 good, ≥ 1 starting, 0 empty
+
+### MonthlyRecapScreen (/recap/:month)
+
+Full page, BlobBackground + RepaintBoundary. 6 slides (recap_slides.dart):
+  1. Intro — writeAccent, "Your <Month>" (or "so far"), year
+  2. Routines — habitAccent, hero: check-ins
+  3. Tasks — taskAccent, hero: tasks completed
+  4. Cashflow — moneyAccent, hero: amount spent
+  5. AI Lab — aiAccent, hero: food scans
+  6. Outro — writeAccent, "Keep going!", TintedPill("Done") closes
+
+Slide layout (RecapSlide): emoji badge (accent-tinted 72px square) +
+  uppercase section label (accent), hero value (48px bold white, counts up
+  from 0 over 1.2s) + label, Wrap of small GlassCard stat chips (value in
+  accent), strong GlassCard with the motivation line.
+
+Playback (RecapSlideshow): story-style segment progress bars at the top +
+  close (×); auto-advance every 7s, tap right ⅔ → next, left ⅓ → back,
+  swipe between slides, hold to pause; "Tap to continue" hint (hidden on
+  the last slide). Slides scroll vertically if they don't fit.
+  MediaQuery.disableAnimations → no auto-advance and no count-up.
+
+Copy: all in the ARB files (`recap*`, `settingsRecap*`).
+
+### Folder structure
+
+```
+lib/features/recap/
+  domain/
+    monthly_recap.dart          ← MonthlyRecap + section recaps + RecapTone
+    monthly_recap_builder.dart  ← buildMonthlyRecap (pure)
+    recap_window.dart           ← banner window, revisit months, yyyy-MM keys
+  presentation/
+    monthly_recap_providers.dart ← monthlyRecap, monthlyRecapBannerMonth
+    monthly_recap_screen.dart    ← route screen + openMonthlyRecap()
+    recap_slide_data.dart
+    recap_slides.dart            ← MonthlyRecap → slides + motivation
+    widgets/
+      monthly_recap_banner.dart  ← home banner
+      recap_slideshow.dart       ← playback, tap/swipe/hold
+      recap_progress_bars.dart
+      recap_slide.dart
+      recap_hero.dart            ← count-up hero number
+```
+
+### What Monthly Recap is NOT
+
+- Not stored or synced — recomputed each time it's opened
+- No notification for it in v1 (banner + Settings only)
+- No persisted recap preferences — nothing in SettingsRepository
+- No sharing/export of the slides in v1

@@ -457,6 +457,26 @@ class AppLocalizationsId extends AppLocalizations {
   String get habitAddAction => '+ Tambah aksi';
 
   @override
+  String get planTabTitle => 'Tugas & Rutinitas';
+
+  @override
+  String get planAdd => 'Tambah tugas atau kebiasaan';
+
+  @override
+  String get taskConvertToRoutine => 'Jadikan rutinitas';
+
+  @override
+  String get habitConvertTitle => 'Jadikan rutinitas';
+
+  @override
+  String habitConvertHint(String name) {
+    return '\"$name\" akan dihapus dari tugas setelah rutinitas ini disimpan.';
+  }
+
+  @override
+  String get habitConvertSave => 'Simpan rutinitas';
+
+  @override
   String get taskGroupUpcoming => 'Mendatang';
 
   @override
@@ -1016,10 +1036,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get navHome => 'Beranda';
 
   @override
-  String get navTasks => 'Tugas';
-
-  @override
-  String get navHabits => 'Kebiasaan';
+  String get navTasks => 'Tugas & Rutinitas';
 
   @override
   String get navJournal => 'Jurnal';
@@ -1107,4 +1124,231 @@ class AppLocalizationsId extends AppLocalizations {
   @override
   String get moneyAdviceInProgress =>
       'Saranmu masih diproses — kamu akan dapat notifikasi kalau gagal.';
+
+  @override
+  String recapBannerTitle(String month) {
+    return 'Rekap $month kamu sudah siap';
+  }
+
+  @override
+  String recapBannerTitleSoFar(String month) {
+    return '$month hampir selesai — lihat rekapmu';
+  }
+
+  @override
+  String get recapBannerSubtitle =>
+      'Rutinitas, tugas, keuangan, dan AI sekilas';
+
+  @override
+  String get recapClose => 'Tutup rekap';
+
+  @override
+  String get recapLoadError => 'Gagal memuat rekapmu. Coba lagi nanti.';
+
+  @override
+  String get recapDone => 'Selesai';
+
+  @override
+  String recapIntroTitle(String month) {
+    return '$month kamu';
+  }
+
+  @override
+  String recapIntroSoFarTitle(String month) {
+    return '$month kamu sejauh ini';
+  }
+
+  @override
+  String get recapIntroLabel => 'rekap bulanan';
+
+  @override
+  String get recapIntroMotivation =>
+      'Setiap langkah kecil yang kamu ambil bulan ini berarti. Yuk, kita lihat lagi bareng-bareng.';
+
+  @override
+  String get recapTapHint => 'Ketuk untuk lanjut';
+
+  @override
+  String get recapRoutinesTitle => 'Rutinitas';
+
+  @override
+  String get recapRoutinesHeroLabel => 'check-in rutinitas';
+
+  @override
+  String get recapStatCompletion => 'Penyelesaian';
+
+  @override
+  String get recapStatPerfectDays => 'Hari sempurna';
+
+  @override
+  String get recapStatLongestStreak => 'Runtutan terpanjang';
+
+  @override
+  String get recapStatTopRoutine => 'Rutinitas teratas';
+
+  @override
+  String recapPercent(int percent) {
+    return '$percent%';
+  }
+
+  @override
+  String recapDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count hari',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get recapRoutinesGreat =>
+      'Konsistensimu luar biasa! Kamu lagi membangun kebiasaan yang awet — terus jaga runtutannya.';
+
+  @override
+  String get recapRoutinesGood =>
+      'Bulan yang mantap! Kamu lebih sering hadir daripada absen. Sedikit dorongan lagi, bulan depan bisa jadi yang terbaik.';
+
+  @override
+  String get recapRoutinesStarting =>
+      'Setiap check-in itu berarti. Pilih satu rutinitas buat difokuskan dan lihat dia tumbuh.';
+
+  @override
+  String get recapRoutinesEmpty =>
+      'Belum ada rutinitas. Mulai satu kebiasaan kecil bulan depan — dua menit sehari sudah cukup.';
+
+  @override
+  String get recapTasksTitle => 'Tugas';
+
+  @override
+  String get recapTasksHeroLabel => 'tugas selesai';
+
+  @override
+  String get recapStatAdded => 'Ditambahkan';
+
+  @override
+  String get recapStatStillOpen => 'Belum selesai';
+
+  @override
+  String get recapTasksGreat =>
+      'Daftar tugasmu kamu libas habis! Pertahankan semangat ini.';
+
+  @override
+  String get recapTasksGood =>
+      'Progres yang keren — sebagian besar sudah beres. Terus jaga ritmenya.';
+
+  @override
+  String get recapTasksStarting =>
+      'Ada tugas yang terlewat, dan itu nggak apa-apa. Mulai bulan depan dengan satu hal per hari aja.';
+
+  @override
+  String get recapTasksEmpty =>
+      'Daftar baru menantimu. Tulis satu hal yang mau kamu selesaikan bulan depan.';
+
+  @override
+  String get recapMoneyTitle => 'Keuangan';
+
+  @override
+  String get recapMoneyHeroLabel => 'pengeluaran';
+
+  @override
+  String get recapStatIncome => 'Pemasukan';
+
+  @override
+  String get recapStatNet => 'Selisih';
+
+  @override
+  String get recapStatNoSpendDays => 'Hari tanpa belanja';
+
+  @override
+  String get recapStatTopCategory => 'Pengeluaran terbesar';
+
+  @override
+  String get recapStatBudgetUsed => 'Anggaran terpakai';
+
+  @override
+  String get recapMoneyGreat =>
+      'Keren — pengeluaranmu tetap terkendali. Dirimu di masa depan pasti berterima kasih!';
+
+  @override
+  String get recapMoneyGood =>
+      'Pemasukanmu lebih besar dari pengeluaran. Terus catat, tabungannya pasti ikut naik.';
+
+  @override
+  String get recapMoneyStarting =>
+      'Pengeluaran bulan ini agak kebablasan. Sadar itu langkah pertama — dan kamu sudah mencatatnya.';
+
+  @override
+  String get recapMoneyEmpty =>
+      'Belum ada catatan. Coba catat setiap pengeluaran bulan depan — hasilnya bikin melek.';
+
+  @override
+  String get recapAiTitle => 'Lab AI';
+
+  @override
+  String get recapAiHeroLabel => 'pindaian makanan';
+
+  @override
+  String get recapStatAvgCalories => 'Rata-rata per pindaian';
+
+  @override
+  String get recapStatTotalCalories => 'Total';
+
+  @override
+  String get recapStatTopFood => 'Paling sering dipindai';
+
+  @override
+  String recapKcal(int count) {
+    return '$count kkal';
+  }
+
+  @override
+  String get recapAiGreat =>
+      'Kamu pemakan yang mindful! Tahu apa yang ada di piringmu itu kekuatan super.';
+
+  @override
+  String get recapAiGood =>
+      'Rasa ingin tahumu keren! Terus pindai buat kenal lebih jauh apa yang jadi bahan bakarmu.';
+
+  @override
+  String get recapAiStarting =>
+      'Awal yang bagus. Coba pindai satu makanan sehari buat lihat polanya.';
+
+  @override
+  String get recapAiEmpty =>
+      'Belum coba Lab AI? Foto makananmu berikutnya dan lihat isinya.';
+
+  @override
+  String get recapAiUnavailable =>
+      'Gagal memuat pindaian AI-mu — cek koneksimu lalu buka rekapnya lagi.';
+
+  @override
+  String get recapOutroTitle => 'Terus melangkah!';
+
+  @override
+  String get recapOutroLabel => 'kamu pasti bisa';
+
+  @override
+  String recapOutroBody(String month) {
+    return 'Langkah kecil setiap hari jadi perubahan besar. Semoga $month jadi lebih baik lagi.';
+  }
+
+  @override
+  String get recapOutroSoFarBody =>
+      'Bulan ini masih ada sisa waktu — tutup dengan kuat, satu langkah kecil tiap kali.';
+
+  @override
+  String get settingsRecapRevisit => 'Lihat lagi rekap bulanan';
+
+  @override
+  String get settingsRecapRevisitSubtitle =>
+      'Putar ulang rekap 12 bulan terakhir';
+
+  @override
+  String get settingsRecapPickerTitle => 'Pilih bulan';
+
+  @override
+  String settingsRecapSoFar(String month) {
+    return '$month (sejauh ini)';
+  }
 }

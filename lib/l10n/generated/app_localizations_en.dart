@@ -453,6 +453,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get habitAddAction => '+ Add action';
 
   @override
+  String get planTabTitle => 'Tasks & Routines';
+
+  @override
+  String get planAdd => 'Add task or habit';
+
+  @override
+  String get taskConvertToRoutine => 'Convert to routine';
+
+  @override
+  String get habitConvertTitle => 'Convert to routine';
+
+  @override
+  String habitConvertHint(String name) {
+    return '\"$name\" will be removed from your tasks once this routine is saved.';
+  }
+
+  @override
+  String get habitConvertSave => 'Save routine';
+
+  @override
   String get taskGroupUpcoming => 'Upcoming';
 
   @override
@@ -1012,10 +1032,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navHome => 'Home';
 
   @override
-  String get navTasks => 'Tasks';
-
-  @override
-  String get navHabits => 'Habits';
+  String get navTasks => 'Tasks & Routines';
 
   @override
   String get navJournal => 'Journal';
@@ -1102,4 +1119,231 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get moneyAdviceInProgress =>
       'Still working on your advice — you\'ll get a notification if it fails.';
+
+  @override
+  String recapBannerTitle(String month) {
+    return 'Your $month recap is ready';
+  }
+
+  @override
+  String recapBannerTitleSoFar(String month) {
+    return '$month is almost over — see your recap';
+  }
+
+  @override
+  String get recapBannerSubtitle =>
+      'Routines, tasks, cashflow and AI at a glance';
+
+  @override
+  String get recapClose => 'Close recap';
+
+  @override
+  String get recapLoadError => 'Couldn\'t load your recap. Try again later.';
+
+  @override
+  String get recapDone => 'Done';
+
+  @override
+  String recapIntroTitle(String month) {
+    return 'Your $month';
+  }
+
+  @override
+  String recapIntroSoFarTitle(String month) {
+    return 'Your $month so far';
+  }
+
+  @override
+  String get recapIntroLabel => 'monthly recap';
+
+  @override
+  String get recapIntroMotivation =>
+      'Every small step you took this month counted. Let\'s look back at them together.';
+
+  @override
+  String get recapTapHint => 'Tap to continue';
+
+  @override
+  String get recapRoutinesTitle => 'Routines';
+
+  @override
+  String get recapRoutinesHeroLabel => 'routine check-ins';
+
+  @override
+  String get recapStatCompletion => 'Completion';
+
+  @override
+  String get recapStatPerfectDays => 'Perfect days';
+
+  @override
+  String get recapStatLongestStreak => 'Longest streak';
+
+  @override
+  String get recapStatTopRoutine => 'Top routine';
+
+  @override
+  String recapPercent(int percent) {
+    return '$percent%';
+  }
+
+  @override
+  String recapDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: '1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get recapRoutinesGreat =>
+      'Incredible consistency! You\'re building routines that last — keep the chain going.';
+
+  @override
+  String get recapRoutinesGood =>
+      'Solid month! You showed up more often than not. One more push and next month is your best yet.';
+
+  @override
+  String get recapRoutinesStarting =>
+      'Every check-in counts. Pick one routine to focus on and watch it grow.';
+
+  @override
+  String get recapRoutinesEmpty =>
+      'No routines yet. Start one tiny habit next month — two minutes a day is enough.';
+
+  @override
+  String get recapTasksTitle => 'Tasks';
+
+  @override
+  String get recapTasksHeroLabel => 'tasks completed';
+
+  @override
+  String get recapStatAdded => 'Added';
+
+  @override
+  String get recapStatStillOpen => 'Still open';
+
+  @override
+  String get recapTasksGreat =>
+      'You crushed your to-do list! That momentum is yours to keep.';
+
+  @override
+  String get recapTasksGood =>
+      'Great progress — you got most things done. Keep that rhythm going.';
+
+  @override
+  String get recapTasksStarting =>
+      'Some tasks slipped, and that\'s okay. Start next month with just one thing a day.';
+
+  @override
+  String get recapTasksEmpty =>
+      'A fresh list awaits. Jot down one thing you want to get done next month.';
+
+  @override
+  String get recapMoneyTitle => 'Cashflow';
+
+  @override
+  String get recapMoneyHeroLabel => 'spent';
+
+  @override
+  String get recapStatIncome => 'Income';
+
+  @override
+  String get recapStatNet => 'Net';
+
+  @override
+  String get recapStatNoSpendDays => 'No-spend days';
+
+  @override
+  String get recapStatTopCategory => 'Top spending';
+
+  @override
+  String get recapStatBudgetUsed => 'Budget used';
+
+  @override
+  String get recapMoneyGreat =>
+      'Nicely done — you kept your spending in check. Future you says thanks!';
+
+  @override
+  String get recapMoneyGood =>
+      'You earned more than you spent. Keep tracking and the savings will follow.';
+
+  @override
+  String get recapMoneyStarting =>
+      'Spending ran ahead this month. Noticing is the first step — and you\'re already tracking it.';
+
+  @override
+  String get recapMoneyEmpty =>
+      'Nothing logged yet. Try tracking every spend next month — it\'s eye-opening.';
+
+  @override
+  String get recapAiTitle => 'AI Lab';
+
+  @override
+  String get recapAiHeroLabel => 'food scans';
+
+  @override
+  String get recapStatAvgCalories => 'Avg. per scan';
+
+  @override
+  String get recapStatTotalCalories => 'Total';
+
+  @override
+  String get recapStatTopFood => 'Most scanned';
+
+  @override
+  String recapKcal(int count) {
+    return '$count kcal';
+  }
+
+  @override
+  String get recapAiGreat =>
+      'You\'re a mindful eater! Knowing what\'s on your plate is a superpower.';
+
+  @override
+  String get recapAiGood =>
+      'Nice curiosity! Keep scanning to learn more about what fuels you.';
+
+  @override
+  String get recapAiStarting =>
+      'A great start. Try scanning a meal a day to spot your patterns.';
+
+  @override
+  String get recapAiEmpty =>
+      'Haven\'t tried the AI Lab yet? Snap your next meal and see what\'s inside.';
+
+  @override
+  String get recapAiUnavailable =>
+      'Couldn\'t load your AI scans — check your connection and open the recap again.';
+
+  @override
+  String get recapOutroTitle => 'Keep going!';
+
+  @override
+  String get recapOutroLabel => 'you\'ve got this';
+
+  @override
+  String recapOutroBody(String month) {
+    return 'Small steps every day add up to big changes. Here\'s to an even better $month.';
+  }
+
+  @override
+  String get recapOutroSoFarBody =>
+      'There\'s still time left this month — finish strong, one small step at a time.';
+
+  @override
+  String get settingsRecapRevisit => 'Revisit a monthly recap';
+
+  @override
+  String get settingsRecapRevisitSubtitle => 'Replay any of the last 12 months';
+
+  @override
+  String get settingsRecapPickerTitle => 'Pick a month';
+
+  @override
+  String settingsRecapSoFar(String month) {
+    return '$month (so far)';
+  }
 }
