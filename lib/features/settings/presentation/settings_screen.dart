@@ -9,12 +9,13 @@ import '../../../core/l10n/l10n.dart';
 import '../../../shared/services/drive_service.dart';
 import '../../auth/domain/auth_state.dart';
 import '../data/journal_reminders_controller.dart';
+import 'background_section.dart';
 import 'backup_settings_controller.dart';
 import 'debug_section.dart';
 import 'monthly_recap_section.dart';
 
-/// Account/sign-out, language, notification toggles, monthly recap, and
-/// Drive backup/restore.
+/// Account/sign-out, language, background photo, notification toggles,
+/// monthly recap, and Drive backup/restore.
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
@@ -27,6 +28,7 @@ class SettingsScreen extends ConsumerWidget {
           _AccountSection(),
           Divider(height: 1),
           _LanguageSection(),
+          BackgroundSection(),
           Divider(height: 1),
           _NotificationsSection(),
           Divider(height: 1),

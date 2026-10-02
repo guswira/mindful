@@ -1351,4 +1351,260 @@ class AppLocalizationsId extends AppLocalizations {
   String settingsRecapSoFar(String month) {
     return '$month (sejauh ini)';
   }
+
+  @override
+  String get settingsBackgroundTitle => 'Latar belakang';
+
+  @override
+  String get settingsBackgroundDefault => 'Bawaan';
+
+  @override
+  String get settingsBackgroundCustom => 'Foto pilihanmu';
+
+  @override
+  String get settingsBackgroundChoose => 'Pilih dari galeri';
+
+  @override
+  String get settingsBackgroundReset => 'Kembalikan ke bawaan';
+
+  @override
+  String get settingsBackgroundUpdated => 'Latar belakang diperbarui';
+
+  @override
+  String settingsBackgroundError(String error) {
+    return 'Gagal mengganti latar belakang: $error';
+  }
+
+  @override
+  String get navExercise => 'Latihan';
+
+  @override
+  String get exerciseTitle => 'Latihan';
+
+  @override
+  String get exerciseSubtitle => 'Pelan-pelan, bernapaslah dengan sadar.';
+
+  @override
+  String get exerciseBreathingSection => 'Pernapasan';
+
+  @override
+  String get exerciseActivitySection => 'Aktivitas';
+
+  @override
+  String get breathingEqualName => 'Pernapasan Seimbang';
+
+  @override
+  String get breathingEqualDescription =>
+      'Tarik dan hembuskan napas dengan hitungan yang sama untuk menenangkan pikiran.';
+
+  @override
+  String get breathingBoxName => 'Pernapasan Kotak';
+
+  @override
+  String get breathingBoxDescription =>
+      'Empat sisi sama — tarik, tahan, hembuskan, tahan. Bagus buat fokus.';
+
+  @override
+  String get breathing478Name => 'Pernapasan 4-7-8';
+
+  @override
+  String get breathing478Description =>
+      'Tahan lama lalu hembuskan perlahan, bantu kamu rileks atau tidur.';
+
+  @override
+  String get breathingHoldTestName => 'Tes Menahan Napas';
+
+  @override
+  String get breathingHoldTestDescription =>
+      'Tarik napas, lalu tahan selama kamu masih nyaman. Ketuk Hembuskan kalau sudah.';
+
+  @override
+  String get breathingCustomName => 'Kustom';
+
+  @override
+  String get breathingCustomDescription =>
+      'Atur sendiri hitungan tiap langkah.';
+
+  @override
+  String breathingPatternStep(String phase, int seconds) {
+    return '$phase $seconds dtk';
+  }
+
+  @override
+  String breathingPatternStepOpen(String phase) {
+    return '$phase selama kamu bisa';
+  }
+
+  @override
+  String get breathingPhaseInhale => 'Tarik napas';
+
+  @override
+  String get breathingPhaseHold => 'Tahan';
+
+  @override
+  String get breathingPhaseExhale => 'Hembuskan';
+
+  @override
+  String get breathingPhaseRest => 'Bernapas normal';
+
+  @override
+  String get breathingStart => 'Mulai';
+
+  @override
+  String get breathingPause => 'Jeda';
+
+  @override
+  String get breathingResume => 'Lanjut';
+
+  @override
+  String get breathingFinish => 'Selesai';
+
+  @override
+  String get breathingReleaseButton => 'Hembuskan';
+
+  @override
+  String get breathingReady => 'Ketuk Mulai kalau kamu sudah siap';
+
+  @override
+  String get breathingPaused => 'Dijeda';
+
+  @override
+  String get breathingElapsed => 'Waktu berjalan';
+
+  @override
+  String get breathingCycles => 'Siklus';
+
+  @override
+  String get breathingBestHold => 'Tahan terlama';
+
+  @override
+  String breathingSessionSaved(String duration, int cycles) {
+    return 'Sesi tersimpan · $duration · $cycles siklus';
+  }
+
+  @override
+  String get breathingSessionTooShort =>
+      'Terlalu singkat untuk disimpan — sesi di bawah 10 detik tidak dihitung.';
+
+  @override
+  String breathingSaveError(String error) {
+    return 'Sesi gagal disimpan: $error';
+  }
+
+  @override
+  String get breathingSoundTooltip => 'Pengaturan suara';
+
+  @override
+  String get breathingBackTooltip => 'Kembali';
+
+  @override
+  String get soundSettingsTitle => 'Suara';
+
+  @override
+  String get soundVoiceGuide => 'Panduan suara';
+
+  @override
+  String get soundVoiceGuideSubtitle =>
+      'Menyebutkan tiap langkah: tarik, tahan, hembuskan';
+
+  @override
+  String get soundVoiceVolume => 'Volume suara';
+
+  @override
+  String get soundAmbience => 'Suasana';
+
+  @override
+  String get soundAmbienceVolume => 'Volume suasana';
+
+  @override
+  String get ambienceNone => 'Mati';
+
+  @override
+  String get ambienceRain => 'Hujan';
+
+  @override
+  String get ambienceOcean => 'Ombak';
+
+  @override
+  String get ambienceWind => 'Angin';
+
+  @override
+  String get ambienceDrone => 'Dengung tenang';
+
+  @override
+  String get customPatternTitle => 'Atur pernapasan';
+
+  @override
+  String get customPatternHoldAfter => 'Tahan setelah hembus';
+
+  @override
+  String get customPatternSave => 'Simpan pola';
+
+  @override
+  String get customPatternEdit => 'Ubah pola';
+
+  @override
+  String customPatternSeconds(int seconds) {
+    return '$seconds dtk';
+  }
+
+  @override
+  String customPatternCycle(int seconds) {
+    return 'Satu siklus: $seconds dtk';
+  }
+
+  @override
+  String customPatternDecrease(String step) {
+    return 'Kurangi $step';
+  }
+
+  @override
+  String customPatternIncrease(String step) {
+    return 'Tambah $step';
+  }
+
+  @override
+  String get exerciseStatSessions => 'Sesi';
+
+  @override
+  String get exerciseStatTimeSpent => 'Waktu latihan';
+
+  @override
+  String get exerciseStatStreak => 'Runtutan hari';
+
+  @override
+  String exerciseDurationHours(int hours, int minutes) {
+    return '${hours}j ${minutes}m';
+  }
+
+  @override
+  String exerciseDurationMinutes(int minutes) {
+    return '${minutes}m';
+  }
+
+  @override
+  String exerciseDurationSeconds(int seconds) {
+    return '${seconds}d';
+  }
+
+  @override
+  String exerciseCalendarDay(String date, int sessions, String duration) {
+    return '$date: $sessions sesi · $duration';
+  }
+
+  @override
+  String exerciseCalendarDayEmpty(String date) {
+    return '$date: belum ada sesi';
+  }
+
+  @override
+  String exerciseCalendarMonth(int sessions, String duration) {
+    return 'Bulan ini: $sessions sesi · $duration';
+  }
+
+  @override
+  String get exerciseCalendarPrevious => 'Bulan sebelumnya';
+
+  @override
+  String get exerciseCalendarNext => 'Bulan berikutnya';
 }

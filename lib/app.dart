@@ -6,9 +6,11 @@ import 'core/l10n/app_language_controller.dart';
 import 'core/l10n/l10n.dart';
 import 'core/router/router.dart';
 import 'core/theme/app_theme.dart';
+import 'features/settings/presentation/custom_background_controller.dart';
+import 'shared/widgets/app_background_scope.dart';
 
 /// Root widget — MaterialApp.router wired to [appRouterProvider],
-/// [AppTheme] and the language chosen in Settings.
+/// [AppTheme], and the language and background photo chosen in Settings.
 class App extends ConsumerWidget {
   const App({super.key});
 
@@ -24,6 +26,9 @@ class App extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final backgroundPath = ref
+        .watch(customBackgroundControllerProvider)
+        .valueOrNull;
     return MaterialApp.router(
       onGenerateTitle: _title,
       theme: AppTheme.dark,
@@ -34,6 +39,10 @@ class App extends ConsumerWidget {
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       localeResolutionCallback: _resolveLocale,
       routerConfig: ref.watch(appRouterProvider),
+      builder: (context, child) => AppBackgroundScope(
+        imagePath: backgroundPath,
+        child: child ?? const SizedBox.shrink(),
+      ),
     );
   }
 }

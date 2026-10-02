@@ -33,6 +33,9 @@ Supabase primary database. Google Drive optional backup.
 - Home widget: home_widget
 - App shortcuts: quick_actions
 - Animations: Flutter built-in only, no third-party animation packages
+- Text-to-speech: flutter_tts (breathing voice guide)
+- Audio playback: audioplayers (breathing ambience loops)
+- Screen wake lock: wakelock_plus (during a breathing session)
 
 ---
 
@@ -40,6 +43,7 @@ Supabase primary database. Google Drive optional backup.
 
 ### Background
 Color(0xFF0A1628) deep navy, full screen on all screens.
+Optional custom photo from Settings (see Custom background below).
 
 ### Blob background (shared/widgets/blob_background.dart)
 Every main screen uses BlobBackground widget — Stack with:
@@ -48,6 +52,40 @@ Every main screen uses BlobBackground widget — Stack with:
     blob 2: 160×160 Color(0xFF378ADD) opacity 0.18 blur 60, bottom:200 left:-40
     blob 3: 120×120 Color(0xFF7C6AF7) opacity 0.12 blur 60, top:280 right:20
   layer 1: child content
+With a custom background set, an extra bottom layer goes under the blobs
+(see Custom background).
+
+### Custom background (Settings → Background)
+The user can replace the plain background with a photo from their
+gallery; the current glass theme is applied on top of it, unchanged:
+  BlobBackground stack, bottom → top:
+    photo — Image.file, BoxFit.cover, full screen, IgnorePointer
+    scrim — GlassTheme.background at opacity 0.55
+      (customBackgroundScrimOpacity), so white text and the 6%/8% glass
+      cards stay readable on bright or busy photos
+    the 3 blobs, then the screen content (GlassCards blur the photo
+      through BackdropFilter like any other background)
+  Applies wherever BlobBackground is used (all main tabs, journal editor,
+    monthly recap); plain-Material screens like Settings stay as they are.
+  Missing/unreadable file → falls back to the default background quietly.
+
+Plumbing:
+  CustomBackgroundRepository (settings/data/custom_background_repository.dart)
+    pick → copy into <app documents>/backgrounds/bg_<timestamp>.<ext>,
+    deleting the previous copy; persists only the FILE NAME in
+    flutter_secure_storage `custom_background_file` — the iOS container
+    path changes across updates, so an absolute path would stop resolving.
+    Fresh file name per pick so the image cache never serves the old one.
+  CustomBackgroundController (@Riverpod keepAlive,
+    settings/presentation/custom_background_controller.dart):
+    Future<String?> absolute path; pickFromGallery() (image_picker,
+    max 2160px, quality 88 — returns false on cancel), reset().
+  App (app.dart) watches it and wraps the router in AppBackgroundScope
+    (shared/widgets/app_background_scope.dart, an InheritedWidget) via
+    MaterialApp.builder; BlobBackground reads AppBackgroundScope.imagePathOf
+    — an InheritedWidget so BlobBackground still works with no
+    ProviderScope (widget tests) and defaults to no photo.
+  Not part of Drive backup — it's a device-local preference.
 
 ### GlassTheme (ThemeExtension — lib/core/theme/glass_theme.dart)
 
@@ -90,6 +128,10 @@ Legacy single accents (kept for non-feature use):
 ClipRRect → BackdropFilter → Container (glass bg + border) → child
 params: child, strong:bool, borderRadius:double, padding:EdgeInsets, margin:EdgeInsets
 Wrap all main screens in RepaintBoundary for Android BackdropFilter compatibility.
+Uses BackdropFilter.grouped (also GlassIconButton, ExperimentalBanner);
+BlobBackground wraps its content in a BackdropGroup, so all glass on a
+screen shares one backdrop read. Separate per-card BackdropFilters made
+cards flash see-through while scrolling on Android.
 
 ### TintedPill widget (shared/widgets/tinted_pill.dart)
 params: label:String, color:Color, onTap:VoidCallback?
@@ -339,7 +381,7 @@ _NavItem widget:
     index 0 Home:              homeAccent    Color(0xFFFFFFFF) white
     index 1 Tasks & Routines:  taskAccent    Color(0xFF60A5FA) blue
     index 2 Journal:           journalAccent Color(0xFFFCD34D) yellow
-    (+ Money, AI — see Money Flow / AI Lab)
+    (+ Money, AI, Exercise — see Money Flow / AI Lab / Exercise)
   inactive icon: Colors.white.withOpacity(0.28)
   active dot: AnimatedContainer width 16, height 4, borderRadius 2,
               color = tab accent color
@@ -517,6 +559,10 @@ NOT in bottom nav.
 
 Language: "System default (<device language>)" / English / Bahasa Indonesia
   picker (see Localization). Default follows the device language.
+Background (background_section.dart): row with a 40×40 thumbnail of the
+  current photo (or wallpaper icon) + "Default" / "Custom photo"; tap →
+  sheet: "Choose from gallery", "Reset to default" (only when custom).
+  SnackBar "Background updated" / error. See Custom background.
 Drive Backup: connect/disconnect, last backup date, pending count,
   back up now, auto-backup toggle.
 Drive Restore (Drive connected): import from Drive, month picker,
@@ -655,16 +701,19 @@ and are out of scope for the Dart ARB files.
 /splash            → SplashScreen
 /onboarding        → OnboardingScreen  (no auth redirect)
 /login             → LoginScreen
-/home              → HomeScreen shell (FloatingNavBar, 5 tabs)
+/home              → HomeScreen shell (FloatingNavBar, 6 tabs)
   /home/today      → HomeTab  (default)
   /home/tasks      → PlanTab  (tasks + routines)
   /home/journal    → JournalTab
   /home/money      → MoneyTab
   /home/ai         → AITab
+  /home/exercise   → ExerciseTab
 /journal/:id/edit  → JournalEditorScreen  (edit only, full page)
 /habits/:id        → HabitDetailScreen    (calendar, full page)
 /settings          → SettingsScreen
 /recap/:month      → MonthlyRecapScreen  (slideshow, full page; month = yyyy-MM)
+/exercise/breathing/:exercise → BreathingSessionScreen (full page;
+                     exercise = BreathingExercise.name, unknown → equal)
 ```
 
 REMOVED routes (replaced by bottom sheets):
@@ -680,7 +729,7 @@ Redirects:
 
 ## UI conventions
 
-- Floating island nav bar — 5 tabs, NO profile tab, NO labels
+- Floating island nav bar — 6 tabs, NO profile tab, NO labels
 - Settings accessed via gear icon top-right of HomeScreen only
 - Each tab has its own accent color (see Feature accent colors)
 - Write button bottom-right of nav row — always teal gradient
@@ -696,8 +745,8 @@ Redirects:
 - RepaintBoundary wrapping all screens (Android BackdropFilter fix)
 - Unsynced dot: small subtle, never disruptive
 - Write button long press: radial arc overlay for quick access
-- Full-page exceptions to "detail views are sheets": habit calendar and
-  the monthly recap slideshow
+- Full-page exceptions to "detail views are sheets": habit calendar, the
+  monthly recap slideshow and a breathing session
 - ShakeWidget on empty required field submit attempt
 
 ---
@@ -794,14 +843,19 @@ lib/
 │   │   └── presentation/
 │   │       └── plan_tab.dart           ← Tasks & Routines tab
 │   ├── recap/                          ← Monthly Recap (see section 15)
+│   ├── exercise/                       ← Exercise / breathing (see section 16)
 │   └── settings/
+│       ├── data/custom_background_repository.dart
 │       └── presentation/
 │           ├── settings_screen.dart
+│           ├── background_section.dart
+│           ├── custom_background_controller.dart
 │           └── monthly_recap_section.dart
 └── shared/
     ├── widgets/
     │   ├── glass_card.dart
-    │   ├── blob_background.dart
+    │   ├── blob_background.dart     ← + custom photo + scrim layer
+    │   ├── app_background_scope.dart ← custom photo path for BlobBackground
     │   ├── tinted_pill.dart
     │   ├── unsynced_badge.dart
     │   ├── floating_nav_bar.dart    ← island nav + write button
@@ -878,6 +932,7 @@ flutter:
   assets:
     - .env
     - assets/quotes.json
+    - assets/ambience/
 ```
 
 ---
@@ -1647,12 +1702,13 @@ Add to glass_theme.dart:
 
 ### Nav bar update
 
-5 tabs total:
+6 tabs total:
   0 Home              white
   1 Tasks & Routines  taskAccent blue   (routine rows inside keep habitAccent)
   2 Journal           journalAccent yellow
   3 Money             moneyAccent green
   4 AI                aiAccent indigo
+  5 Exercise          exerciseAccent pink (see Exercise)
 
 Icon size 20px.
 
@@ -1801,3 +1857,194 @@ lib/features/recap/
 - No notification for it in v1 (banner + Settings only)
 - No persisted recap preferences — nothing in SettingsRepository
 - No sharing/export of the slides in v1
+
+
+---
+
+## 16. Exercise
+
+A calm practice tab, starting with guided breathing. Feature accent:
+exerciseAccent: Color(0xFFF9A8D4) — soft pink (in GlassTheme).
+
+### Nav + routes
+
+Floating nav, 6th tab: index 5, Icons.self_improvement_outlined,
+exerciseAccent. Shell branch /home/exercise → ExerciseTab.
+Session: /exercise/breathing/:exercise → BreathingSessionScreen (full page,
+outside the shell — the nav bar is hidden during a session).
+
+### Exercises (BreathingExercise enum — domain/breathing_exercise.dart)
+
+Stored as its JsonValue in Supabase; `name` is the route segment.
+  equal           'equal'      Equal Breathing     Inhale 4 · Release 4
+  box             'box'        Box Breathing       Inhale 4 · Hold 4 · Release 4 · Hold 4
+  fourSevenEight  '4_7_8'      4-7-8 Breathing     Inhale 4 · Hold 7 · Release 8
+  holdTest        'hold_test'  Breath Holding Test Inhale 5 · Hold (until the user
+                                                   taps Release) · Release 5 ·
+                                                   Breathe normally 20
+  custom          'custom'     Customize           user counts (below)
+
+Steps (BreathPhaseType): inhale, hold (full), exhale ("Release"),
+holdEmpty (box's 4th side, shown "Hold"), rest ("Breathe normally").
+BreathingPattern (domain/breathing_pattern.dart) = ordered BreathPhases;
+`seconds: null` = open-ended (hold test).
+
+Customize: inhale/exhale 1–20s, hold/hold-after 0–20s (0 skips the step).
+Defaults 4 / 2 / 6 / 0. Edited in CustomPatternSheet (− / + steppers per
+step, "One cycle: Ns", TintedPill("Save pattern")), opened from the edit
+icon on the Customize card.
+
+### Exercise tab (/home/exercise)
+
+BlobBackground + RepaintBoundary, CustomScrollView, bottom padding 88:
+  "Exercise" title + "Slow down and breathe with intention."
+  BREATHING section — SliverList of BreathingExerciseCard (GlassCard):
+    icon square (exerciseAccent), name, one-line purpose, step summary
+    ("Inhale 4s · Hold 7s · Release 8s", exerciseAccent),
+    TintedPill("Start"); Customize also has an edit icon.
+    Tap card or Start → push /exercise/breathing/<name>.
+  ACTIVITY section:
+    ExerciseStatsRow — 3 GlassCards: Sessions (all-time), Time spent
+      ("45s" / "12m" / "1h 5m"), Day streak (consecutive days ending today,
+      or yesterday so it doesn't read 0 before today's session).
+    ExerciseCalendarCard — month grid (Mon first), prev/next (can't go
+      past this month); each day circle tinted exerciseAccent by time
+      spent (25% → 75% alpha at 10+ min), today ringed in accent. Tap a day
+      → "Oct 2: 2 sessions · 6m" below the grid; tap again (or no
+      selection) → "This month: N sessions · T".
+
+### BreathingSessionScreen
+
+BlobBackground + RepaintBoundary, SafeArea, Column:
+  SessionTopBar: glass back button, exercise name + step summary, glass
+    music-note button → SoundSettingsSheet.
+  BreathingCircle (Expanded): CustomPaint disc that grows over the inhale,
+    stays full on hold, shrinks over the release (easeInOut), min 55% of
+    full; thin ring around it with the current step's progress arc
+    (exerciseAccent); a ripple ring expands + fades from the disc on every
+    step change (2.4s), a thicker/brighter one when a cycle completes.
+    Center: step word ("Inhale" / "Hold" / "Release" / "Breathe
+    normally") + seconds left (count UP during an open-ended hold);
+    "Tap Start when you're ready" before starting, "Paused" while paused.
+  SessionStatsRow: Time elapsed (mm:ss), Cycles, + Best hold for the hold
+    test.
+  SessionControls (bottom, primary actions): Start → [Pause | Finish];
+    during the hold test's open-ended hold Pause becomes Release; paused →
+    [Resume | Finish].
+  MediaQuery.disableAnimations → no ripples (the disc still sizes, since
+    it carries the timing).
+
+Behavior:
+  BreathingEngine (domain/breathing_engine.dart) — pure, clock-free state
+    machine (tick(delta) / release()), unit tested. A cycle = one lap of
+    the pattern.
+  BreathingSessionController (ChangeNotifier) ticks it from a Ticker every
+    frame while running; each step change → ripple + voice.
+  Leaving by any route (back button, system back, Finish) ends + saves the
+    session (PopScope); the app being hidden pauses it.
+  Screen kept awake while running (wakelock_plus via KeepScreenOn).
+  Save (BreathingSessionSaver): sessions under 10s aren't saved
+    ("Too short to save…"); otherwise SnackBar "Session saved · 3m ·
+    12 cycles". The screen pops first; the saver holds the
+    ProviderContainer + ScaffoldMessenger since Supabase may be slow.
+
+### Voice guide + ambience (SoundSettingsSheet)
+
+Opened from the session's music-note button; every change applies live to
+the running session and persists (sliders persist on release only):
+  Voice guide Switch + volume slider — flutter_tts speaks each step word
+    (the same ARB copy as the circle) in the app language (en-US / id-ID),
+    rate 0.45; the previous word is cut off, never queued. On iOS the TTS
+    uses a shared playback session with mixWithOthers so it plays over
+    the ambience. Android 11+ needs the TTS_SERVICE <queries> entry
+    (AndroidManifest.xml).
+  Ambience chips Off / Rain / Ocean / Wind / Calm drone + volume slider —
+    audioplayers loops assets/ambience/<track>.wav (ReleaseMode.loop,
+    mixWithOthers focus); pauses with the session, stops on finish.
+    Tracks are synthesized 20s seamless loops (22.05kHz mono WAV — not
+    AAC/MP3, whose encoder padding leaves an audible gap on every loop).
+  Voice/ambience failures are logged and the session continues silently.
+
+BreathingPreferences (Freezed, domain/breathing_preferences.dart):
+  voiceEnabled (true), voiceVolume (0.8), ambience (rain),
+  ambienceVolume (0.5), custom: CustomBreathing.
+  Device-local (flutter_secure_storage `breathing_preferences`, one JSON
+  value via BreathingPreferencesRepository) — not synced, not in Drive
+  backup. BreathingPreferencesController (@Riverpod keepAlive):
+  preview() (in memory) / save() (persist).
+
+### Supabase schema
+
+```sql
+create table breathing_sessions (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users not null,
+  exercise text not null,          -- BreathingExercise JsonValue
+  started_at timestamptz not null,
+  duration_seconds int not null,
+  cycles int not null default 0,
+  best_hold_seconds int,           -- hold test only
+  sync_status text default 'synced',
+  created_at timestamptz default now()
+);
+alter table breathing_sessions enable row level security;
+create policy "own" on breathing_sessions for all using (auth.uid()=user_id);
+```
+
+BreathingSession (Freezed, snake_case JSON). Times stored UTC; grouped by
+local day for the stats/calendar.
+BreathingSessionRepository: Hive box `breathing_sessions`, optimistic
+  (Hive first; a failed Supabase upsert → syncStatus pending). Wired into
+  SyncService: retryPendingSessions() + refresh() on open; refresh keeps
+  pending rows so it can never drop an unsynced session. Upsert (not
+  insert) so a retry of a write that actually landed doesn't fail on the
+  duplicate id.
+
+### Folder structure
+
+```
+assets/ambience/  rain.wav  ocean.wav  wind.wav  drone.wav
+
+lib/features/exercise/
+  data/
+    breathing_session_repository.dart   ← Hive + Supabase sessions
+    supabase_breathing_datasource.dart
+    breathing_preferences_repository.dart
+    breathing_voice.dart                ← flutter_tts wrapper
+    ambience_player.dart                ← audioplayers loop wrapper
+    keep_screen_on.dart                 ← wakelock_plus wrapper
+  domain/
+    breathing_exercise.dart
+    breathing_pattern.dart              ← phases + presets
+    breathing_engine.dart               ← pure session state machine
+    breathing_session.dart
+    breathing_preferences.dart          ← + AmbienceTrack, CustomBreathing
+    exercise_stats.dart                 ← totals, streak, per-day
+  presentation/
+    exercise_tab.dart
+    exercise_providers.dart             ← sessions, stats, preferences
+    breathing_session_screen.dart
+    breathing_session_controller.dart   ← Ticker + voice + ambience
+    breathing_session_saver.dart
+    breathing_labels.dart               ← enum → copy, duration format
+    sound_settings_sheet.dart
+    custom_pattern_sheet.dart
+    widgets/
+      breathing_exercise_card.dart
+      breathing_circle.dart / breathing_circle_painter.dart
+      session_top_bar.dart / session_stats_row.dart / session_controls.dart
+      exercise_stats_row.dart
+      exercise_calendar_card.dart / exercise_calendar_grid.dart
+```
+
+Copy: all in the ARB files (`exercise*`, `breathing*`, `sound*`,
+`ambience*`, `customPattern*`, `navExercise`).
+
+### What Exercise is NOT (v1)
+
+- Breathing only — no workouts, yoga or step tracking yet
+- No reminders/notifications for practice
+- Not in the Monthly Recap or the home screen (yet)
+- No custom ambience upload — bundled tracks only
+- Sessions aren't part of Drive backup/restore
+- No background playback — a session pauses when the app is hidden

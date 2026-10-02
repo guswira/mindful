@@ -2450,6 +2450,444 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{month} (so far)'**
   String settingsRecapSoFar(String month);
+
+  /// No description provided for @settingsBackgroundTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Background'**
+  String get settingsBackgroundTitle;
+
+  /// No description provided for @settingsBackgroundDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get settingsBackgroundDefault;
+
+  /// No description provided for @settingsBackgroundCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom photo'**
+  String get settingsBackgroundCustom;
+
+  /// No description provided for @settingsBackgroundChoose.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from gallery'**
+  String get settingsBackgroundChoose;
+
+  /// No description provided for @settingsBackgroundReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset to default'**
+  String get settingsBackgroundReset;
+
+  /// No description provided for @settingsBackgroundUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Background updated'**
+  String get settingsBackgroundUpdated;
+
+  /// No description provided for @settingsBackgroundError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t change the background: {error}'**
+  String settingsBackgroundError(String error);
+
+  /// No description provided for @navExercise.
+  ///
+  /// In en, this message translates to:
+  /// **'Exercise'**
+  String get navExercise;
+
+  /// No description provided for @exerciseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Exercise'**
+  String get exerciseTitle;
+
+  /// No description provided for @exerciseSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Slow down and breathe with intention.'**
+  String get exerciseSubtitle;
+
+  /// No description provided for @exerciseBreathingSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Breathing'**
+  String get exerciseBreathingSection;
+
+  /// No description provided for @exerciseActivitySection.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity'**
+  String get exerciseActivitySection;
+
+  /// No description provided for @breathingEqualName.
+  ///
+  /// In en, this message translates to:
+  /// **'Equal Breathing'**
+  String get breathingEqualName;
+
+  /// No description provided for @breathingEqualDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Inhale and release for the same count to steady your mind.'**
+  String get breathingEqualDescription;
+
+  /// No description provided for @breathingBoxName.
+  ///
+  /// In en, this message translates to:
+  /// **'Box Breathing'**
+  String get breathingBoxName;
+
+  /// No description provided for @breathingBoxDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Four equal sides — inhale, hold, release, hold. Great for focus.'**
+  String get breathingBoxDescription;
+
+  /// No description provided for @breathing478Name.
+  ///
+  /// In en, this message translates to:
+  /// **'4-7-8 Breathing'**
+  String get breathing478Name;
+
+  /// No description provided for @breathing478Description.
+  ///
+  /// In en, this message translates to:
+  /// **'A long hold and a slow release to help you unwind or fall asleep.'**
+  String get breathing478Description;
+
+  /// No description provided for @breathingHoldTestName.
+  ///
+  /// In en, this message translates to:
+  /// **'Breath Holding Test'**
+  String get breathingHoldTestName;
+
+  /// No description provided for @breathingHoldTestDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Breathe in, then hold for as long as you comfortably can. Tap Release when you\'re done.'**
+  String get breathingHoldTestDescription;
+
+  /// No description provided for @breathingCustomName.
+  ///
+  /// In en, this message translates to:
+  /// **'Customize'**
+  String get breathingCustomName;
+
+  /// No description provided for @breathingCustomDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Set your own count for each step.'**
+  String get breathingCustomDescription;
+
+  /// No description provided for @breathingPatternStep.
+  ///
+  /// In en, this message translates to:
+  /// **'{phase} {seconds}s'**
+  String breathingPatternStep(String phase, int seconds);
+
+  /// No description provided for @breathingPatternStepOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'{phase} as long as you can'**
+  String breathingPatternStepOpen(String phase);
+
+  /// No description provided for @breathingPhaseInhale.
+  ///
+  /// In en, this message translates to:
+  /// **'Inhale'**
+  String get breathingPhaseInhale;
+
+  /// No description provided for @breathingPhaseHold.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold'**
+  String get breathingPhaseHold;
+
+  /// No description provided for @breathingPhaseExhale.
+  ///
+  /// In en, this message translates to:
+  /// **'Release'**
+  String get breathingPhaseExhale;
+
+  /// No description provided for @breathingPhaseRest.
+  ///
+  /// In en, this message translates to:
+  /// **'Breathe normally'**
+  String get breathingPhaseRest;
+
+  /// No description provided for @breathingStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get breathingStart;
+
+  /// No description provided for @breathingPause.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get breathingPause;
+
+  /// No description provided for @breathingResume.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume'**
+  String get breathingResume;
+
+  /// No description provided for @breathingFinish.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish'**
+  String get breathingFinish;
+
+  /// No description provided for @breathingReleaseButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Release'**
+  String get breathingReleaseButton;
+
+  /// No description provided for @breathingReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap Start when you\'re ready'**
+  String get breathingReady;
+
+  /// No description provided for @breathingPaused.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused'**
+  String get breathingPaused;
+
+  /// No description provided for @breathingElapsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Time elapsed'**
+  String get breathingElapsed;
+
+  /// No description provided for @breathingCycles.
+  ///
+  /// In en, this message translates to:
+  /// **'Cycles'**
+  String get breathingCycles;
+
+  /// No description provided for @breathingBestHold.
+  ///
+  /// In en, this message translates to:
+  /// **'Best hold'**
+  String get breathingBestHold;
+
+  /// No description provided for @breathingSessionSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Session saved · {duration} · {cycles, plural, =1{1 cycle} other{{cycles} cycles}}'**
+  String breathingSessionSaved(String duration, int cycles);
+
+  /// No description provided for @breathingSessionTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Too short to save — sessions under 10 seconds aren\'t counted.'**
+  String get breathingSessionTooShort;
+
+  /// No description provided for @breathingSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t save the session: {error}'**
+  String breathingSaveError(String error);
+
+  /// No description provided for @breathingSoundTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Sound settings'**
+  String get breathingSoundTooltip;
+
+  /// No description provided for @breathingBackTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get breathingBackTooltip;
+
+  /// No description provided for @soundSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sound'**
+  String get soundSettingsTitle;
+
+  /// No description provided for @soundVoiceGuide.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice guide'**
+  String get soundVoiceGuide;
+
+  /// No description provided for @soundVoiceGuideSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Says each step out loud: inhale, hold, release'**
+  String get soundVoiceGuideSubtitle;
+
+  /// No description provided for @soundVoiceVolume.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice volume'**
+  String get soundVoiceVolume;
+
+  /// No description provided for @soundAmbience.
+  ///
+  /// In en, this message translates to:
+  /// **'Ambience'**
+  String get soundAmbience;
+
+  /// No description provided for @soundAmbienceVolume.
+  ///
+  /// In en, this message translates to:
+  /// **'Ambience volume'**
+  String get soundAmbienceVolume;
+
+  /// No description provided for @ambienceNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get ambienceNone;
+
+  /// No description provided for @ambienceRain.
+  ///
+  /// In en, this message translates to:
+  /// **'Rain'**
+  String get ambienceRain;
+
+  /// No description provided for @ambienceOcean.
+  ///
+  /// In en, this message translates to:
+  /// **'Ocean'**
+  String get ambienceOcean;
+
+  /// No description provided for @ambienceWind.
+  ///
+  /// In en, this message translates to:
+  /// **'Wind'**
+  String get ambienceWind;
+
+  /// No description provided for @ambienceDrone.
+  ///
+  /// In en, this message translates to:
+  /// **'Calm drone'**
+  String get ambienceDrone;
+
+  /// No description provided for @customPatternTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Customize breathing'**
+  String get customPatternTitle;
+
+  /// No description provided for @customPatternHoldAfter.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold after release'**
+  String get customPatternHoldAfter;
+
+  /// No description provided for @customPatternSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save pattern'**
+  String get customPatternSave;
+
+  /// No description provided for @customPatternEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit pattern'**
+  String get customPatternEdit;
+
+  /// No description provided for @customPatternSeconds.
+  ///
+  /// In en, this message translates to:
+  /// **'{seconds}s'**
+  String customPatternSeconds(int seconds);
+
+  /// No description provided for @customPatternCycle.
+  ///
+  /// In en, this message translates to:
+  /// **'One cycle: {seconds}s'**
+  String customPatternCycle(int seconds);
+
+  /// No description provided for @customPatternDecrease.
+  ///
+  /// In en, this message translates to:
+  /// **'Decrease {step}'**
+  String customPatternDecrease(String step);
+
+  /// No description provided for @customPatternIncrease.
+  ///
+  /// In en, this message translates to:
+  /// **'Increase {step}'**
+  String customPatternIncrease(String step);
+
+  /// No description provided for @exerciseStatSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'Sessions'**
+  String get exerciseStatSessions;
+
+  /// No description provided for @exerciseStatTimeSpent.
+  ///
+  /// In en, this message translates to:
+  /// **'Time spent'**
+  String get exerciseStatTimeSpent;
+
+  /// No description provided for @exerciseStatStreak.
+  ///
+  /// In en, this message translates to:
+  /// **'Day streak'**
+  String get exerciseStatStreak;
+
+  /// No description provided for @exerciseDurationHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours}h {minutes}m'**
+  String exerciseDurationHours(int hours, int minutes);
+
+  /// No description provided for @exerciseDurationMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes}m'**
+  String exerciseDurationMinutes(int minutes);
+
+  /// No description provided for @exerciseDurationSeconds.
+  ///
+  /// In en, this message translates to:
+  /// **'{seconds}s'**
+  String exerciseDurationSeconds(int seconds);
+
+  /// No description provided for @exerciseCalendarDay.
+  ///
+  /// In en, this message translates to:
+  /// **'{date}: {sessions, plural, =1{1 session} other{{sessions} sessions}} · {duration}'**
+  String exerciseCalendarDay(String date, int sessions, String duration);
+
+  /// No description provided for @exerciseCalendarDayEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'{date}: no sessions'**
+  String exerciseCalendarDayEmpty(String date);
+
+  /// No description provided for @exerciseCalendarMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'This month: {sessions, plural, =1{1 session} other{{sessions} sessions}} · {duration}'**
+  String exerciseCalendarMonth(int sessions, String duration);
+
+  /// No description provided for @exerciseCalendarPrevious.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous month'**
+  String get exerciseCalendarPrevious;
+
+  /// No description provided for @exerciseCalendarNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next month'**
+  String get exerciseCalendarNext;
 }
 
 class _AppLocalizationsDelegate

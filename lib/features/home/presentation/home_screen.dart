@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../shared/widgets/floating_nav_bar.dart';
 
 /// Shell for the /home/today, /home/tasks (tasks & routines),
-/// /home/journal, /home/money and /home/ai branches, in that order, with [FloatingNavBar] overlaid at the bottom.
+/// /home/journal, /home/money, /home/ai and /home/exercise branches, in that order, with [FloatingNavBar] overlaid at the bottom.
 /// See SPEC.md Navigation and Floating Island Nav Bar sections.
 class HomeScreen extends StatelessWidget {
   const HomeScreen({required this.navigationShell, super.key});

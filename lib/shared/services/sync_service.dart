@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../features/exercise/data/breathing_session_repository.dart';
 import '../../features/habits/data/habit_repository.dart';
 import '../../features/journal/data/journal_repository.dart';
 import '../../features/money/data/money_repository.dart';
@@ -71,13 +72,16 @@ class SyncService {
   }
 }
 
-/// The app-wide [SyncService], wired to the journal and habit repositories.
+/// The app-wide [SyncService], wired to every Hive-cached repository.
 @Riverpod(keepAlive: true)
 Future<SyncService> syncService(Ref ref) async {
   final journalRepository = await ref.watch(journalRepositoryProvider.future);
   final habitRepository = await ref.watch(habitRepositoryProvider.future);
   final taskRepository = await ref.watch(taskRepositoryProvider.future);
   final moneyRepository = await ref.watch(moneyRepositoryProvider.future);
+  final breathingRepository = await ref.watch(
+    breathingSessionRepositoryProvider.future,
+  );
   return SyncService(
     pull: [
       () async {
@@ -88,12 +92,14 @@ Future<SyncService> syncService(Ref ref) async {
         await taskRepository.refresh();
       },
       () => moneyRepository.refresh(),
+      () => breathingRepository.refresh(),
     ],
     retryPending: [
       () => journalRepository.retryPendingEntries(),
       () => habitRepository.retryPendingLogs(),
       () => taskRepository.retryPendingTasks(),
       () => moneyRepository.retryPendingEntries(),
+      () => breathingRepository.retryPendingSessions(),
     ],
     updateWidgetData: () =>
         refreshWidgetsBestEffort(() => ref.read(widgetServiceProvider.future)),

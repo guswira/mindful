@@ -6,6 +6,12 @@ import '../../core/theme/glass_theme.dart';
 
 /// The reusable frosted glass card used for content surfaces throughout
 /// the app — a blurred, semi-transparent container with a hairline border.
+///
+/// Uses [BackdropFilter.grouped], sharing one backdrop read with every
+/// other glass surface under the same [BackdropGroup] (each screen's
+/// `BlobBackground` provides one). With a separate read per card, Android's
+/// renderer drew some cards see-through for a frame while a list of them
+/// scrolled. Outside a group it behaves like a plain [BackdropFilter].
 class GlassCard extends StatelessWidget {
   const GlassCard({
     required this.child,
@@ -36,7 +42,7 @@ class GlassCard extends StatelessWidget {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(borderRadius),
-        child: BackdropFilter(
+        child: BackdropFilter.grouped(
           filter: ImageFilter.blur(
             sigmaX: strong ? 24 : 20,
             sigmaY: strong ? 24 : 20,

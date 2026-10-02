@@ -25,7 +25,7 @@ class ExperimentalBanner extends StatelessWidget {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(14),
-        child: BackdropFilter(
+        child: BackdropFilter.grouped(
           filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
           child: Container(
             padding: const EdgeInsets.all(16),

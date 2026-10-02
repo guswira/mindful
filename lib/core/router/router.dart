@@ -11,6 +11,9 @@ import '../../features/ai/presentation/ai_tab.dart';
 import '../../features/auth/domain/auth_state.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/splash_screen.dart';
+import '../../features/exercise/domain/breathing_exercise.dart';
+import '../../features/exercise/presentation/breathing_session_screen.dart';
+import '../../features/exercise/presentation/exercise_tab.dart';
 import '../../features/habits/data/habit_reminders_controller.dart';
 import '../../features/habits/presentation/habit_detail_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
@@ -132,6 +135,14 @@ GoRouter appRouter(Ref ref) {
               ),
             ],
           ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/home/exercise',
+                builder: (context, state) => const ExerciseTab(),
+              ),
+            ],
+          ),
         ],
       ),
       GoRoute(
@@ -143,6 +154,14 @@ GoRouter appRouter(Ref ref) {
         path: '/habits/:id',
         builder: (context, state) =>
             HabitDetailScreen(id: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: '/exercise/breathing/:exercise',
+        builder: (context, state) => BreathingSessionScreen(
+          exercise:
+              BreathingExercise.fromName(state.pathParameters['exercise']) ??
+              BreathingExercise.equal,
+        ),
       ),
       GoRoute(
         path: '/settings',

@@ -55,9 +55,7 @@ void main() {
       expect(controller.text, '2.000');
     });
 
-    testWidgets('backspace removes a digit, long press clears', (
-      tester,
-    ) async {
+    testWidgets('backspace removes a digit, long press clears', (tester) async {
       controller.text = '12.345';
       await tester.pumpWidget(buildKeypad());
 

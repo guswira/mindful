@@ -61,6 +61,6 @@
 	<key>NSCameraUsageDescription</key>
 	<string>Used to scan food for calorie estimation</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Used to pick food photos for calorie estimation</string>
+	<string>Used to add photos to journal entries, scan food for calories, and set your app background</string>
 </dict>
 </plist>

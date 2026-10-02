@@ -6,9 +6,9 @@ part of 'sync_service.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$syncServiceHash() => r'b16f0fde615f407c17faa9dcd70f6f77dd6767d0';
+String _$syncServiceHash() => r'f6ca240586959118cf85107ae8726494d30bb5af';
 
-/// The app-wide [SyncService], wired to the journal and habit repositories.
+/// The app-wide [SyncService], wired to every Hive-cached repository.
 ///
 /// Copied from [syncService].
 @ProviderFor(syncService)

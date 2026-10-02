@@ -813,5 +813,201 @@
         "type": "String"
       }
     }
-  }
+  },
+  "settingsBackgroundTitle": "Background",
+  "settingsBackgroundDefault": "Default",
+  "settingsBackgroundCustom": "Custom photo",
+  "settingsBackgroundChoose": "Choose from gallery",
+  "settingsBackgroundReset": "Reset to default",
+  "settingsBackgroundUpdated": "Background updated",
+  "settingsBackgroundError": "Couldn't change the background: {error}",
+  "@settingsBackgroundError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "navExercise": "Exercise",
+  "exerciseTitle": "Exercise",
+  "exerciseSubtitle": "Slow down and breathe with intention.",
+  "exerciseBreathingSection": "Breathing",
+  "exerciseActivitySection": "Activity",
+  "breathingEqualName": "Equal Breathing",
+  "breathingEqualDescription": "Inhale and release for the same count to steady your mind.",
+  "breathingBoxName": "Box Breathing",
+  "breathingBoxDescription": "Four equal sides — inhale, hold, release, hold. Great for focus.",
+  "breathing478Name": "4-7-8 Breathing",
+  "breathing478Description": "A long hold and a slow release to help you unwind or fall asleep.",
+  "breathingHoldTestName": "Breath Holding Test",
+  "breathingHoldTestDescription": "Breathe in, then hold for as long as you comfortably can. Tap Release when you're done.",
+  "breathingCustomName": "Customize",
+  "breathingCustomDescription": "Set your own count for each step.",
+  "breathingPatternStep": "{phase} {seconds}s",
+  "@breathingPatternStep": {
+    "placeholders": {
+      "phase": {
+        "type": "String"
+      },
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "breathingPatternStepOpen": "{phase} as long as you can",
+  "@breathingPatternStepOpen": {
+    "placeholders": {
+      "phase": {
+        "type": "String"
+      }
+    }
+  },
+  "breathingPhaseInhale": "Inhale",
+  "breathingPhaseHold": "Hold",
+  "breathingPhaseExhale": "Release",
+  "breathingPhaseRest": "Breathe normally",
+  "breathingStart": "Start",
+  "breathingPause": "Pause",
+  "breathingResume": "Resume",
+  "breathingFinish": "Finish",
+  "breathingReleaseButton": "Release",
+  "breathingReady": "Tap Start when you're ready",
+  "breathingPaused": "Paused",
+  "breathingElapsed": "Time elapsed",
+  "breathingCycles": "Cycles",
+  "breathingBestHold": "Best hold",
+  "breathingSessionSaved": "Session saved · {duration} · {cycles, plural, =1{1 cycle} other{{cycles} cycles}}",
+  "@breathingSessionSaved": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      },
+      "cycles": {
+        "type": "int"
+      }
+    }
+  },
+  "breathingSessionTooShort": "Too short to save — sessions under 10 seconds aren't counted.",
+  "breathingSaveError": "Couldn't save the session: {error}",
+  "@breathingSaveError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "breathingSoundTooltip": "Sound settings",
+  "breathingBackTooltip": "Back",
+  "soundSettingsTitle": "Sound",
+  "soundVoiceGuide": "Voice guide",
+  "soundVoiceGuideSubtitle": "Says each step out loud: inhale, hold, release",
+  "soundVoiceVolume": "Voice volume",
+  "soundAmbience": "Ambience",
+  "soundAmbienceVolume": "Ambience volume",
+  "ambienceNone": "Off",
+  "ambienceRain": "Rain",
+  "ambienceOcean": "Ocean",
+  "ambienceWind": "Wind",
+  "ambienceDrone": "Calm drone",
+  "customPatternTitle": "Customize breathing",
+  "customPatternHoldAfter": "Hold after release",
+  "customPatternSave": "Save pattern",
+  "customPatternEdit": "Edit pattern",
+  "customPatternSeconds": "{seconds}s",
+  "@customPatternSeconds": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "customPatternCycle": "One cycle: {seconds}s",
+  "@customPatternCycle": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "customPatternDecrease": "Decrease {step}",
+  "@customPatternDecrease": {
+    "placeholders": {
+      "step": {
+        "type": "String"
+      }
+    }
+  },
+  "customPatternIncrease": "Increase {step}",
+  "@customPatternIncrease": {
+    "placeholders": {
+      "step": {
+        "type": "String"
+      }
+    }
+  },
+  "exerciseStatSessions": "Sessions",
+  "exerciseStatTimeSpent": "Time spent",
+  "exerciseStatStreak": "Day streak",
+  "exerciseDurationHours": "{hours}h {minutes}m",
+  "@exerciseDurationHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "exerciseDurationMinutes": "{minutes}m",
+  "@exerciseDurationMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "exerciseDurationSeconds": "{seconds}s",
+  "@exerciseDurationSeconds": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "exerciseCalendarDay": "{date}: {sessions, plural, =1{1 session} other{{sessions} sessions}} · {duration}",
+  "@exerciseCalendarDay": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "sessions": {
+        "type": "int"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "exerciseCalendarDayEmpty": "{date}: no sessions",
+  "@exerciseCalendarDayEmpty": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "exerciseCalendarMonth": "This month: {sessions, plural, =1{1 session} other{{sessions} sessions}} · {duration}",
+  "@exerciseCalendarMonth": {
+    "placeholders": {
+      "sessions": {
+        "type": "int"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "exerciseCalendarPrevious": "Previous month",
+  "exerciseCalendarNext": "Next month"
 }

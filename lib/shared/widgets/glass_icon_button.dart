@@ -27,7 +27,7 @@ class GlassIconButton extends StatelessWidget {
     final button = GestureDetector(
       onTap: onTap,
       child: ClipOval(
-        child: BackdropFilter(
+        child: BackdropFilter.grouped(
           filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
           child: Container(
             width: size,

@@ -1,9 +1,21 @@
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
+import '../../core/theme/glass_theme.dart';
+import 'app_background_scope.dart';
+
 /// The 3-blob blurred background layer used behind content on every main
 /// screen, per the frosted glass dark theme.
+///
+/// With a custom photo set in Settings (via [AppBackgroundScope]) the photo
+/// fills the screen under a background-colored scrim, and the blobs and
+/// glass content sit on top as usual — so cards and text stay legible on
+/// any photo, bright or busy.
+///
+/// [child] sits in a [BackdropGroup], so every `GlassCard` on the screen
+/// shares one backdrop read — see `GlassCard` for why.
 class BlobBackground extends StatelessWidget {
   const BlobBackground({required this.child, super.key});
 
@@ -11,11 +23,49 @@ class BlobBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final imagePath = AppBackgroundScope.imagePathOf(context);
     return Stack(
       children: [
+        if (imagePath != null)
+          Positioned.fill(child: _CustomPhoto(path: imagePath)),
         const Positioned.fill(child: IgnorePointer(child: _Blobs())),
-        child,
+        BackdropGroup(child: child),
       ],
+    );
+  }
+}
+
+/// How much of the theme background color covers a custom photo.
+const double customBackgroundScrimOpacity = 0.55;
+
+class _CustomPhoto extends StatelessWidget {
+  const _CustomPhoto({required this.path});
+
+  final String path;
+
+  @override
+  Widget build(BuildContext context) {
+    final scrim =
+        Theme.of(context).extension<GlassTheme>()?.background ??
+        const Color(0xFF0A1628);
+    return IgnorePointer(
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Image.file(
+            File(path),
+            fit: BoxFit.cover,
+            gaplessPlayback: true,
+            // The file can vanish (cleared app data, restored backup) —
+            // fall back to the plain background rather than an error box.
+            errorBuilder: (context, error, stackTrace) =>
+                const SizedBox.shrink(),
+          ),
+          ColoredBox(
+            color: scrim.withValues(alpha: customBackgroundScrimOpacity),
+          ),
+        ],
+      ),
     );
   }
 }

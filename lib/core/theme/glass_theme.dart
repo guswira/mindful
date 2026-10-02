@@ -22,6 +22,7 @@ class GlassTheme extends ThemeExtension<GlassTheme> {
     required this.moneyAccent,
     required this.moneySpending,
     required this.aiAccent,
+    required this.exerciseAccent,
     required this.textSecondary,
     required this.textMuted,
     required this.textHint,
@@ -46,6 +47,7 @@ class GlassTheme extends ThemeExtension<GlassTheme> {
     moneyAccent: const Color(0xFF34D399),
     moneySpending: const Color(0xFFFC8181),
     aiAccent: const Color(0xFF818CF8),
+    exerciseAccent: const Color(0xFFF9A8D4),
     textSecondary: Colors.white.withValues(alpha: 0.55),
     textMuted: Colors.white.withValues(alpha: 0.35),
     textHint: Colors.white.withValues(alpha: 0.25),
@@ -68,6 +70,9 @@ class GlassTheme extends ThemeExtension<GlassTheme> {
   final Color moneyAccent;
   final Color moneySpending;
   final Color aiAccent;
+
+  /// Exercise tab accent — breathing circle, ripples, calendar days.
+  final Color exerciseAccent;
   final Color textSecondary;
   final Color textMuted;
   final Color textHint;
@@ -90,6 +95,7 @@ class GlassTheme extends ThemeExtension<GlassTheme> {
     Color? moneyAccent,
     Color? moneySpending,
     Color? aiAccent,
+    Color? exerciseAccent,
     Color? textSecondary,
     Color? textMuted,
     Color? textHint,
@@ -112,6 +118,7 @@ class GlassTheme extends ThemeExtension<GlassTheme> {
       moneyAccent: moneyAccent ?? this.moneyAccent,
       moneySpending: moneySpending ?? this.moneySpending,
       aiAccent: aiAccent ?? this.aiAccent,
+      exerciseAccent: exerciseAccent ?? this.exerciseAccent,
       textSecondary: textSecondary ?? this.textSecondary,
       textMuted: textMuted ?? this.textMuted,
       textHint: textHint ?? this.textHint,
@@ -143,6 +150,7 @@ class GlassTheme extends ThemeExtension<GlassTheme> {
       moneyAccent: Color.lerp(moneyAccent, other.moneyAccent, t)!,
       moneySpending: Color.lerp(moneySpending, other.moneySpending, t)!,
       aiAccent: Color.lerp(aiAccent, other.aiAccent, t)!,
+      exerciseAccent: Color.lerp(exerciseAccent, other.exerciseAccent, t)!,
       textSecondary: Color.lerp(textSecondary, other.textSecondary, t)!,
       textMuted: Color.lerp(textMuted, other.textMuted, t)!,
       textHint: Color.lerp(textHint, other.textHint, t)!,

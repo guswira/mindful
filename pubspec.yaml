@@ -61,6 +61,9 @@ dependencies:
   google_generative_ai: ^0.4.7
   flutter_image_compress: ^2.5.1
   path_provider: ^2.1.5
+  flutter_tts: ^4.2.5
+  audioplayers: ^6.7.1
+  wakelock_plus: ^1.4.0
 
 dev_dependencies:
   flutter_test:
@@ -94,6 +97,7 @@ flutter:
   assets:
     - .env
     - assets/quotes.json
+    - assets/ambience/
 
 flutter_launcher_icons:
   android: true

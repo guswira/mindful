@@ -1346,4 +1346,277 @@ class AppLocalizationsEn extends AppLocalizations {
   String settingsRecapSoFar(String month) {
     return '$month (so far)';
   }
+
+  @override
+  String get settingsBackgroundTitle => 'Background';
+
+  @override
+  String get settingsBackgroundDefault => 'Default';
+
+  @override
+  String get settingsBackgroundCustom => 'Custom photo';
+
+  @override
+  String get settingsBackgroundChoose => 'Choose from gallery';
+
+  @override
+  String get settingsBackgroundReset => 'Reset to default';
+
+  @override
+  String get settingsBackgroundUpdated => 'Background updated';
+
+  @override
+  String settingsBackgroundError(String error) {
+    return 'Couldn\'t change the background: $error';
+  }
+
+  @override
+  String get navExercise => 'Exercise';
+
+  @override
+  String get exerciseTitle => 'Exercise';
+
+  @override
+  String get exerciseSubtitle => 'Slow down and breathe with intention.';
+
+  @override
+  String get exerciseBreathingSection => 'Breathing';
+
+  @override
+  String get exerciseActivitySection => 'Activity';
+
+  @override
+  String get breathingEqualName => 'Equal Breathing';
+
+  @override
+  String get breathingEqualDescription =>
+      'Inhale and release for the same count to steady your mind.';
+
+  @override
+  String get breathingBoxName => 'Box Breathing';
+
+  @override
+  String get breathingBoxDescription =>
+      'Four equal sides — inhale, hold, release, hold. Great for focus.';
+
+  @override
+  String get breathing478Name => '4-7-8 Breathing';
+
+  @override
+  String get breathing478Description =>
+      'A long hold and a slow release to help you unwind or fall asleep.';
+
+  @override
+  String get breathingHoldTestName => 'Breath Holding Test';
+
+  @override
+  String get breathingHoldTestDescription =>
+      'Breathe in, then hold for as long as you comfortably can. Tap Release when you\'re done.';
+
+  @override
+  String get breathingCustomName => 'Customize';
+
+  @override
+  String get breathingCustomDescription => 'Set your own count for each step.';
+
+  @override
+  String breathingPatternStep(String phase, int seconds) {
+    return '$phase ${seconds}s';
+  }
+
+  @override
+  String breathingPatternStepOpen(String phase) {
+    return '$phase as long as you can';
+  }
+
+  @override
+  String get breathingPhaseInhale => 'Inhale';
+
+  @override
+  String get breathingPhaseHold => 'Hold';
+
+  @override
+  String get breathingPhaseExhale => 'Release';
+
+  @override
+  String get breathingPhaseRest => 'Breathe normally';
+
+  @override
+  String get breathingStart => 'Start';
+
+  @override
+  String get breathingPause => 'Pause';
+
+  @override
+  String get breathingResume => 'Resume';
+
+  @override
+  String get breathingFinish => 'Finish';
+
+  @override
+  String get breathingReleaseButton => 'Release';
+
+  @override
+  String get breathingReady => 'Tap Start when you\'re ready';
+
+  @override
+  String get breathingPaused => 'Paused';
+
+  @override
+  String get breathingElapsed => 'Time elapsed';
+
+  @override
+  String get breathingCycles => 'Cycles';
+
+  @override
+  String get breathingBestHold => 'Best hold';
+
+  @override
+  String breathingSessionSaved(String duration, int cycles) {
+    String _temp0 = intl.Intl.pluralLogic(
+      cycles,
+      locale: localeName,
+      other: '$cycles cycles',
+      one: '1 cycle',
+    );
+    return 'Session saved · $duration · $_temp0';
+  }
+
+  @override
+  String get breathingSessionTooShort =>
+      'Too short to save — sessions under 10 seconds aren\'t counted.';
+
+  @override
+  String breathingSaveError(String error) {
+    return 'Couldn\'t save the session: $error';
+  }
+
+  @override
+  String get breathingSoundTooltip => 'Sound settings';
+
+  @override
+  String get breathingBackTooltip => 'Back';
+
+  @override
+  String get soundSettingsTitle => 'Sound';
+
+  @override
+  String get soundVoiceGuide => 'Voice guide';
+
+  @override
+  String get soundVoiceGuideSubtitle =>
+      'Says each step out loud: inhale, hold, release';
+
+  @override
+  String get soundVoiceVolume => 'Voice volume';
+
+  @override
+  String get soundAmbience => 'Ambience';
+
+  @override
+  String get soundAmbienceVolume => 'Ambience volume';
+
+  @override
+  String get ambienceNone => 'Off';
+
+  @override
+  String get ambienceRain => 'Rain';
+
+  @override
+  String get ambienceOcean => 'Ocean';
+
+  @override
+  String get ambienceWind => 'Wind';
+
+  @override
+  String get ambienceDrone => 'Calm drone';
+
+  @override
+  String get customPatternTitle => 'Customize breathing';
+
+  @override
+  String get customPatternHoldAfter => 'Hold after release';
+
+  @override
+  String get customPatternSave => 'Save pattern';
+
+  @override
+  String get customPatternEdit => 'Edit pattern';
+
+  @override
+  String customPatternSeconds(int seconds) {
+    return '${seconds}s';
+  }
+
+  @override
+  String customPatternCycle(int seconds) {
+    return 'One cycle: ${seconds}s';
+  }
+
+  @override
+  String customPatternDecrease(String step) {
+    return 'Decrease $step';
+  }
+
+  @override
+  String customPatternIncrease(String step) {
+    return 'Increase $step';
+  }
+
+  @override
+  String get exerciseStatSessions => 'Sessions';
+
+  @override
+  String get exerciseStatTimeSpent => 'Time spent';
+
+  @override
+  String get exerciseStatStreak => 'Day streak';
+
+  @override
+  String exerciseDurationHours(int hours, int minutes) {
+    return '${hours}h ${minutes}m';
+  }
+
+  @override
+  String exerciseDurationMinutes(int minutes) {
+    return '${minutes}m';
+  }
+
+  @override
+  String exerciseDurationSeconds(int seconds) {
+    return '${seconds}s';
+  }
+
+  @override
+  String exerciseCalendarDay(String date, int sessions, String duration) {
+    String _temp0 = intl.Intl.pluralLogic(
+      sessions,
+      locale: localeName,
+      other: '$sessions sessions',
+      one: '1 session',
+    );
+    return '$date: $_temp0 · $duration';
+  }
+
+  @override
+  String exerciseCalendarDayEmpty(String date) {
+    return '$date: no sessions';
+  }
+
+  @override
+  String exerciseCalendarMonth(int sessions, String duration) {
+    String _temp0 = intl.Intl.pluralLogic(
+      sessions,
+      locale: localeName,
+      other: '$sessions sessions',
+      one: '1 session',
+    );
+    return 'This month: $_temp0 · $duration';
+  }
+
+  @override
+  String get exerciseCalendarPrevious => 'Previous month';
+
+  @override
+  String get exerciseCalendarNext => 'Next month';
 }
