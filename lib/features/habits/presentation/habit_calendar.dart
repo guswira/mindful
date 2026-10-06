@@ -94,26 +94,31 @@ class HabitMonthHeader extends StatelessWidget {
   }
 }
 
-/// A full month grid with a colored dot on each completed day. Tapping a
-/// completed day calls [onDayTap] with that day's log.
+/// A full month grid marking each completed day — with a colored dot, or
+/// with [labelFor]'s text (e.g. the action performed) when it's given.
+/// Tapping any day up to today calls [onDayTap] with the day and its log
+/// (null when nothing was logged); future days aren't tappable.
 class HabitMonthGrid extends StatelessWidget {
   const HabitMonthGrid({
     required this.month,
     required this.color,
     required this.logsByDate,
     required this.onDayTap,
+    this.labelFor,
     super.key,
   });
 
   final DateTime month;
   final Color color;
   final Map<DateTime, HabitLog> logsByDate;
-  final ValueChanged<HabitLog> onDayTap;
+  final void Function(DateTime date, HabitLog? log) onDayTap;
+  final String Function(HabitLog log)? labelFor;
 
   @override
   Widget build(BuildContext context) {
     final daysInMonth = DateUtils.getDaysInMonth(month.year, month.month);
     final leadingBlanks = DateTime(month.year, month.month).weekday - 1;
+    final today = DateUtils.dateOnly(DateTime.now());
 
     return Column(
       children: [
@@ -141,7 +146,10 @@ class HabitMonthGrid extends StatelessWidget {
                 date: DateTime(month.year, month.month, day),
                 color: color,
                 log: logsByDate[DateTime(month.year, month.month, day)],
-                onTap: onDayTap,
+                labelFor: labelFor,
+                onTap: DateTime(month.year, month.month, day).isAfter(today)
+                    ? null
+                    : onDayTap,
               ),
           ],
         ),
@@ -155,31 +163,68 @@ class _DayCell extends StatelessWidget {
     required this.date,
     required this.color,
     required this.log,
+    required this.labelFor,
     required this.onTap,
   });
 
   final DateTime date;
   final Color color;
   final HabitLog? log;
-  final ValueChanged<HabitLog> onTap;
+  final String Function(HabitLog log)? labelFor;
+  final void Function(DateTime date, HabitLog? log)? onTap;
 
   @override
   Widget build(BuildContext context) {
     final log = this.log;
+    final onTap = this.onTap;
     return InkWell(
-      onTap: log == null ? null : () => onTap(log),
+      onTap: onTap == null ? null : () => onTap(date, log),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text('${date.day}', style: Theme.of(context).textTheme.bodySmall),
           const SizedBox(height: 2),
           if (log != null)
-            Container(
-              width: 6,
-              height: 6,
-              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-            ),
+            switch (labelFor) {
+              final labelFor? => _ActionLabel(
+                label: labelFor(log),
+                color: color,
+              ),
+              null => Container(
+                width: 6,
+                height: 6,
+                decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+              ),
+            },
         ],
+      ),
+    );
+  }
+}
+
+/// The action done on a day, as a tiny tinted tag under the day number.
+class _ActionLabel extends StatelessWidget {
+  const _ActionLabel({required this.label, required this.color});
+
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 1),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.18),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: Theme.of(
+          context,
+        ).textTheme.labelSmall?.copyWith(fontSize: 9, color: color),
       ),
     );
   }

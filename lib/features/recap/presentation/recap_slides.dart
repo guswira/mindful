@@ -1,8 +1,8 @@
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/glass_theme.dart';
-import '../../money/domain/money_entry.dart';
 import '../../money/presentation/money_labels.dart';
 import '../domain/monthly_recap.dart';
 import 'recap_slide_data.dart';
@@ -20,7 +20,7 @@ List<RecapSlideData> buildRecapSlides(
   return [
     RecapSlideData(
       accent: glass.writeAccent,
-      emoji: '🌙',
+      icon: Icons.nightlight_outlined,
       title: l10n.recapIntroLabel,
       heroText: recap.isComplete
           ? l10n.recapIntroTitle(monthName)
@@ -34,7 +34,7 @@ List<RecapSlideData> buildRecapSlides(
     _ai(recap.ai, l10n, glass),
     RecapSlideData(
       accent: glass.writeAccent,
-      emoji: '🚀',
+      icon: Icons.rocket_launch_outlined,
       title: l10n.recapOutroLabel,
       heroText: l10n.recapOutroTitle,
       heroLabel: '',
@@ -69,7 +69,7 @@ RecapSlideData _routines(
   GlassTheme glass,
 ) => RecapSlideData(
   accent: glass.habitAccent,
-  emoji: '💪',
+  icon: Icons.self_improvement_rounded,
   title: l10n.recapRoutinesTitle,
   heroValue: r.checkIns.toDouble(),
   formatHero: _count,
@@ -85,10 +85,7 @@ RecapSlideData _routines(
       label: l10n.recapStatLongestStreak,
     ),
     if (r.bestHabitName case final name?)
-      (
-        value: '${r.bestHabitIcon ?? ''} $name'.trim(),
-        label: l10n.recapStatTopRoutine,
-      ),
+      (value: name, label: l10n.recapStatTopRoutine),
   ],
   motivation: _toneLine(
     r.tone,
@@ -102,7 +99,7 @@ RecapSlideData _routines(
 RecapSlideData _tasks(TaskRecap t, AppLocalizations l10n, GlassTheme glass) =>
     RecapSlideData(
       accent: glass.taskAccent,
-      emoji: '✅',
+      icon: Icons.checklist_rounded,
       title: l10n.recapTasksTitle,
       heroValue: t.completed.toDouble(),
       formatHero: _count,
@@ -134,7 +131,7 @@ RecapSlideData _cashflow(
   final netSign = c.net > 0 ? '+' : (c.net < 0 ? '-' : '');
   return RecapSlideData(
     accent: glass.moneyAccent,
-    emoji: '💰',
+    icon: Icons.account_balance_wallet_outlined,
     title: l10n.recapMoneyTitle,
     heroValue: c.spending,
     formatHero: money,
@@ -150,10 +147,7 @@ RecapSlideData _cashflow(
       (value: l10n.recapDays(c.noSpendDays), label: l10n.recapStatNoSpendDays),
       if (c.topCategory case final category?)
         (
-          value:
-              '${categoryEmoji[category] ?? ''} '
-                      '${categoryLabel(l10n, category)}'
-                  .trim(),
+          value: categoryLabel(l10n, category),
           label: l10n.recapStatTopCategory,
         ),
     ],
@@ -170,7 +164,7 @@ RecapSlideData _cashflow(
 RecapSlideData _ai(AiRecap? a, AppLocalizations l10n, GlassTheme glass) =>
     RecapSlideData(
       accent: glass.aiAccent,
-      emoji: '✨',
+      icon: Icons.auto_awesome_outlined,
       title: l10n.recapAiTitle,
       heroValue: (a?.scans ?? 0).toDouble(),
       formatHero: _count,

@@ -251,7 +251,7 @@ abstract class AppLocalizations {
   /// No description provided for @aiResultDisclaimer.
   ///
   /// In en, this message translates to:
-  /// **'⚠ AI estimates may vary based on portion size, preparation method, and ingredients.'**
+  /// **'AI estimates may vary based on portion size, preparation method, and ingredients.'**
   String get aiResultDisclaimer;
 
   /// No description provided for @aiLowConfidenceWarning.
@@ -305,19 +305,19 @@ abstract class AppLocalizations {
   /// No description provided for @aiConfidenceHigh.
   ///
   /// In en, this message translates to:
-  /// **'✓ Confident'**
+  /// **'Confident'**
   String get aiConfidenceHigh;
 
   /// No description provided for @aiConfidenceLow.
   ///
   /// In en, this message translates to:
-  /// **'! Uncertain'**
+  /// **'Uncertain'**
   String get aiConfidenceLow;
 
   /// No description provided for @aiConfidenceMedium.
   ///
   /// In en, this message translates to:
-  /// **'~ Estimate'**
+  /// **'Estimate'**
   String get aiConfidenceMedium;
 
   /// No description provided for @aiCaloriesUnit.
@@ -401,7 +401,7 @@ abstract class AppLocalizations {
   /// No description provided for @aiCheckFoodCalories.
   ///
   /// In en, this message translates to:
-  /// **'📷  Check food calories'**
+  /// **'Check food calories'**
   String get aiCheckFoodCalories;
 
   /// No description provided for @aiChooseFromGallery.
@@ -533,7 +533,7 @@ abstract class AppLocalizations {
   /// No description provided for @notifJournalMorningTitle.
   ///
   /// In en, this message translates to:
-  /// **'Good morning ☀️'**
+  /// **'Good morning'**
   String get notifJournalMorningTitle;
 
   /// No description provided for @notifJournalMorningBody.
@@ -545,7 +545,7 @@ abstract class AppLocalizations {
   /// No description provided for @notifJournalEveningTitle.
   ///
   /// In en, this message translates to:
-  /// **'How was your day? 🌙'**
+  /// **'How was your day?'**
   String get notifJournalEveningTitle;
 
   /// No description provided for @notifJournalEveningBody.
@@ -689,14 +689,32 @@ abstract class AppLocalizations {
   /// No description provided for @widgetChooseTasks.
   ///
   /// In en, this message translates to:
-  /// **'✅ Todo'**
+  /// **'Todo'**
   String get widgetChooseTasks;
 
   /// No description provided for @widgetChooseHabits.
   ///
   /// In en, this message translates to:
-  /// **'💪 Routines'**
+  /// **'Routines'**
   String get widgetChooseHabits;
+
+  /// No description provided for @widgetRoutineDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get widgetRoutineDone;
+
+  /// No description provided for @widgetRoutinesAllDone.
+  ///
+  /// In en, this message translates to:
+  /// **'All done'**
+  String get widgetRoutinesAllDone;
+
+  /// No description provided for @widgetNoRoutines.
+  ///
+  /// In en, this message translates to:
+  /// **'No routines yet'**
+  String get widgetNoRoutines;
 
   /// No description provided for @widgetDoneCount.
   ///
@@ -854,11 +872,23 @@ abstract class AppLocalizations {
   /// **'Habit name...'**
   String get habitNameHint;
 
-  /// No description provided for @habitEmptyList.
+  /// No description provided for @habitIntroTitle.
   ///
   /// In en, this message translates to:
-  /// **'No habits yet'**
-  String get habitEmptyList;
+  /// **'Routines repeat every day'**
+  String get habitIntroTitle;
+
+  /// No description provided for @habitIntroBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a small habit — a walk, water, reading — and check it off daily. Mindful tracks your streak and can remind you on the days you choose.'**
+  String get habitIntroBody;
+
+  /// No description provided for @habitIntroAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Add routine'**
+  String get habitIntroAction;
 
   /// No description provided for @habitSyncFailed.
   ///
@@ -875,7 +905,7 @@ abstract class AppLocalizations {
   /// No description provided for @habitArchiveConfirmBody.
   ///
   /// In en, this message translates to:
-  /// **'\"{name}\" will be hidden from today\'s list.'**
+  /// **'\"{name}\" will be hidden from today\'s list. Find it under Archived in Routines.'**
   String habitArchiveConfirmBody(String name);
 
   /// No description provided for @habitDeleteConfirmTitle.
@@ -944,6 +974,72 @@ abstract class AppLocalizations {
   /// **'Save routine'**
   String get habitConvertSave;
 
+  /// No description provided for @habitArchivedLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Archived ({count})'**
+  String habitArchivedLink(int count);
+
+  /// No description provided for @habitArchivedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Archived routines'**
+  String get habitArchivedTitle;
+
+  /// No description provided for @habitArchivedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Hidden from today\'s list, history kept. Restore one to track it again.'**
+  String get habitArchivedHint;
+
+  /// No description provided for @habitArchivedEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No archived routines'**
+  String get habitArchivedEmpty;
+
+  /// No description provided for @habitRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get habitRestore;
+
+  /// No description provided for @habitActionSummaryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Actions this month'**
+  String get habitActionSummaryTitle;
+
+  /// No description provided for @habitActionSummaryCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 time} other{{count} times}}'**
+  String habitActionSummaryCount(int count);
+
+  /// No description provided for @habitDayLoggedAs.
+  ///
+  /// In en, this message translates to:
+  /// **'Logged as'**
+  String get habitDayLoggedAs;
+
+  /// No description provided for @habitDayChangeTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Change to'**
+  String get habitDayChangeTo;
+
+  /// No description provided for @habitDayNotDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Not done'**
+  String get habitDayNotDone;
+
+  /// No description provided for @habitActionRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed action'**
+  String get habitActionRemoved;
+
   /// No description provided for @taskGroupUpcoming.
   ///
   /// In en, this message translates to:
@@ -956,11 +1052,23 @@ abstract class AppLocalizations {
   /// **'No date'**
   String get taskGroupNoDate;
 
-  /// No description provided for @taskEmptyList.
+  /// No description provided for @taskIntroTitle.
   ///
   /// In en, this message translates to:
-  /// **'No tasks yet'**
-  String get taskEmptyList;
+  /// **'Clear your head, one task at a time'**
+  String get taskIntroTitle;
+
+  /// No description provided for @taskIntroBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Jot down what needs doing, give it a due date or a reminder, and break bigger jobs into subtasks. Today\'s tasks also show on your home screen.'**
+  String get taskIntroBody;
+
+  /// No description provided for @taskIntroAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Add task'**
+  String get taskIntroAction;
 
   /// No description provided for @taskCompletedSection.
   ///
@@ -1136,18 +1244,6 @@ abstract class AppLocalizations {
   /// **'Today\'s Todo'**
   String get homeSectionTodayTasks;
 
-  /// No description provided for @homeSectionHabits.
-  ///
-  /// In en, this message translates to:
-  /// **'Routines'**
-  String get homeSectionHabits;
-
-  /// No description provided for @homeSectionJournal.
-  ///
-  /// In en, this message translates to:
-  /// **'Journal'**
-  String get homeSectionJournal;
-
   /// No description provided for @homeJournalPlanTitle.
   ///
   /// In en, this message translates to:
@@ -1169,7 +1265,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeJournalReflectTitle.
   ///
   /// In en, this message translates to:
-  /// **'Review what happened'**
+  /// **'Review today'**
   String get homeJournalReflectTitle;
 
   /// No description provided for @homeJournalReflectSubtitle.
@@ -1184,41 +1280,11 @@ abstract class AppLocalizations {
   /// **'Reflect'**
   String get homeJournalReflectAction;
 
-  /// No description provided for @homeHabitsProgress.
-  ///
-  /// In en, this message translates to:
-  /// **'{done}/{total}'**
-  String homeHabitsProgress(int done, int total);
-
-  /// No description provided for @homeStreakJournalLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Journal streak'**
-  String get homeStreakJournalLabel;
-
-  /// No description provided for @homeStreakHabitsLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Habits today'**
-  String get homeStreakHabitsLabel;
-
-  /// No description provided for @homeStreakTasksLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Tasks due'**
-  String get homeStreakTasksLabel;
-
   /// No description provided for @homeTasksEmpty.
   ///
   /// In en, this message translates to:
   /// **'What needs to be done today?'**
   String get homeTasksEmpty;
-
-  /// No description provided for @homeAddTask.
-  ///
-  /// In en, this message translates to:
-  /// **'Add task'**
-  String get homeAddTask;
 
   /// No description provided for @homeSyncFailed.
   ///
@@ -1229,20 +1295,140 @@ abstract class AppLocalizations {
   /// No description provided for @homeHabitsAllDone.
   ///
   /// In en, this message translates to:
-  /// **'All done! 🎉'**
+  /// **'All done!'**
   String get homeHabitsAllDone;
 
-  /// No description provided for @homeHabitsEmpty.
+  /// No description provided for @homeBeMindfulIntro.
   ///
   /// In en, this message translates to:
-  /// **'Build your first habit'**
-  String get homeHabitsEmpty;
+  /// **'Mindful helps you slow down and live with intention — routines, tasks, money, food, breathing and journaling, all in one calm place. Try them one by one:'**
+  String get homeBeMindfulIntro;
 
-  /// No description provided for @homeHabitsStart.
+  /// No description provided for @homeBuildFirstRoutine.
   ///
   /// In en, this message translates to:
-  /// **'Start'**
-  String get homeHabitsStart;
+  /// **'Build your first routine'**
+  String get homeBuildFirstRoutine;
+
+  /// No description provided for @homeBuildFirstRoutineSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Small daily habits add up over time.'**
+  String get homeBuildFirstRoutineSubtitle;
+
+  /// No description provided for @homeBuildFirstRoutineAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Build'**
+  String get homeBuildFirstRoutineAction;
+
+  /// No description provided for @homeMindfulSpendingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Mindful with spending'**
+  String get homeMindfulSpendingTitle;
+
+  /// No description provided for @homeMindfulSpendingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Record your spending to see where your money goes.'**
+  String get homeMindfulSpendingSubtitle;
+
+  /// No description provided for @homeMindfulSpendingAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Record'**
+  String get homeMindfulSpendingAction;
+
+  /// No description provided for @homeMindfulTaskTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Mindful with your time'**
+  String get homeMindfulTaskTitle;
+
+  /// No description provided for @homeMindfulTaskSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a task so nothing slips through today.'**
+  String get homeMindfulTaskSubtitle;
+
+  /// No description provided for @homeMindfulTaskAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get homeMindfulTaskAction;
+
+  /// No description provided for @homeMindfulFoodTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Mindful with the food you eat'**
+  String get homeMindfulFoodTitle;
+
+  /// No description provided for @homeMindfulFoodSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Snap a meal and let AI estimate its nutrition.'**
+  String get homeMindfulFoodSubtitle;
+
+  /// No description provided for @homeMindfulFoodAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan'**
+  String get homeMindfulFoodAction;
+
+  /// No description provided for @homeMindfulBreathingStepTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Mindful breathing'**
+  String get homeMindfulBreathingStepTitle;
+
+  /// No description provided for @homeMindfulBreathingStepSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Take a minute for a guided breath.'**
+  String get homeMindfulBreathingStepSubtitle;
+
+  /// No description provided for @homeMindfulBreathingStepAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Breathe'**
+  String get homeMindfulBreathingStepAction;
+
+  /// No description provided for @homeMindfulJournalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Mindful with your thoughts'**
+  String get homeMindfulJournalTitle;
+
+  /// No description provided for @homeMindfulJournalSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Write your first journal entry.'**
+  String get homeMindfulJournalSubtitle;
+
+  /// No description provided for @homeMindfulJournalAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Write'**
+  String get homeMindfulJournalAction;
+
+  /// No description provided for @homeMindfulBudgetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Mindful with your budget'**
+  String get homeMindfulBudgetTitle;
+
+  /// No description provided for @homeMindfulBudgetSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a budget and see what\'s left each day.'**
+  String get homeMindfulBudgetSubtitle;
+
+  /// No description provided for @homeMindfulBudgetAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Set'**
+  String get homeMindfulBudgetAction;
 
   /// No description provided for @homeUnsyncedBanner.
   ///
@@ -1261,18 +1447,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sign in failed: {error}'**
   String authSignInFailed(String error);
-
-  /// No description provided for @journalTabTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Journal'**
-  String get journalTabTitle;
-
-  /// No description provided for @journalLoadFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Couldn\'t load entries: {error}'**
-  String journalLoadFailed(String error);
 
   /// No description provided for @journalSearchHint.
   ///
@@ -1303,12 +1477,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Title...'**
   String get journalTitleHint;
-
-  /// No description provided for @journalBodyHint.
-  ///
-  /// In en, this message translates to:
-  /// **'What\'s on your mind...'**
-  String get journalBodyHint;
 
   /// No description provided for @journalDeleteEntry.
   ///
@@ -1373,13 +1541,13 @@ abstract class AppLocalizations {
   /// No description provided for @moneyTypeToggleSpending.
   ///
   /// In en, this message translates to:
-  /// **'💸 Spending'**
+  /// **'Spending'**
   String get moneyTypeToggleSpending;
 
   /// No description provided for @moneyTypeToggleIncome.
   ///
   /// In en, this message translates to:
-  /// **'💰 Income'**
+  /// **'Income'**
   String get moneyTypeToggleIncome;
 
   /// No description provided for @moneyKeypadBackspace.
@@ -1478,11 +1646,17 @@ abstract class AppLocalizations {
   /// **'+ Income'**
   String get moneyAddIncome;
 
-  /// No description provided for @moneyEmptyBudgetPrompt.
+  /// No description provided for @moneyBudgetIntroTitle.
   ///
   /// In en, this message translates to:
-  /// **'Set your budget to get started'**
-  String get moneyEmptyBudgetPrompt;
+  /// **'Set a budget'**
+  String get moneyBudgetIntroTitle;
+
+  /// No description provided for @moneyBudgetIntroBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a monthly or daily amount. Mindful shows what\'s left as you spend, so you know where you stand before the month runs out.'**
+  String get moneyBudgetIntroBody;
 
   /// No description provided for @moneySetBudget.
   ///
@@ -1544,6 +1718,24 @@ abstract class AppLocalizations {
   /// **'No entries in this period'**
   String get moneyNoEntriesInPeriod;
 
+  /// No description provided for @moneySpendingIntroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Record your spending'**
+  String get moneySpendingIntroTitle;
+
+  /// No description provided for @moneySpendingIntroBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Log what you spend and earn in a few taps. Mindful groups it by day and category, so you can see where your money really goes.'**
+  String get moneySpendingIntroBody;
+
+  /// No description provided for @moneySpendingIntroAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Record spending'**
+  String get moneySpendingIntroAction;
+
   /// No description provided for @moneyRecapTitle.
   ///
   /// In en, this message translates to:
@@ -1565,8 +1757,8 @@ abstract class AppLocalizations {
   /// No description provided for @moneyRecapTopCategory.
   ///
   /// In en, this message translates to:
-  /// **'Top category: {emoji} {category}'**
-  String moneyRecapTopCategory(String emoji, String category);
+  /// **'Top category: {category}'**
+  String moneyRecapTopCategory(String category);
 
   /// No description provided for @moneyMonthlyRemaining.
   ///
@@ -1932,7 +2124,7 @@ abstract class AppLocalizations {
   /// No description provided for @navJournal.
   ///
   /// In en, this message translates to:
-  /// **'Journal'**
+  /// **'Mindfulness'**
   String get navJournal;
 
   /// No description provided for @navMoney.
@@ -1986,7 +2178,7 @@ abstract class AppLocalizations {
   /// No description provided for @moneyAdviceButton.
   ///
   /// In en, this message translates to:
-  /// **'✨ AI advice'**
+  /// **'AI advice'**
   String get moneyAdviceButton;
 
   /// No description provided for @moneyAdviceTitle.
@@ -2034,7 +2226,7 @@ abstract class AppLocalizations {
   /// No description provided for @moneyAdviceDisclaimer.
   ///
   /// In en, this message translates to:
-  /// **'⚠ Experimental AI advice. Use as a guide only, not financial advice.'**
+  /// **'Experimental AI advice. Use as a guide only, not financial advice.'**
   String get moneyAdviceDisclaimer;
 
   /// Gemini prompt (not shown to the user). Written in the app language so Gemini replies in it. {data} is the user's money summary.
@@ -2493,28 +2685,28 @@ abstract class AppLocalizations {
   /// **'Couldn\'t change the background: {error}'**
   String settingsBackgroundError(String error);
 
-  /// No description provided for @navExercise.
+  /// No description provided for @exerciseHistory.
   ///
   /// In en, this message translates to:
-  /// **'Exercise'**
-  String get navExercise;
+  /// **'History'**
+  String get exerciseHistory;
 
-  /// No description provided for @exerciseTitle.
+  /// No description provided for @exerciseShowAll.
   ///
   /// In en, this message translates to:
-  /// **'Exercise'**
-  String get exerciseTitle;
+  /// **'Show all ({count} more)'**
+  String exerciseShowAll(int count);
 
-  /// No description provided for @exerciseSubtitle.
+  /// No description provided for @exerciseShowLess.
   ///
   /// In en, this message translates to:
-  /// **'Slow down and breathe with intention.'**
-  String get exerciseSubtitle;
+  /// **'Show less'**
+  String get exerciseShowLess;
 
   /// No description provided for @exerciseBreathingSection.
   ///
   /// In en, this message translates to:
-  /// **'Breathing'**
+  /// **'Breathing exercise'**
   String get exerciseBreathingSection;
 
   /// No description provided for @exerciseActivitySection.
@@ -2888,6 +3080,234 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Next month'**
   String get exerciseCalendarNext;
+
+  /// No description provided for @moodHappy.
+  ///
+  /// In en, this message translates to:
+  /// **'Happy'**
+  String get moodHappy;
+
+  /// No description provided for @moodNeutral.
+  ///
+  /// In en, this message translates to:
+  /// **'Neutral'**
+  String get moodNeutral;
+
+  /// No description provided for @moodSad.
+  ///
+  /// In en, this message translates to:
+  /// **'Sad'**
+  String get moodSad;
+
+  /// No description provided for @moodAnxious.
+  ///
+  /// In en, this message translates to:
+  /// **'Anxious'**
+  String get moodAnxious;
+
+  /// No description provided for @moodExcited.
+  ///
+  /// In en, this message translates to:
+  /// **'Excited'**
+  String get moodExcited;
+
+  /// No description provided for @journalTypeReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Today review'**
+  String get journalTypeReview;
+
+  /// No description provided for @journalTypePlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan'**
+  String get journalTypePlan;
+
+  /// No description provided for @journalTypeGratitude.
+  ///
+  /// In en, this message translates to:
+  /// **'Gratitude'**
+  String get journalTypeGratitude;
+
+  /// No description provided for @journalTypeReviewHint.
+  ///
+  /// In en, this message translates to:
+  /// **'How did today go?'**
+  String get journalTypeReviewHint;
+
+  /// No description provided for @journalTypePlanHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What do you want to get done today?'**
+  String get journalTypePlanHint;
+
+  /// No description provided for @journalTypeGratitudeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What are you grateful for today?'**
+  String get journalTypeGratitudeHint;
+
+  /// No description provided for @mindfulnessTabTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Mindfulness'**
+  String get mindfulnessTabTitle;
+
+  /// No description provided for @journalTodaySection.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s journal'**
+  String get journalTodaySection;
+
+  /// No description provided for @journalWrite.
+  ///
+  /// In en, this message translates to:
+  /// **'Write'**
+  String get journalWrite;
+
+  /// No description provided for @journalHistoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Journal history'**
+  String get journalHistoryTitle;
+
+  /// No description provided for @journalHistoryMonthEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No entries this month'**
+  String get journalHistoryMonthEmpty;
+
+  /// No description provided for @journalHistoryDayEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'{date}: no entries'**
+  String journalHistoryDayEmpty(String date);
+
+  /// No description provided for @exerciseActivityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Exercise activity'**
+  String get exerciseActivityTitle;
+
+  /// No description provided for @homeAddTodo.
+  ///
+  /// In en, this message translates to:
+  /// **'Add todo'**
+  String get homeAddTodo;
+
+  /// No description provided for @homeAddRoutine.
+  ///
+  /// In en, this message translates to:
+  /// **'Add routine'**
+  String get homeAddRoutine;
+
+  /// No description provided for @homeSectionMindfulness.
+  ///
+  /// In en, this message translates to:
+  /// **'Mindfulness'**
+  String get homeSectionMindfulness;
+
+  /// No description provided for @homeMindfulBreathingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Breathing exercise'**
+  String get homeMindfulBreathingTitle;
+
+  /// No description provided for @homeMindfulBreathingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Slow down with a guided breath.'**
+  String get homeMindfulBreathingSubtitle;
+
+  /// No description provided for @homeMindfulBreathingAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Breathe'**
+  String get homeMindfulBreathingAction;
+
+  /// No description provided for @breathingPickerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a breathing exercise'**
+  String get breathingPickerTitle;
+
+  /// No description provided for @loginTagline.
+  ///
+  /// In en, this message translates to:
+  /// **'Your day, a little more mindful.'**
+  String get loginTagline;
+
+  /// No description provided for @loginFeatureJournalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily journal'**
+  String get loginFeatureJournalTitle;
+
+  /// No description provided for @loginFeatureJournalBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan your morning, review your evening, and note what you\'re grateful for.'**
+  String get loginFeatureJournalBody;
+
+  /// No description provided for @loginFeatureRoutinesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tasks & routines'**
+  String get loginFeatureRoutinesTitle;
+
+  /// No description provided for @loginFeatureRoutinesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Build routines that stick and tick off tasks, with reminders that keep you on track.'**
+  String get loginFeatureRoutinesBody;
+
+  /// No description provided for @loginFeatureMoneyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Mindful spending'**
+  String get loginFeatureMoneyTitle;
+
+  /// No description provided for @loginFeatureMoneyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Record spending and income, and see how much of your budget is left.'**
+  String get loginFeatureMoneyBody;
+
+  /// No description provided for @loginFeatureBreathingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Guided breathing'**
+  String get loginFeatureBreathingTitle;
+
+  /// No description provided for @loginFeatureBreathingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Slow down with breathing exercises, a voice guide, and calming ambience.'**
+  String get loginFeatureBreathingBody;
+
+  /// No description provided for @loginFeatureAiTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'AI food check'**
+  String get loginFeatureAiTitle;
+
+  /// No description provided for @loginFeatureAiBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Snap a photo of your meal for a quick nutrition estimate.'**
+  String get loginFeatureAiBody;
+
+  /// No description provided for @loginFeatureRecapTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly recap'**
+  String get loginFeatureRecapTitle;
+
+  /// No description provided for @loginFeatureRecapBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Look back on your month, story-style, and keep the streak going.'**
+  String get loginFeatureRecapBody;
 }
 
 class _AppLocalizationsDelegate

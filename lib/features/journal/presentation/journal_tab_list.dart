@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/constants/spacing.dart';
 import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/glass_theme.dart';
 import '../../../shared/widgets/glass_bottom_sheet.dart';
@@ -10,9 +11,10 @@ import '../../../shared/widgets/glass_card.dart';
 import '../../../shared/widgets/unsynced_badge.dart';
 import '../domain/journal_entry.dart';
 import 'journal_detail_sheet.dart';
+import 'journal_labels.dart';
 import 'journal_tab.dart' show journalPhotoUrlProvider;
 
-/// Glass search input for [JournalTab] — its border highlights in
+/// Glass search input for the journal history screen — its border highlights in
 /// journalAccent while focused. See SPEC.md Daily Journal Tab.
 class JournalSearchField extends StatefulWidget {
   const JournalSearchField({
@@ -79,29 +81,36 @@ class _JournalSearchFieldState extends State<JournalSearchField> {
   }
 }
 
-/// [items] (month-header strings interleaved with [JournalEntry]s) as
-/// glass cards. See SPEC.md Daily Journal Tab.
-class JournalGroupedList extends StatelessWidget {
-  const JournalGroupedList({required this.items, super.key});
+/// [items] (group-header strings interleaved with [JournalEntry]s) as
+/// glass cards, for a [CustomScrollView]. Shows [emptyLabel] when there's
+/// nothing to list.
+class JournalGroupedSliverList extends StatelessWidget {
+  const JournalGroupedSliverList({
+    required this.items,
+    required this.emptyLabel,
+    super.key,
+  });
 
   final List<Object> items;
+  final String emptyLabel;
 
   @override
   Widget build(BuildContext context) {
     if (items.isEmpty) {
       final glass = Theme.of(context).extension<GlassTheme>()!;
-      return Center(
-        child: Text(
-          context.l10n.journalEmpty,
-          style: TextStyle(color: glass.textMuted),
+      return SliverPadding(
+        padding: const EdgeInsets.symmetric(vertical: 32),
+        sliver: SliverToBoxAdapter(
+          child: Center(
+            child: Text(emptyLabel, style: TextStyle(color: glass.textMuted)),
+          ),
         ),
       );
     }
-    return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 88),
+    return SliverList.builder(
       itemCount: items.length,
       itemBuilder: (context, index) => switch (items[index]) {
-        final String month => _MonthHeader(month),
+        final String header => _GroupHeader(header),
         final JournalEntry entry => _JournalEntryCard(entry: entry),
         _ => const SizedBox.shrink(),
       },
@@ -109,10 +118,17 @@ class JournalGroupedList extends StatelessWidget {
   }
 }
 
-class _MonthHeader extends StatelessWidget {
-  const _MonthHeader(this.month);
+/// Opens [entry] in [JournalDetailSheet].
+void showJournalDetail(BuildContext context, JournalEntry entry) =>
+    showGlassBottomSheet(
+      context: context,
+      builder: (_) => JournalDetailSheet(journalId: entry.id),
+    );
 
-  final String month;
+class _GroupHeader extends StatelessWidget {
+  const _GroupHeader(this.label);
+
+  final String label;
 
   @override
   Widget build(BuildContext context) {
@@ -120,11 +136,107 @@ class _MonthHeader extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(4, 16, 4, 8),
       child: Text(
-        month,
+        label,
         style: TextStyle(
           fontSize: 13,
           fontWeight: FontWeight.w600,
           color: glass.journalAccent,
+        ),
+      ),
+    );
+  }
+}
+
+/// The entry's [JournalType] as a small journalAccent label.
+class JournalTypeBadge extends StatelessWidget {
+  const JournalTypeBadge({required this.type, super.key});
+
+  final JournalType type;
+
+  @override
+  Widget build(BuildContext context) {
+    final glass = Theme.of(context).extension<GlassTheme>()!;
+    return Row(
+      children: [
+        Icon(journalTypeIcon(type), size: 13, color: glass.journalAccent),
+        const SizedBox(width: Spacing.xs),
+        Flexible(
+          child: Text(
+            context.l10n.journalTypeName(type),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: glass.journalAccent,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// A fixed-width card for the Mindfulness tab's horizontal "today"
+/// strip: type, mood, the start of the body and the time it was written.
+class JournalTodayCard extends StatelessWidget {
+  const JournalTodayCard({required this.entry, super.key});
+
+  /// Card width — the strip's height is sized around it.
+  static const double width = 200;
+
+  final JournalEntry entry;
+
+  @override
+  Widget build(BuildContext context) {
+    final glass = Theme.of(context).extension<GlassTheme>()!;
+    final textTheme = Theme.of(context).textTheme;
+    final mood = entry.mood;
+    return SizedBox(
+      width: width,
+      child: GestureDetector(
+        onTap: () => showJournalDetail(context, entry),
+        behavior: HitTestBehavior.opaque,
+        child: GlassCard(
+          borderRadius: 16,
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(child: JournalTypeBadge(type: entry.type)),
+                  if (mood != null)
+                    Icon(
+                      moodIcon(mood),
+                      size: 16,
+                      color: glass.textSecondary,
+                      semanticLabel: context.l10n.moodName(mood),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Expanded(
+                child: Text(
+                  entry.body,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: textTheme.bodyMedium?.copyWith(color: Colors.white),
+                ),
+              ),
+              Row(
+                children: [
+                  Text(
+                    DateFormat.jm().format(entry.createdAt.toLocal()),
+                    style: textTheme.labelSmall?.copyWith(
+                      color: glass.textMuted,
+                    ),
+                  ),
+                  const Spacer(),
+                  UnsyncedBadge(syncStatus: entry.syncStatus),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -149,10 +261,7 @@ class _JournalEntryCard extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: () => showGlassBottomSheet(
-            context: context,
-            builder: (_) => JournalDetailSheet(journalId: entry.id),
-          ),
+          onTap: () => showJournalDetail(context, entry),
           child: GlassCard(
             borderRadius: 16,
             child: Row(
@@ -179,6 +288,8 @@ class _JournalEntryCard extends StatelessWidget {
                     children: [
                       Row(
                         children: [
+                          Flexible(child: JournalTypeBadge(type: entry.type)),
+                          const SizedBox(width: Spacing.sm),
                           Text(
                             dateLabel,
                             style: TextStyle(
@@ -223,7 +334,12 @@ class _MoodBadge extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(mood.emoji, style: const TextStyle(fontSize: 20)),
+        Icon(
+          moodIcon(mood),
+          size: 20,
+          color: Colors.white.withValues(alpha: 0.7),
+          semanticLabel: context.l10n.moodName(mood),
+        ),
         const SizedBox(height: 2),
         Container(
           width: 4,

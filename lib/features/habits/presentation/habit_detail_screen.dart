@@ -1,19 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../core/constants/spacing.dart';
 import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/glass_theme.dart';
+import '../../../shared/services/widget_service.dart';
 import '../../../shared/widgets/glass_bottom_sheet.dart';
+import '../../../shared/widgets/glass_page_scaffold.dart';
+import '../../auth/domain/auth_state.dart';
 import '../data/habit_repository.dart';
 import '../domain/habit.dart';
+import '../domain/habit_action_summary.dart';
 import '../domain/habit_log.dart';
 import 'add_habit_sheet.dart';
+import 'habit_action_summary_card.dart';
 import 'habit_calendar.dart';
+import 'habit_day_log_sheet.dart';
 import 'habit_form.dart';
 import 'habit_providers.dart';
+import 'habit_tab.dart';
 
 part 'habit_detail_screen.g.dart';
 
@@ -48,6 +55,42 @@ class HabitDetailController extends _$HabitDetailController {
       month: newMonth,
       logsByDate: {...current.logsByDate, ...newLogs},
     ));
+  }
+
+  /// Rewrites the log on [date] to [choice] — saved (keeping the day's log
+  /// id and note) or deleted — and updates the loaded logs in place. Also
+  /// refreshes today's routine list and the home widgets, since [date] may
+  /// be today. A failed Supabase delete is rethrown for the caller to
+  /// surface, after the cache and [state] have already dropped the log.
+  Future<void> setDayLog(DateTime date, HabitDayChoice choice) async {
+    final repository = await ref.read(habitRepositoryProvider.future);
+    final current = await future;
+    final day = _dateOnly(date);
+    final logs = {...current.logsByDate};
+    final existing = logs[day] ?? repository.getLog(habitId, day);
+    try {
+      if (choice.done) {
+        final log = HabitLog(
+          id: existing?.id ?? const Uuid().v4(),
+          userId: ref.read(currentUserIdProvider),
+          habitId: habitId,
+          date: day,
+          completedActionId: choice.actionId,
+          note: existing?.note,
+        );
+        logs[day] = log;
+        await repository.saveLog(log);
+      } else {
+        logs.remove(day);
+        await repository.deleteLog(habitId, day);
+      }
+    } finally {
+      state = AsyncData((month: current.month, logsByDate: logs));
+      ref.invalidate(habitTabControllerProvider);
+      await refreshWidgetsBestEffort(
+        () => ref.read(widgetServiceProvider.future),
+      );
+    }
   }
 
   Future<Map<DateTime, HabitLog>> _fetchMonth(DateTime month) async {
@@ -107,21 +150,19 @@ class HabitDetailScreen extends ConsumerWidget {
     final detailAsync = ref.watch(habitDetailControllerProvider(id));
 
     final habit = habitAsync.value;
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(habit?.name ?? context.l10n.habitFallbackTitle),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.edit_outlined),
-            onPressed: habit == null
-                ? null
-                : () => showGlassBottomSheet(
-                    context: context,
-                    builder: (_) => AddHabitSheet(habit: habit),
-                  ),
-          ),
-        ],
-      ),
+    return GlassPageScaffold(
+      title: Text(habit?.name ?? context.l10n.habitFallbackTitle),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.edit_outlined, color: Colors.white70),
+          onPressed: habit == null
+              ? null
+              : () => showGlassBottomSheet(
+                  context: context,
+                  builder: (_) => AddHabitSheet(habit: habit),
+                ),
+        ),
+      ],
       body: switch ((habitAsync, detailAsync)) {
         (AsyncData(value: final habit?), AsyncData(:final value)) =>
           _HabitDetailBody(habit: habit, state: value),
@@ -145,36 +186,52 @@ class _HabitDetailBody extends ConsumerWidget {
         .changeMonth(delta);
   }
 
-  void _showLogDetails(BuildContext context, HabitLog log) {
-    final actionLabel = switch (log.completedActionId) {
-      null => context.l10n.commonDone,
-      final actionId =>
-        habit.actions
-            .where((action) => action.id == actionId)
-            .map((action) => action.label)
-            .firstOrElse(actionId),
-    };
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(DateFormat.yMMMd().format(log.date)),
-        content: Text(
-          log.note == null ? actionLabel : '$actionLabel\n${log.note}',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(context.l10n.commonClose),
-          ),
-        ],
-      ),
+  /// The action [log] recorded — "Done" for a plain log, "Removed action"
+  /// when that action no longer exists on the habit.
+  String _actionLabel(BuildContext context, HabitLog log) =>
+      switch ((log.completedActionId, actionForLog(habit, log))) {
+        (_, final action?) => action.label,
+        (null, _) => context.l10n.commonDone,
+        _ => context.l10n.habitActionRemoved,
+      };
+
+  /// Opens the day sheet and applies whatever the user changed it to.
+  Future<void> _openDay(
+    BuildContext context,
+    WidgetRef ref,
+    DateTime date,
+    HabitLog? log,
+    Color color,
+  ) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final l10n = context.l10n;
+    final controller = ref.read(
+      habitDetailControllerProvider(habit.id).notifier,
     );
+    final choice = await showGlassBottomSheet<HabitDayChoice>(
+      context: context,
+      builder: (_) =>
+          HabitDayLogSheet(habit: habit, date: date, log: log, color: color),
+    );
+    if (choice == null) {
+      return;
+    }
+    try {
+      await controller.setDayLog(date, choice);
+    } catch (error) {
+      debugPrint('Updating ${habit.id} on $date failed: $error');
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.habitSyncFailed(habit.name, '$error'))),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final streaks = _computeStreaks(state.logsByDate);
     final habitAccent = Theme.of(context).extension<GlassTheme>()!.habitAccent;
+    final color = parseHexColorOr(habit.color, habitAccent);
+    final hasActions = habit.actions.isNotEmpty;
     return GestureDetector(
       onHorizontalDragEnd: (details) {
         final velocity = details.primaryVelocity ?? 0;
@@ -197,16 +254,24 @@ class _HabitDetailBody extends ConsumerWidget {
           const SizedBox(height: Spacing.sm),
           HabitMonthGrid(
             month: state.month,
-            color: parseHexColorOr(habit.color, habitAccent),
+            color: color,
             logsByDate: state.logsByDate,
-            onDayTap: (log) => _showLogDetails(context, log),
+            labelFor: hasActions ? (log) => _actionLabel(context, log) : null,
+            onDayTap: (date, log) => _openDay(context, ref, date, log, color),
           ),
+          if (hasActions) ...[
+            const SizedBox(height: Spacing.md),
+            HabitActionSummaryCard(
+              counts: countActionsInMonth(
+                habit,
+                state.logsByDate.values,
+                state.month,
+              ),
+              color: color,
+            ),
+          ],
         ],
       ),
     );
   }
-}
-
-extension<T> on Iterable<T> {
-  T firstOrElse(T fallback) => isEmpty ? fallback : first;
 }

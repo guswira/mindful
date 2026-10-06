@@ -1,28 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- RemoteViews can't apply a real backdrop blur (no BackdropFilter
-     equivalent), so this approximates frosted glass with a translucent
-     dark fill, a soft top-to-bottom sheen, and a hairline border. -->
+<!-- The in-app GlassCard, rebuilt for RemoteViews. Widgets can't blur the
+     wallpaper (no BackdropFilter equivalent), so the frost is layered the
+     way it reads in the app: the app's dark background, the teal and blue
+     BlobBackground glows bleeding through, GlassTheme.cardColor's 6% white
+     tint, a soft top sheen, and cardBorder's hairline at the card's 18dp
+     radius. Bottom → top. -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Dark base: translucent enough to tint with the wallpaper, dense
+         enough to stand in for the blur that would wash out its detail. -->
     <item>
         <shape android:shape="rectangle">
-            <solid android:color="@color/widget_glass_background" />
-            <corners android:radius="20dp" />
+            <solid android:color="@color/widget_glass_base" />
+            <corners android:radius="18dp" />
         </shape>
     </item>
+    <!-- Blob 1: teal (writeAccent), top-right, like BlobBackground. -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:type="radial"
+                android:centerX="0.95"
+                android:centerY="0.0"
+                android:gradientRadius="160dp"
+                android:startColor="@color/widget_glass_glow_teal"
+                android:endColor="#0014E6AA" />
+            <corners android:radius="18dp" />
+        </shape>
+    </item>
+    <!-- Blob 2: blue, bottom-left. -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:type="radial"
+                android:centerX="0.0"
+                android:centerY="1.0"
+                android:gradientRadius="140dp"
+                android:startColor="@color/widget_glass_glow_blue"
+                android:endColor="#00378ADD" />
+            <corners android:radius="18dp" />
+        </shape>
+    </item>
+    <!-- Frost: GlassTheme.cardColor, white at 6%. -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/widget_glass_frost" />
+            <corners android:radius="18dp" />
+        </shape>
+    </item>
+    <!-- Sheen: light catching the top edge of the glass. -->
     <item>
         <shape android:shape="rectangle">
             <gradient
                 android:type="linear"
                 android:angle="270"
                 android:startColor="@color/widget_glass_sheen"
+                android:centerColor="#00FFFFFF"
                 android:endColor="#00FFFFFF" />
-            <corners android:radius="20dp" />
+            <corners android:radius="18dp" />
         </shape>
     </item>
+    <!-- Hairline: GlassTheme.cardBorder, white at 12%. -->
     <item>
         <shape android:shape="rectangle">
-            <corners android:radius="20dp" />
-            <stroke android:width="1dp" android:color="@color/widget_glass_border" />
+            <corners android:radius="18dp" />
+            <stroke android:width="0.5dp" android:color="@color/widget_glass_border" />
         </shape>
     </item>
 </layer-list>

@@ -8,6 +8,8 @@ import 'package:mindful/core/theme/glass_theme.dart';
 import 'package:mindful/features/money/data/money_repository.dart';
 import 'package:mindful/features/money/domain/budget_settings.dart';
 import 'package:mindful/features/money/domain/budget_type.dart';
+import 'package:mindful/features/money/domain/entry_type.dart';
+import 'package:mindful/features/money/domain/money_entry.dart';
 import 'package:mindful/features/money/presentation/money_tab.dart';
 
 class _MockBox extends Mock implements Box<dynamic> {}
@@ -37,14 +39,19 @@ void main() {
     ),
   );
 
-  testWidgets('no budget set shows the "Set your budget" prompt', (
-    tester,
-  ) async {
+  testWidgets('no budget or entries yet shows both intros', (tester) async {
     await tester.pumpWidget(buildTab());
     await tester.pumpAndSettle();
 
-    expect(find.text('Set your budget to get started'), findsOneWidget);
+    expect(find.text('Set a budget'), findsOneWidget);
     expect(find.text('Set budget'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('Record your spending'), 200);
+    expect(find.text('Record spending'), findsOneWidget);
+    // The intro offers adding the first entry, so no quick add buttons.
+    expect(find.text('+ Spending'), findsNothing);
+    expect(find.text('+ Income'), findsNothing);
+    // Nothing to filter yet, so the period pills stay hidden.
+    expect(find.text('This Week'), findsNothing);
   });
 
   testWidgets(
@@ -100,5 +107,27 @@ void main() {
     expect(find.text('Daily'), findsOneWidget);
     expect(find.textContaining('of USD 1,000'), findsOneWidget);
     expect(find.textContaining('of USD 50'), findsOneWidget);
+  });
+
+  testWidgets('quick add buttons show once an entry exists', (tester) async {
+    final now = DateTime.now();
+    final entry = MoneyEntry(
+      id: 'e1',
+      userId: 'u1',
+      type: EntryType.spending,
+      amount: 12,
+      category: 'Food',
+      date: now,
+      createdAt: now,
+      updatedAt: now,
+    );
+    when(() => entriesBox.values).thenReturn([entry.toJson()]);
+
+    await tester.pumpWidget(buildTab());
+    await tester.pumpAndSettle();
+
+    expect(find.text('+ Spending'), findsOneWidget);
+    expect(find.text('+ Income'), findsOneWidget);
+    expect(find.text('Record your spending'), findsNothing);
   });
 }

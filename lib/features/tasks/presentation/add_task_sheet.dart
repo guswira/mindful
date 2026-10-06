@@ -7,17 +7,14 @@ import '../../../core/constants/spacing.dart';
 import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/glass_theme.dart';
 import '../../../shared/services/notification_service.dart';
-import '../../../shared/services/widget_service.dart';
 import '../../../shared/widgets/shake_widget.dart';
 import '../../../shared/widgets/sheet_header.dart';
 import '../../../shared/widgets/tinted_pill.dart';
 import '../../auth/domain/auth_state.dart';
-import '../data/task_repository.dart';
 import '../domain/task.dart';
 import '../domain/task_checkbox.dart';
 import 'add_task_sheet_rows.dart';
 import 'add_task_sheet_subtasks.dart';
-import 'task_providers.dart';
 import 'task_tab.dart';
 
 /// Bottom sheet to create or edit a task: name, optional subtasks, due
@@ -145,20 +142,14 @@ class _AddTaskSheetState extends ConsumerState<AddTaskSheet> {
             checkboxes: _checkboxes,
           );
 
-    final repository = await ref.read(taskRepositoryProvider.future);
-    await (existing == null
-        ? repository.create(task)
-        : repository.update(task));
+    final taskTab = ref.read(taskTabControllerProvider.notifier);
+    await taskTab.save(task, isNew: existing == null);
     await _scheduleReminder(task);
-    await refreshWidgetsBestEffort(
-      () => ref.read(widgetServiceProvider.future),
-    );
 
     if (!mounted) {
       return;
     }
     if (existing == null) {
-      final taskTab = ref.read(taskTabControllerProvider.notifier);
       final messenger = ScaffoldMessenger.of(context);
       Navigator.pop(context);
       messenger.showSnackBar(
@@ -171,7 +162,6 @@ class _AddTaskSheetState extends ConsumerState<AddTaskSheet> {
         ),
       );
     } else {
-      ref.invalidate(taskByIdProvider(task.id));
       Navigator.pop(context);
     }
   }

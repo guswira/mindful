@@ -75,10 +75,13 @@ class TaskRepository {
   /// Replaces the cache with the current state of Supabase.
   Future<List<Task>> refresh() async {
     final tasks = await _datasource.getAll();
-    await _cacheBox.clear();
-    for (final task in tasks) {
-      await _cacheBox.put(task.id, task.toJson());
-    }
+    // Put then prune rather than clear first, so a read mid-refresh never
+    // sees an empty cache.
+    await _cacheBox.putAll({for (final task in tasks) task.id: task.toJson()});
+    final fresh = {for (final task in tasks) task.id};
+    await _cacheBox.deleteAll(
+      _cacheBox.keys.where((key) => !fresh.contains(key)).toList(),
+    );
     return getAll();
   }
 

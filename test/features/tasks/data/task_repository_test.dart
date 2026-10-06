@@ -127,14 +127,21 @@ void main() {
     verify(() => datasource.delete('t1')).called(1);
   });
 
-  test('refresh replaces the cache with Supabase data', () async {
+  test('refresh replaces the cache with Supabase data, never emptying it '
+      'first', () async {
     when(() => datasource.getAll()).thenAnswer((_) async => [_task]);
+    when(() => box.putAll(any())).thenAnswer((_) async {});
+    when(() => box.deleteAll(any())).thenAnswer((_) async {});
+    when(() => box.keys).thenReturn(['t1', 'stale']);
     when(() => box.values).thenReturn([_task.toJson()]);
 
     final tasks = await repository.refresh();
 
-    verify(() => box.clear()).called(1);
-    verify(() => box.put('t1', any(that: equals(_task.toJson())))).called(1);
+    verifyNever(() => box.clear());
+    verify(
+      () => box.putAll(any(that: equals({'t1': _task.toJson()}))),
+    ).called(1);
+    verify(() => box.deleteAll(['stale'])).called(1);
     expect(tasks, [_task]);
   });
 

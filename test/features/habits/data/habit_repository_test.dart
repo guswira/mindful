@@ -34,6 +34,7 @@ void main() {
     registerFallbackValue(_habit);
     registerFallbackValue(_log);
     registerFallbackValue(DateTime(2000));
+    registerFallbackValue(<dynamic>[]);
   });
 
   late _MockBox habitsBox;
@@ -82,13 +83,32 @@ void main() {
     expect(() => repository.saveHabit(_habit), throwsException);
   });
 
-  test('deleteHabit removes the habit from cache and Supabase', () async {
+  test('deleteHabit removes the habit and its logs from Supabase, then the '
+      'cache', () async {
     when(() => datasource.deleteHabit('h1')).thenAnswer((_) async {});
+    when(() => habitLogsBox.keys).thenReturn([
+      'h1_2026-03-05T00:00:00.000',
+      'h2_2026-03-05T00:00:00.000',
+      'h10_2026-03-05T00:00:00.000',
+    ]);
+    when(() => habitLogsBox.deleteAll(any())).thenAnswer((_) async {});
 
     await repository.deleteHabit('h1');
 
-    verify(() => habitsBox.delete('h1')).called(1);
     verify(() => datasource.deleteHabit('h1')).called(1);
+    verify(() => habitsBox.delete('h1')).called(1);
+    verify(
+      () => habitLogsBox.deleteAll(['h1_2026-03-05T00:00:00.000']),
+    ).called(1);
+  });
+
+  test('deleteHabit leaves the cache untouched when Supabase fails', () async {
+    when(() => datasource.deleteHabit('h1')).thenThrow(Exception('offline'));
+
+    await expectLater(repository.deleteHabit('h1'), throwsException);
+
+    verifyNever(() => habitsBox.delete(any()));
+    verifyNever(() => habitLogsBox.deleteAll(any()));
   });
 
   test('getLog returns null when nothing is cached for that day', () {
@@ -137,16 +157,21 @@ void main() {
     ).called(1);
   });
 
-  test('refreshFromSupabase replaces the cache with Supabase data', () async {
+  test('refreshFromSupabase replaces the cache with Supabase data, never '
+      'emptying it first', () async {
     when(() => datasource.fetchHabits()).thenAnswer((_) async => [_habit]);
     when(() => datasource.fetchLogs(any())).thenAnswer((_) async => [_log]);
+    when(() => habitsBox.putAll(any())).thenAnswer((_) async {});
+    when(() => habitsBox.deleteAll(any())).thenAnswer((_) async {});
+    when(() => habitsBox.keys).thenReturn(['h1', 'stale']);
 
     await repository.refreshFromSupabase();
 
-    verify(() => habitsBox.clear()).called(1);
+    verifyNever(() => habitsBox.clear());
     verify(
-      () => habitsBox.put('h1', any(that: equals(_habit.toJson()))),
+      () => habitsBox.putAll(any(that: equals({'h1': _habit.toJson()}))),
     ).called(1);
+    verify(() => habitsBox.deleteAll(['stale'])).called(1);
     verify(
       () => habitLogsBox.put(
         'h1_2026-03-05T00:00:00.000',

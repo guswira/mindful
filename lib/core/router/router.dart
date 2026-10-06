@@ -13,12 +13,13 @@ import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/splash_screen.dart';
 import '../../features/exercise/domain/breathing_exercise.dart';
 import '../../features/exercise/presentation/breathing_session_screen.dart';
-import '../../features/exercise/presentation/exercise_tab.dart';
+import '../../features/exercise/presentation/exercise_activity_screen.dart';
 import '../../features/habits/data/habit_reminders_controller.dart';
 import '../../features/habits/presentation/habit_detail_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
 import '../../features/home/presentation/home_tab.dart';
 import '../../features/journal/presentation/journal_editor_screen.dart';
+import '../../features/journal/presentation/journal_history_screen.dart';
 import '../../features/journal/presentation/journal_tab.dart';
 import '../../features/money/presentation/money_tab.dart';
 import '../../features/plan/presentation/plan_tab.dart';
@@ -135,15 +136,14 @@ GoRouter appRouter(Ref ref) {
               ),
             ],
           ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: '/home/exercise',
-                builder: (context, state) => const ExerciseTab(),
-              ),
-            ],
-          ),
         ],
+      ),
+      // Exercise was merged into the Mindfulness tab; kept so any
+      // stale link still lands somewhere sensible.
+      GoRoute(path: '/home/exercise', redirect: (_, _) => '/home/journal'),
+      GoRoute(
+        path: '/journal/history',
+        builder: (context, state) => const JournalHistoryScreen(),
       ),
       GoRoute(
         path: '/journal/:id/edit',
@@ -154,6 +154,10 @@ GoRouter appRouter(Ref ref) {
         path: '/habits/:id',
         builder: (context, state) =>
             HabitDetailScreen(id: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: '/exercise/activity',
+        builder: (context, state) => const ExerciseActivityScreen(),
       ),
       GoRoute(
         path: '/exercise/breathing/:exercise',

@@ -58,20 +58,3 @@ const List<String> incomeCategories = [
   'Gift',
   'Other',
 ];
-
-/// The emoji shown next to each spending/income category.
-const Map<String, String> categoryEmoji = {
-  'Food': '🍔',
-  'Transport': '🚗',
-  'Shopping': '🛍',
-  'Health': '💊',
-  'Entertainment': '🎬',
-  'Bills': '📱',
-  'Education': '📚',
-  'Travel': '✈️',
-  'Other': '📦',
-  'Salary': '💼',
-  'Freelance': '💻',
-  'Investment': '📈',
-  'Gift': '🎁',
-};

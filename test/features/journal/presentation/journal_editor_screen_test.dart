@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mindful/core/theme/glass_theme.dart';
 import 'package:mindful/features/journal/data/journal_entries_controller.dart';
 import 'package:mindful/features/journal/domain/journal_entry.dart';
+import 'package:mindful/features/journal/presentation/journal_labels.dart';
 import 'package:mindful/features/journal/presentation/journal_editor_screen.dart';
 
 final _entry = JournalEntry(
@@ -36,7 +37,7 @@ void main() {
 
     expect(find.text('Today was good'), findsOneWidget);
     for (final mood in Mood.values) {
-      expect(find.text(mood.emoji), findsOneWidget);
+      expect(find.byIcon(moodIcon(mood)), findsOneWidget);
     }
   });
 
@@ -45,11 +46,7 @@ void main() {
     await tester.pump();
 
     final bodyField = tester.widget<TextField>(
-      find.widgetWithText(
-        TextField,
-        "What's on your mind...",
-        skipOffstage: false,
-      ),
+      find.widgetWithText(TextField, 'How did today go?', skipOffstage: false),
     );
     expect(bodyField.focusNode?.hasFocus, isTrue);
   });
@@ -59,7 +56,7 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.enterText(
-      find.widgetWithText(TextField, "What's on your mind..."),
+      find.widgetWithText(TextField, 'How did today go?'),
       '',
     );
     await tester.tap(find.text('Save'));

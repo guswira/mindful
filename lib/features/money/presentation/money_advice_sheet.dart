@@ -46,9 +46,22 @@ class MoneyAdviceSheet extends StatelessWidget {
           const SizedBox(height: Spacing.md),
           AdviceContent(advice: advice),
           const SizedBox(height: Spacing.md),
-          Text(
-            context.l10n.moneyAdviceDisclaimer,
-            style: TextStyle(color: glass.textMuted, fontSize: 11),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                Icons.info_outline_rounded,
+                size: 13,
+                color: glass.textMuted,
+              ),
+              const SizedBox(width: Spacing.xs),
+              Expanded(
+                child: Text(
+                  context.l10n.moneyAdviceDisclaimer,
+                  style: TextStyle(color: glass.textMuted, fontSize: 11),
+                ),
+              ),
+            ],
           ),
         ],
       ),

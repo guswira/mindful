@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 import '../../../core/l10n/l10n.dart';
 import '../domain/budget_type.dart';
 import '../domain/entry_type.dart';
@@ -35,3 +37,20 @@ String budgetTypeLabel(AppLocalizations l10n, BudgetType type) =>
       BudgetType.monthly => l10n.moneyBudgetMonthly,
       BudgetType.daily => l10n.moneyBudgetDaily,
     };
+
+/// Flat icon for a money [category]; a generic one for unknown values.
+IconData categoryIcon(String category) => switch (category) {
+  'Food' => Icons.restaurant_rounded,
+  'Transport' => Icons.directions_car_outlined,
+  'Shopping' => Icons.shopping_bag_outlined,
+  'Health' => Icons.health_and_safety_outlined,
+  'Entertainment' => Icons.movie_outlined,
+  'Bills' => Icons.receipt_long_outlined,
+  'Education' => Icons.school_outlined,
+  'Travel' => Icons.flight_outlined,
+  'Salary' => Icons.work_outline_rounded,
+  'Freelance' => Icons.laptop_mac_outlined,
+  'Investment' => Icons.trending_up_rounded,
+  'Gift' => Icons.card_giftcard_outlined,
+  _ => Icons.category_outlined,
+};

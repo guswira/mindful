@@ -36,6 +36,10 @@ const String _moneyAdviceRetryActionId = '_money_advice_retry';
 /// Monochrome app-icon silhouette (res/drawable-*/ic_stat_notification.png).
 const String _smallIcon = 'ic_stat_notification';
 
+/// Tints the small icon (and app name) in the shade — the app icon's sun
+/// color, res/values/ic_launcher_colors.xml `notification_accent`.
+const Color _accentColor = Color(0xFFD9824F);
+
 /// The full-colour app icon, shown inside the expanded notification.
 const AndroidBitmap<Object> _largeIcon = DrawableResourceAndroidBitmap(
   'ic_notification_large',
@@ -214,6 +218,7 @@ class NotificationService {
           'budget_reminders',
           l10n.notifBudgetChannelName,
           largeIcon: _largeIcon,
+          color: _accentColor,
           channelDescription: l10n.notifBudgetChannelDescription,
         ),
         iOS: const DarwinNotificationDetails(),
@@ -254,6 +259,7 @@ class NotificationService {
           'debug_test',
           l10n.notifDebugChannelName,
           largeIcon: _largeIcon,
+          color: _accentColor,
           channelDescription: l10n.notifDebugChannelDescription,
           importance: Importance.max,
           priority: Priority.high,
@@ -335,6 +341,7 @@ class NotificationService {
           'journal_reminders',
           currentL10n.notifJournalChannelName,
           largeIcon: _largeIcon,
+          color: _accentColor,
           channelDescription: currentL10n.notifJournalChannelDescription,
         ),
         iOS: const DarwinNotificationDetails(),
@@ -472,6 +479,7 @@ class NotificationService {
         'habit_reminders',
         currentL10n.notifHabitChannelName,
         largeIcon: _largeIcon,
+        color: _accentColor,
         channelDescription: currentL10n.notifHabitChannelDescription,
         importance: Importance.max,
         priority: Priority.high,
@@ -553,11 +561,25 @@ class NotificationService {
     await _taskIdAllocator.release(taskId);
   }
 
+  /// Cancels every task and habit reminder and frees all their ids — on
+  /// sign-out, so the next account on this device never gets the previous
+  /// one's reminders. Journal and budget reminders are device settings, not
+  /// account data, and stay scheduled.
+  Future<void> forgetAllItemReminders() async {
+    for (final taskId in _taskIdAllocator.itemIds) {
+      await forgetTaskReminder(taskId);
+    }
+    for (final habitId in _habitIdAllocator.itemIds) {
+      await forgetHabitReminder(habitId);
+    }
+  }
+
   NotificationDetails _taskNotificationDetails() => NotificationDetails(
     android: AndroidNotificationDetails(
       'task_reminders',
       currentL10n.notifTaskChannelName,
       largeIcon: _largeIcon,
+      color: _accentColor,
       channelDescription: currentL10n.notifTaskChannelDescription,
       importance: Importance.max,
       priority: Priority.high,
@@ -653,6 +675,7 @@ class NotificationService {
         channelId,
         channelName,
         largeIcon: _largeIcon,
+        color: _accentColor,
         channelDescription: channelDescription,
         ongoing: true,
         autoCancel: false,
@@ -684,6 +707,7 @@ class NotificationService {
         channelId,
         channelName,
         largeIcon: _largeIcon,
+        color: _accentColor,
         channelDescription: channelDescription,
         importance: Importance.max,
         priority: Priority.high,

@@ -100,13 +100,13 @@ flutter:
     - assets/ambience/
 
 flutter_launcher_icons:
-  android: true
+  # Android's launcher icons (legacy, round, adaptive + themed monochrome)
+  # come hand-made from the "Ripple Horizon" icon pack and are committed
+  # under android/app/src/main/res/mipmap-* — don't let this overwrite them.
+  android: false
   ios: true
+  # Full-bleed 1024px art (#1E3B3F background); iOS rounds the corners.
   image_path: "assets/icon/app_icon.png"
-  min_sdk_android: 21
-  # The source art is already a filled circle on a navy gradient matching
-  # the app's own background (Color(0xFF0A1628)), so a plain (non-adaptive)
-  # icon reproduces it faithfully without a separate foreground layer.
   remove_alpha_ios: true
 
   # To add assets to your application, add an assets section, like this:

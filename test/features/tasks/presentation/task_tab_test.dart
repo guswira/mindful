@@ -72,6 +72,7 @@ class _NoHabitsController extends HabitTabController {
 
 Widget _buildTab() => ProviderScope(
   overrides: [
+    archivedHabitsProvider.overrideWith((ref) async => const []),
     taskTabControllerProvider.overrideWith(_FakeTaskTabController.new),
     habitTabControllerProvider.overrideWith(_NoHabitsController.new),
   ],

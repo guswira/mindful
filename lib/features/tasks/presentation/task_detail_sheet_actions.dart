@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/l10n/l10n.dart';
-import '../../../shared/services/notification_service.dart';
-import '../../../shared/services/widget_service.dart';
-import '../data/task_repository.dart';
 import '../domain/task.dart';
+import 'task_tab.dart';
 
 /// What the caller should do once [TaskDetailSheet] closes — returned as
 /// the sheet's pop result since the follow-up sheet needs to open from the
@@ -103,30 +101,8 @@ Future<void> _confirmDelete(
     return;
   }
 
-  final repository = await ref.read(taskRepositoryProvider.future);
-  await forgetTaskReminder(ref, task.id);
-  await repository.delete(task.id);
-  await refreshWidgetsBestEffort(() => ref.read(widgetServiceProvider.future));
+  await ref.read(taskTabControllerProvider.notifier).delete(task.id);
   if (context.mounted) {
     Navigator.pop(context);
   }
-}
-
-/// Cancels [taskId]'s scheduled reminder, if any, keeping its notification
-/// id reserved — used by "Mark as done" in [TaskDetailSheet], since the
-/// task still exists and could get a reminder again later.
-Future<void> cancelTaskReminder(WidgetRef ref, String taskId) async {
-  final notificationService = await ref.read(
-    notificationServiceProvider.future,
-  );
-  await notificationService.cancelTaskReminder(taskId);
-}
-
-/// Cancels [taskId]'s scheduled reminder and frees its notification id for
-/// reuse — used by "Delete", which removes the task itself.
-Future<void> forgetTaskReminder(WidgetRef ref, String taskId) async {
-  final notificationService = await ref.read(
-    notificationServiceProvider.future,
-  );
-  await notificationService.forgetTaskReminder(taskId);
 }

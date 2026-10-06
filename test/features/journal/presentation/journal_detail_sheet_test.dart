@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mindful/core/theme/app_theme.dart';
 import 'package:mindful/features/journal/data/journal_entries_controller.dart';
 import 'package:mindful/features/journal/domain/journal_entry.dart';
+import 'package:mindful/features/journal/presentation/journal_labels.dart';
 import 'package:mindful/features/journal/presentation/journal_detail_sheet.dart';
 
 final _entry = JournalEntry(
@@ -39,7 +40,7 @@ void main() {
     expect(find.text('January 15, 2026'), findsOneWidget);
     expect(find.text('A good day'), findsOneWidget);
     expect(find.text('Today was good'), findsOneWidget);
-    expect(find.text(Mood.happy.emoji), findsOneWidget);
+    expect(find.byIcon(moodIcon(Mood.happy)), findsOneWidget);
   });
 
   testWidgets('the overflow menu offers Edit and Delete', (tester) async {

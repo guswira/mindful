@@ -31,10 +31,17 @@ class WidgetProviderNames {
       '$_androidPackage.MindfulSmallWidget';
 
   // iOS widgets are looked up by the `kind` given to their WidgetKit
-  // `StaticConfiguration`/`AppIntentConfiguration`, not a class name.
+  // `StaticConfiguration`/`AppIntentConfiguration`, not a class name — must
+  // match ios/MindfulWidgets/*.swift.
   static const String iOSMediumWidget = 'MindfulMediumWidget';
   static const String iOSSmallWidget = 'MindfulSmallWidget';
-  static const String iOSLockScreenWidget = 'MindfulLockScreen';
+  static const String iOSLockScreenWidget = 'MindfulLockScreenWidget';
+  static const String iOSRoutineLockScreenWidget =
+      'MindfulRoutineLockScreenWidget';
+
+  /// Shared with the widget extension (both targets' entitlements). Without
+  /// it every iOS `saveWidgetData` call fails.
+  static const String iOSAppGroupId = 'group.com.guswira.mindful.widget';
 }
 
 /// Collects today's home/lock screen widget data and pushes it to the
@@ -85,6 +92,9 @@ class WidgetService {
       HomeWidget.saveWidgetData<String>('tasks', tasksJson),
       HomeWidget.saveWidgetData<int>('habitsDone', habitsDone),
       HomeWidget.saveWidgetData<int>('habitsTotal', habitsTotal),
+      // Lets the iOS lock screen widget tell yesterday's completion states
+      // apart after midnight, before the app has refreshed them.
+      HomeWidget.saveWidgetData<String>('habitsDate', widgetDateKey(today)),
       HomeWidget.saveWidgetData<int>('tasksDone', tasksDone),
       HomeWidget.saveWidgetData<int>('tasksTotal', tasksTotal),
       HomeWidget.saveWidgetData<int>('journalStreak', _journalStreak(today)),
@@ -116,12 +126,14 @@ class WidgetService {
         qualifiedAndroidName: WidgetProviderNames.smallAndroidQualified,
       );
     } else if (Platform.isIOS) {
-      await HomeWidget.updateWidget(
-        iOSName: WidgetProviderNames.iOSMediumWidget,
-      );
-      await HomeWidget.updateWidget(
-        iOSName: WidgetProviderNames.iOSSmallWidget,
-      );
+      for (final kind in const [
+        WidgetProviderNames.iOSMediumWidget,
+        WidgetProviderNames.iOSSmallWidget,
+        WidgetProviderNames.iOSLockScreenWidget,
+        WidgetProviderNames.iOSRoutineLockScreenWidget,
+      ]) {
+        await HomeWidget.updateWidget(iOSName: kind);
+      }
     }
   }
 
@@ -144,12 +156,36 @@ class WidgetService {
         ('labelChooseHabits', l10n.widgetChooseHabits),
         ('labelHabitsCount', l10n.widgetDoneCount(habitsDone, habitsTotal)),
         ('labelTasksCount', l10n.widgetDoneCount(tasksDone, tasksTotal)),
-        ('labelHabitsRemaining', l10n.widgetRemaining(habitsTotal - habitsDone)),
+        (
+          'labelHabitsRemaining',
+          l10n.widgetRemaining(habitsTotal - habitsDone),
+        ),
         ('labelTasksRemaining', l10n.widgetRemaining(tasksTotal - tasksDone)),
+        ('labelRoutineDone', l10n.widgetRoutineDone),
+        ('labelRoutinesAllDone', l10n.widgetRoutinesAllDone),
+        ('labelNoRoutines', l10n.widgetNoRoutines),
+        ('labelDoneCountFormat', _doneCountTemplate(l10n.widgetDoneCount)),
+        ('labelRemainingFormat', _remainingTemplate(l10n.widgetRemaining)),
       ])
         HomeWidget.saveWidgetData<String>(key, value),
     ];
   }
+
+  // Stand-in numbers no real count reaches, swapped for tokens below.
+  static const int _doneToken = 987654301;
+  static const int _totalToken = 987654302;
+
+  /// [message] with `{done}`/`{total}` in place of the numbers, so the iOS
+  /// widgets can redraw counts that a lock screen tap has changed since.
+  static String _doneCountTemplate(String Function(int, int) message) =>
+      message(_doneToken, _totalToken)
+          .replaceAll('$_doneToken', '{done}')
+          .replaceAll('$_totalToken', '{total}');
+
+  /// [message] with `{count}` in place of the number — see
+  /// [_doneCountTemplate].
+  static String _remainingTemplate(String Function(int) message) =>
+      message(_doneToken).replaceAll('$_doneToken', '{count}');
 
   Map<String, dynamic> _habitJson(Habit habit, HabitLog? todayLog) => {
     'id': habit.id,
@@ -159,7 +195,18 @@ class WidgetService {
     'actions': [for (final action in habit.actions) action.label],
     'isCompleted': todayLog != null,
     'completedAction': todayLog?.completedActionId,
+    // iOS widget intents only know actions by label (see `actions`).
+    'completedActionLabel': _actionLabel(habit, todayLog?.completedActionId),
   };
+
+  static String? _actionLabel(Habit habit, String? actionId) {
+    for (final action in habit.actions) {
+      if (action.id == actionId) {
+        return action.label;
+      }
+    }
+    return null;
+  }
 
   /// The small widget's chosen list ('tasks' or 'habits'), defaulting to
   /// 'tasks' until the user picks one from its chooser.
@@ -192,6 +239,13 @@ class WidgetService {
   static DateTime _dateOnly(DateTime date) =>
       DateTime(date.year, date.month, date.day);
 }
+
+/// `yyyy-MM-dd` in ASCII digits whatever the app locale — the format the
+/// iOS widget extension writes and compares.
+String widgetDateKey(DateTime date) =>
+    '${date.year.toString().padLeft(4, '0')}-'
+    '${date.month.toString().padLeft(2, '0')}-'
+    '${date.day.toString().padLeft(2, '0')}';
 
 /// The app-wide [WidgetService], backed by the journal/habit/task
 /// repositories.

@@ -6,17 +6,16 @@ import 'package:intl/intl.dart';
 import '../../../core/constants/spacing.dart';
 import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/glass_theme.dart';
-import '../../../shared/services/widget_service.dart';
 import '../../../shared/widgets/glass_bottom_sheet.dart';
 import '../../../shared/widgets/tinted_pill.dart';
 import '../../habits/presentation/add_habit_sheet.dart';
-import '../data/task_repository.dart';
 import '../domain/task.dart';
 import '../domain/task_checkbox.dart';
 import 'add_task_sheet.dart';
 import 'task_detail_sheet_actions.dart';
 import 'task_detail_sheet_checklist.dart';
 import 'task_providers.dart';
+import 'task_tab.dart';
 
 export 'task_detail_sheet_actions.dart'
     show TaskDetailOutcome, TaskDetailResult;
@@ -66,18 +65,13 @@ class TaskDetailSheet extends ConsumerWidget {
             existing,
       ],
     );
-    final repository = await ref.read(taskRepositoryProvider.future);
-    await repository.update(updated);
-    ref.invalidate(taskByIdProvider(task.id));
+    await ref
+        .read(taskTabControllerProvider.notifier)
+        .save(updated, isNew: false);
   }
 
   Future<void> _complete(BuildContext context, WidgetRef ref, Task task) async {
-    final repository = await ref.read(taskRepositoryProvider.future);
-    await cancelTaskReminder(ref, task.id);
-    await repository.markComplete(task.id);
-    await refreshWidgetsBestEffort(
-      () => ref.read(widgetServiceProvider.future),
-    );
+    await ref.read(taskTabControllerProvider.notifier).complete(task.id);
     HapticFeedback.lightImpact();
     if (context.mounted) {
       Navigator.pop(context);

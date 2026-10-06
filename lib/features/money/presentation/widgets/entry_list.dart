@@ -7,9 +7,11 @@ import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/glass_theme.dart';
 import '../../../../shared/widgets/glass_bottom_sheet.dart';
 import '../../../../shared/widgets/glass_card.dart';
+import '../../../../shared/widgets/intro_card.dart';
 import '../../../../shared/widgets/unsynced_badge.dart';
 import '../../domain/entry_type.dart';
 import '../../domain/money_entry.dart';
+import '../add_money_sheet.dart';
 import '../money_detail_sheet.dart';
 import '../money_labels.dart';
 import '../money_providers.dart';
@@ -60,9 +62,22 @@ class _EntryListState extends ConsumerState<EntryList> {
   @override
   Widget build(BuildContext context) {
     final entriesAsync = ref.watch(moneyEntriesProvider(_rangeFor(_period)));
+    final allEntries = ref.watch(moneyEntriesProvider(null)).valueOrNull;
+    // Nothing recorded at all — the intro replaces the period pills and an
+    // empty list, which would have nothing to filter.
+    if (allEntries != null && allEntries.isEmpty) {
+      return const _SpendingIntro();
+    }
+    final noSpending =
+        allEntries != null &&
+        !allEntries.any((entry) => entry.type == EntryType.spending);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (noSpending) ...[
+          const _SpendingIntro(),
+          const SizedBox(height: Spacing.md),
+        ],
         _PeriodPillRow(
           selected: _period,
           labelFor: (period) => _labelFor(context.l10n, period),
@@ -75,6 +90,28 @@ class _EntryListState extends ConsumerState<EntryList> {
           _ => const Center(child: CircularProgressIndicator()),
         },
       ],
+    );
+  }
+}
+
+/// Shown until the first spending entry is recorded.
+class _SpendingIntro extends StatelessWidget {
+  const _SpendingIntro();
+
+  @override
+  Widget build(BuildContext context) {
+    final glass = Theme.of(context).extension<GlassTheme>()!;
+    final l10n = context.l10n;
+    return IntroCard(
+      icon: Icons.account_balance_wallet_outlined,
+      color: glass.moneyAccent,
+      title: l10n.moneySpendingIntroTitle,
+      body: l10n.moneySpendingIntroBody,
+      actionLabel: l10n.moneySpendingIntroAction,
+      onAction: () => showGlassBottomSheet(
+        context: context,
+        builder: (_) => const AddMoneySheet(),
+      ),
     );
   }
 }
@@ -225,10 +262,7 @@ class _EntryCard extends StatelessWidget {
                 color: color.withValues(alpha: 0.18),
                 shape: BoxShape.circle,
               ),
-              child: Text(
-                categoryEmoji[entry.category] ?? '',
-                style: const TextStyle(fontSize: 16),
-              ),
+              child: Icon(categoryIcon(entry.category), size: 18, color: color),
             ),
             const SizedBox(width: Spacing.sm),
             Expanded(

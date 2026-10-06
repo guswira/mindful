@@ -17,7 +17,6 @@ const _routines = RoutineRecap(
   perfectDays: 20,
   longestStreak: 12,
   bestHabitName: 'Read',
-  bestHabitIcon: '📚',
   bestHabitCheckIns: 28,
 );
 

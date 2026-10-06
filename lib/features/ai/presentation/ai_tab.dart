@@ -120,9 +120,9 @@ class _AITabState extends ConsumerState<AITab> {
       Navigator.of(context, rootNavigator: true).pop();
     }
     if (analysis == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.aiErrorNotFood)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(context.l10n.aiErrorNotFood)));
       return;
     }
     _showResult(analysis);

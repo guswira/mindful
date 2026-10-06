@@ -29,7 +29,7 @@ void main() {
 
     expect(find.text('Experimental AI Features'), findsOneWidget);
     expect(find.text('Food Calorie Checker'), findsOneWidget);
-    expect(find.text('📷  Check food calories'), findsOneWidget);
+    expect(find.text('Check food calories'), findsOneWidget);
   });
 
   testWidgets('no scans yet shows the empty-state message', (tester) async {

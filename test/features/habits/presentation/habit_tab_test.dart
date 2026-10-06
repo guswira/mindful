@@ -9,6 +9,7 @@ import 'package:mindful/features/habits/domain/habit.dart';
 import 'package:mindful/features/habits/domain/habit_action.dart';
 import 'package:mindful/features/habits/domain/habit_log.dart';
 import 'package:mindful/features/habits/presentation/habit_tab.dart';
+import 'package:mindful/features/habits/presentation/routine_pill.dart';
 import 'package:mindful/features/tasks/domain/task.dart';
 
 final _habitWithActions = Habit(
@@ -41,7 +42,11 @@ class _FakeHabitTabController extends HabitTabController {
   ];
 
   @override
-  Future<void> logAction(Habit habit, HabitAction? action) async {
+  Future<void> logAction(
+    Habit habit,
+    HabitAction? action, {
+    DateTime? on,
+  }) async {
     final current = state.value ?? const <HabitTabItem>[];
     state = AsyncData([
       for (final item in current)
@@ -62,7 +67,7 @@ class _FakeHabitTabController extends HabitTabController {
   }
 
   @override
-  Future<void> unlog(Habit habit) async {
+  Future<void> unlog(Habit habit, {DateTime? on}) async {
     final current = state.value ?? const <HabitTabItem>[];
     state = AsyncData([
       for (final item in current)
@@ -79,10 +84,11 @@ class _NoTasksController extends TaskTabController {
   Future<List<Task>> build() async => const [];
 }
 
-Widget _buildTab() => ProviderScope(
+Widget _buildTab({List<Habit> archived = const []}) => ProviderScope(
   overrides: [
     habitTabControllerProvider.overrideWith(_FakeHabitTabController.new),
     taskTabControllerProvider.overrideWith(_NoTasksController.new),
+    archivedHabitsProvider.overrideWith((ref) async => archived),
   ],
   child: MaterialApp(
     theme: ThemeData(extensions: [GlassTheme.dark()]),
@@ -99,20 +105,20 @@ void main() {
 
     expect(find.text('Workout'), findsOneWidget);
     expect(find.text('Meditate'), findsOneWidget);
-    expect(find.widgetWithText(ChoiceChip, 'Gym'), findsOneWidget);
-    expect(find.widgetWithText(ChoiceChip, 'Run'), findsOneWidget);
-    expect(find.widgetWithText(ChoiceChip, 'Done'), findsOneWidget);
+    expect(find.widgetWithText(RoutinePill, 'Gym'), findsOneWidget);
+    expect(find.widgetWithText(RoutinePill, 'Run'), findsOneWidget);
+    expect(find.widgetWithText(RoutinePill, 'Done'), findsOneWidget);
   });
 
   testWidgets('tapping an action marks it done', (tester) async {
     await tester.pumpWidget(_buildTab());
     await tester.pumpAndSettle();
 
-    await tester.tap(find.widgetWithText(ChoiceChip, 'Gym'));
+    await tester.tap(find.widgetWithText(RoutinePill, 'Gym'));
     await tester.pumpAndSettle();
 
-    final chip = tester.widget<ChoiceChip>(
-      find.widgetWithText(ChoiceChip, 'Gym'),
+    final chip = tester.widget<RoutinePill>(
+      find.widgetWithText(RoutinePill, 'Gym'),
     );
     expect(chip.selected, isTrue);
   });
@@ -123,11 +129,11 @@ void main() {
     await tester.pumpWidget(_buildTab());
     await tester.pumpAndSettle();
 
-    await tester.tap(find.widgetWithText(ChoiceChip, 'Done'));
+    await tester.tap(find.widgetWithText(RoutinePill, 'Done'));
     await tester.pumpAndSettle();
 
-    final chip = tester.widget<ChoiceChip>(
-      find.widgetWithText(ChoiceChip, 'Done'),
+    final chip = tester.widget<RoutinePill>(
+      find.widgetWithText(RoutinePill, 'Done'),
     );
     expect(chip.selected, isTrue);
   });
@@ -136,13 +142,13 @@ void main() {
     await tester.pumpWidget(_buildTab());
     await tester.pumpAndSettle();
 
-    await tester.tap(find.widgetWithText(ChoiceChip, 'Done'));
+    await tester.tap(find.widgetWithText(RoutinePill, 'Done'));
     await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(ChoiceChip, 'Done'));
+    await tester.tap(find.widgetWithText(RoutinePill, 'Done'));
     await tester.pumpAndSettle();
 
-    final chip = tester.widget<ChoiceChip>(
-      find.widgetWithText(ChoiceChip, 'Done'),
+    final chip = tester.widget<RoutinePill>(
+      find.widgetWithText(RoutinePill, 'Done'),
     );
     expect(chip.selected, isFalse);
   });
@@ -151,13 +157,13 @@ void main() {
     await tester.pumpWidget(_buildTab());
     await tester.pumpAndSettle();
 
-    await tester.tap(find.widgetWithText(ChoiceChip, 'Gym'));
+    await tester.tap(find.widgetWithText(RoutinePill, 'Gym'));
     await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(ChoiceChip, 'Gym'));
+    await tester.tap(find.widgetWithText(RoutinePill, 'Gym'));
     await tester.pumpAndSettle();
 
-    final gym = tester.widget<ChoiceChip>(
-      find.widgetWithText(ChoiceChip, 'Gym'),
+    final gym = tester.widget<RoutinePill>(
+      find.widgetWithText(RoutinePill, 'Gym'),
     );
     expect(gym.selected, isFalse);
   });
@@ -166,16 +172,16 @@ void main() {
     await tester.pumpWidget(_buildTab());
     await tester.pumpAndSettle();
 
-    await tester.tap(find.widgetWithText(ChoiceChip, 'Gym'));
+    await tester.tap(find.widgetWithText(RoutinePill, 'Gym'));
     await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(ChoiceChip, 'Run'));
+    await tester.tap(find.widgetWithText(RoutinePill, 'Run'));
     await tester.pumpAndSettle();
 
-    final gym = tester.widget<ChoiceChip>(
-      find.widgetWithText(ChoiceChip, 'Gym'),
+    final gym = tester.widget<RoutinePill>(
+      find.widgetWithText(RoutinePill, 'Gym'),
     );
-    final run = tester.widget<ChoiceChip>(
-      find.widgetWithText(ChoiceChip, 'Run'),
+    final run = tester.widget<RoutinePill>(
+      find.widgetWithText(RoutinePill, 'Run'),
     );
     expect(gym.selected, isFalse);
     expect(run.selected, isTrue);
@@ -193,5 +199,21 @@ void main() {
     expect(find.text('Edit'), findsOneWidget);
     expect(find.text('Archive'), findsOneWidget);
     expect(find.text('Delete'), findsOneWidget);
+  });
+
+  testWidgets('no "Archived" link while nothing is archived', (tester) async {
+    await tester.pumpWidget(_buildTab());
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Archived'), findsNothing);
+  });
+
+  testWidgets('"Archived" link counts archived habits', (tester) async {
+    await tester.pumpWidget(
+      _buildTab(archived: [_habitNoActions.copyWith(archived: true)]),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Archived (1)'), findsOneWidget);
   });
 }

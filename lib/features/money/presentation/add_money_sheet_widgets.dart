@@ -6,7 +6,6 @@ import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/glass_theme.dart';
 import '../../../shared/widgets/shake_widget.dart';
 import '../domain/entry_type.dart';
-import '../domain/money_entry.dart';
 import 'amount_input_formatter.dart';
 import 'amount_keypad.dart';
 import 'money_labels.dart';
@@ -77,13 +76,24 @@ class _TypePill extends StatelessWidget {
             width: 0.5,
           ),
         ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: active ? color : glass.textSecondary,
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-          ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              isSpending ? Icons.payments_outlined : Icons.savings_outlined,
+              size: 18,
+              color: active ? color : glass.textSecondary,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                color: active ? color : glass.textSecondary,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -193,9 +203,12 @@ class CategoryWrap extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    categoryEmoji[category] ?? '',
-                    style: const TextStyle(fontSize: 14),
+                  Icon(
+                    categoryIcon(category),
+                    size: 16,
+                    color: category == selected
+                        ? activeColor
+                        : glass.textSecondary,
                   ),
                   const SizedBox(width: Spacing.xs),
                   Text(

@@ -57,9 +57,9 @@ class MindfulSmallWidget : AppWidgetProvider() {
       val prefs = HomeWidgetPlugin.getData(context)
       views.setTextViewText(R.id.choose_title, prefs.getString("labelShowMe", null) ?: "Show me:")
       views.setTextViewText(
-          R.id.choose_tasks, prefs.getString("labelChooseTasks", null) ?: "✅ Todo")
+          R.id.choose_tasks, prefs.getString("labelChooseTasks", null) ?: "Todo")
       views.setTextViewText(
-          R.id.choose_habits, prefs.getString("labelChooseHabits", null) ?: "💪 Routines")
+          R.id.choose_habits, prefs.getString("labelChooseHabits", null) ?: "Routines")
       views.setOnClickPendingIntent(
           R.id.choose_tasks,
           chooseModePendingIntent(context, "tasks", REQUEST_CODE_CHOOSE_TASKS),

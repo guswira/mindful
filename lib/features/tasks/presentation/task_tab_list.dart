@@ -7,6 +7,7 @@ import '../../../core/theme/glass_theme.dart';
 import '../../../shared/widgets/glass_bottom_sheet.dart';
 import '../../../shared/widgets/glass_card.dart';
 import '../../../shared/widgets/group_label.dart';
+import '../../../shared/widgets/intro_card.dart';
 import '../../habits/presentation/add_habit_sheet.dart';
 import '../domain/task.dart';
 import 'add_task_sheet.dart';
@@ -85,21 +86,28 @@ class TaskSections extends StatelessWidget {
   }
 }
 
+/// Shown instead of the task groups until the first task exists.
 class _EmptyTasks extends StatelessWidget {
   const _EmptyTasks();
 
   @override
   Widget build(BuildContext context) {
     final glass = Theme.of(context).extension<GlassTheme>()!;
+    final l10n = context.l10n;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        GroupLabel(context.l10n.taskTabTitle),
+        GroupLabel(l10n.taskTabTitle),
         const SizedBox(height: Spacing.sm),
-        GlassCard(
-          child: Text(
-            context.l10n.taskEmptyList,
-            style: TextStyle(color: glass.textMuted, fontSize: 14),
+        IntroCard(
+          icon: Icons.checklist_rounded,
+          color: glass.taskAccent,
+          title: l10n.taskIntroTitle,
+          body: l10n.taskIntroBody,
+          actionLabel: l10n.taskIntroAction,
+          onAction: () => showGlassBottomSheet(
+            context: context,
+            builder: (_) => const AddTaskSheet(),
           ),
         ),
       ],

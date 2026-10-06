@@ -6,7 +6,7 @@ part of 'task_tab.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$taskTabControllerHash() => r'54319de9b9999b404f2c1cc83ac78267319ff064';
+String _$taskTabControllerHash() => r'7f79890e13455a047108adba7b1b387e9c81ff0e';
 
 /// Loads all tasks and marks completions, refreshed from Supabase in the
 /// background. See SPEC.md Task Manager.

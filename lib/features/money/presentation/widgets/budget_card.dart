@@ -7,6 +7,7 @@ import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/glass_theme.dart';
 import '../../../../shared/widgets/dashed_border_container.dart';
 import '../../../../shared/widgets/glass_card.dart';
+import '../../../../shared/widgets/intro_card.dart';
 import '../../../../shared/widgets/glass_icon_button.dart';
 import '../../../../shared/widgets/tinted_pill.dart';
 import '../../data/money_repository.dart';
@@ -20,7 +21,7 @@ import '../money_providers.dart';
 
 /// Monthly and daily budget gauges side by side — a ghost "set budget"
 /// card stands in for whichever one hasn't been configured yet, and a
-/// single full-width prompt replaces both if neither has. See SPEC.md
+/// single IntroCard explaining budgets replaces both if neither has. See SPEC.md
 /// Money Flow Feature Money Flow Tab, Budget Card.
 class BudgetCard extends ConsumerWidget {
   const BudgetCard({super.key});
@@ -40,9 +41,14 @@ class BudgetCard extends ConsumerWidget {
     );
 
     if (monthlySet == null && dailySet == null) {
-      return GlassCard(
-        strong: true,
-        child: _EmptyBudgetRow(onSetBudget: openSettings),
+      final glass = Theme.of(context).extension<GlassTheme>()!;
+      return IntroCard(
+        icon: Icons.track_changes_rounded,
+        color: glass.moneyAccent,
+        title: l10n.moneyBudgetIntroTitle,
+        body: l10n.moneyBudgetIntroBody,
+        actionLabel: l10n.moneySetBudget,
+        onAction: openSettings,
       );
     }
 
@@ -77,33 +83,6 @@ class BudgetCard extends ConsumerWidget {
                   pillLabel: l10n.moneySetDaily,
                   onTap: openSettings,
                 ),
-        ),
-      ],
-    );
-  }
-}
-
-class _EmptyBudgetRow extends StatelessWidget {
-  const _EmptyBudgetRow({required this.onSetBudget});
-
-  final VoidCallback onSetBudget;
-
-  @override
-  Widget build(BuildContext context) {
-    final glass = Theme.of(context).extension<GlassTheme>()!;
-    return Row(
-      children: [
-        Expanded(
-          child: Text(
-            context.l10n.moneyEmptyBudgetPrompt,
-            style: TextStyle(color: glass.textSecondary, fontSize: 14),
-          ),
-        ),
-        const SizedBox(width: Spacing.sm),
-        TintedPill(
-          label: context.l10n.moneySetBudget,
-          color: glass.moneyAccent,
-          onTap: onSetBudget,
         ),
       ],
     );

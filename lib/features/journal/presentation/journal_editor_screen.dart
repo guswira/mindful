@@ -7,12 +7,13 @@ import 'package:intl/intl.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/l10n/l10n.dart';
-import '../../../core/theme/glass_theme.dart';
-import '../../../shared/widgets/blob_background.dart';
+import '../../../shared/widgets/glass_page_scaffold.dart';
 import '../data/journal_entries_controller.dart';
 import '../data/journal_photo_mime_type.dart';
 import '../domain/journal_entry.dart';
 import 'journal_editor_widgets.dart';
+import 'journal_labels.dart';
+import 'journal_type_selector.dart';
 import 'journal_photo_strip.dart';
 
 /// Full-page editor for an existing journal entry — the body autofocuses
@@ -37,6 +38,7 @@ class _JournalEditorScreenState extends ConsumerState<JournalEditorScreen> {
   final _picker = ImagePicker();
 
   Mood? _mood;
+  JournalType _type = JournalType.review;
   List<String> _existingPhotoIds = const [];
   final List<XFile> _newPhotos = [];
   bool _seeded = false;
@@ -62,6 +64,7 @@ class _JournalEditorScreenState extends ConsumerState<JournalEditorScreen> {
     _titleController.text = entry.title ?? '';
     _bodyController.text = entry.body;
     _mood = entry.mood;
+    _type = entry.type;
     _existingPhotoIds = entry.photoUrls;
     _seeded = true;
   }
@@ -73,107 +76,99 @@ class _JournalEditorScreenState extends ConsumerState<JournalEditorScreen> {
       _seedFrom(entry);
     }
     final photoCount = _existingPhotoIds.length + _newPhotos.length;
-    final glass = Theme.of(context).extension<GlassTheme>()!;
 
-    return Scaffold(
-      resizeToAvoidBottomInset: true,
-      backgroundColor: glass.background,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: const BackButton(color: Colors.white70),
-        title: Text(
-          entry == null ? '' : DateFormat('MMMM d').format(entry.date),
-          style: const TextStyle(color: Colors.white, fontSize: 16),
-        ),
-        actions: [
-          if (entry != null)
-            IconButton(
-              icon: const Icon(Icons.more_horiz, color: Colors.white70),
-              onPressed: () => _showMoreOptions(entry),
-            ),
-        ],
-      ),
-      body: BlobBackground(
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    TextField(
-                      controller: _titleController,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      decoration: InputDecoration(
-                        hintText: context.l10n.journalTitleHint,
-                        hintStyle: const TextStyle(color: Colors.white24),
-                        border: InputBorder.none,
-                      ),
+    return GlassPageScaffold(
+      title: Text(entry == null ? '' : DateFormat('MMMM d').format(entry.date)),
+      actions: [
+        if (entry != null)
+          IconButton(
+            icon: const Icon(Icons.more_horiz, color: Colors.white70),
+            onPressed: () => _showMoreOptions(entry),
+          ),
+      ],
+      body: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 8),
+                  JournalTypeSelector(
+                    selected: _type,
+                    onChanged: (type) => setState(() => _type = type),
+                  ),
+                  TextField(
+                    controller: _titleController,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
                     ),
-                    const SizedBox(height: 8),
-                    if (_existingPhotoIds.isNotEmpty || _newPhotos.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: JournalPhotoStrip(
-                          existingPhotoIds: _existingPhotoIds,
-                          newPhotos: _newPhotos,
-                          onRemoveExisting: (id) => setState(
-                            () => _existingPhotoIds = [
-                              for (final photoId in _existingPhotoIds)
-                                if (photoId != id) photoId,
-                            ],
-                          ),
-                          onRemoveNew: (photo) =>
-                              setState(() => _newPhotos.remove(photo)),
-                          onAdd: _pickPhoto,
+                    decoration: InputDecoration(
+                      hintText: context.l10n.journalTitleHint,
+                      hintStyle: const TextStyle(color: Colors.white24),
+                      border: InputBorder.none,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  if (_existingPhotoIds.isNotEmpty || _newPhotos.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: JournalPhotoStrip(
+                        existingPhotoIds: _existingPhotoIds,
+                        newPhotos: _newPhotos,
+                        onRemoveExisting: (id) => setState(
+                          () => _existingPhotoIds = [
+                            for (final photoId in _existingPhotoIds)
+                              if (photoId != id) photoId,
+                          ],
                         ),
+                        onRemoveNew: (photo) =>
+                            setState(() => _newPhotos.remove(photo)),
+                        onAdd: _pickPhoto,
                       ),
-                    TextField(
-                      controller: _bodyController,
-                      focusNode: _bodyFocus,
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 16,
-                        height: 1.6,
-                      ),
-                      decoration: InputDecoration(
-                        hintText: context.l10n.journalBodyHint,
-                        hintStyle: const TextStyle(color: Colors.white24),
-                        border: InputBorder.none,
-                      ),
-                      maxLines: null,
-                      minLines: 10,
-                      keyboardType: TextInputType.multiline,
-                      textInputAction: TextInputAction.newline,
                     ),
-                    const SizedBox(height: 200),
-                  ],
-                ),
+                  TextField(
+                    controller: _bodyController,
+                    focusNode: _bodyFocus,
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 16,
+                      height: 1.6,
+                    ),
+                    decoration: InputDecoration(
+                      hintText: context.l10n.journalTypeHint(_type),
+                      hintStyle: const TextStyle(color: Colors.white24),
+                      border: InputBorder.none,
+                    ),
+                    maxLines: null,
+                    minLines: 10,
+                    keyboardType: TextInputType.multiline,
+                    textInputAction: TextInputAction.newline,
+                  ),
+                  const SizedBox(height: 200),
+                ],
               ),
             ),
-            JournalMoodBar(
-              selected: _mood,
-              onChanged: (mood) => setState(() => _mood = mood),
-            ),
-            JournalActionBar(
-              photoCount: photoCount,
-              saving: _saving,
-              onPickPhoto: _pickPhoto,
-              onSave: () => _save(entry),
-            ),
-            SizedBox(
-              height: MediaQuery.of(context).viewInsets.bottom == 0
-                  ? MediaQuery.of(context).padding.bottom
-                  : 0,
-            ),
-          ],
-        ),
+          ),
+          JournalMoodBar(
+            selected: _mood,
+            onChanged: (mood) => setState(() => _mood = mood),
+          ),
+          JournalActionBar(
+            photoCount: photoCount,
+            saving: _saving,
+            onPickPhoto: _pickPhoto,
+            onSave: () => _save(entry),
+          ),
+          SizedBox(
+            height: MediaQuery.of(context).viewInsets.bottom == 0
+                ? MediaQuery.of(context).padding.bottom
+                : 0,
+          ),
+        ],
       ),
     );
   }
@@ -277,6 +272,7 @@ class _JournalEditorScreenState extends ConsumerState<JournalEditorScreen> {
         body: body,
         title: title.isEmpty ? null : title,
         mood: _mood,
+        type: _type,
         photoUrls: photoUrls,
       ),
     );

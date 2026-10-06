@@ -6,9 +6,9 @@ import '../../core/l10n/l10n.dart';
 import '../../core/theme/glass_theme.dart';
 import 'floating_nav_write_button.dart';
 
-/// Island nav bar (6 tabs: Home, Tasks & Routines, Journal, Money, AI,
-/// Exercise) +
-/// write button, replacing the standard bottom nav bar entirely. See SPEC.md Floating Island Nav Bar.
+/// Island nav bar (5 tabs: Home, Tasks & Routines, Mindfulness,
+/// Money, AI) + write button, replacing the standard bottom nav bar
+/// entirely. See SPEC.md Floating Island Nav Bar.
 class FloatingNavBar extends StatelessWidget {
   const FloatingNavBar({
     required this.currentIndex,
@@ -110,15 +110,6 @@ class _NavIsland extends StatelessWidget {
                   active: currentIndex == 4,
                   activeColor: glass.aiAccent,
                   onTap: () => onTabChanged(4),
-                ),
-              ),
-              Expanded(
-                child: _NavItem(
-                  icon: Icons.self_improvement_outlined,
-                  label: l10n.navExercise,
-                  active: currentIndex == 5,
-                  activeColor: glass.exerciseAccent,
-                  onTap: () => onTabChanged(5),
                 ),
               ),
             ],

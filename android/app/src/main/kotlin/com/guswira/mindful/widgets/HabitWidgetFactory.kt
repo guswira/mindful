@@ -6,6 +6,7 @@ import android.net.Uri
 import android.view.View
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
+import androidx.core.content.ContextCompat
 import com.guswira.mindful.R
 import org.json.JSONArray
 
@@ -14,6 +15,7 @@ private data class HabitEntry(
     val id: String,
     val name: String,
     val icon: String,
+    val color: String?,
     val actions: List<String>,
     val isCompleted: Boolean,
 )
@@ -48,7 +50,12 @@ class HabitWidgetFactory(
   override fun getViewAt(position: Int): RemoteViews {
     val habit = habits[position]
     val views = RemoteViews(context.packageName, R.layout.widget_habit_row)
-    views.setTextViewText(R.id.habit_icon, habit.icon)
+    // The user's color for this routine tints its icon, pills and check.
+    val color =
+        routineColor(habit.color, ContextCompat.getColor(context, R.color.widget_habit_accent))
+    showRoutineIcon(views, habit, color)
+    views.setInt(R.id.habit_icon_background, "setColorFilter", color)
+    views.setInt(R.id.habit_check, "setColorFilter", color)
     views.setTextViewText(R.id.habit_name, habit.name)
     views.removeAllViews(R.id.action_buttons)
 
@@ -84,6 +91,8 @@ class HabitWidgetFactory(
       for (action in habit.actions.take(2)) {
         val pill = RemoteViews(context.packageName, R.layout.widget_action_pill)
         pill.setTextViewText(R.id.pill_label, action)
+        pill.setTextColor(R.id.pill_label, color)
+        pill.setInt(R.id.pill_background, "setColorFilter", color)
         // A view inside a RemoteViewsService-backed list can't use
         // setOnClickPendingIntent (silently ignored) — only a fill-in
         // intent merged into the ListView's PendingIntentTemplate, set
@@ -100,6 +109,21 @@ class HabitWidgetFactory(
       }
     }
     return views
+  }
+
+  /** The preset's flat icon in [color], else the emoji itself. */
+  private fun showRoutineIcon(views: RemoteViews, habit: HabitEntry, color: Int) {
+    val iconRes = routineIconRes(habit.icon)
+    if (iconRes == null) {
+      views.setViewVisibility(R.id.habit_icon_image, View.GONE)
+      views.setViewVisibility(R.id.habit_icon, View.VISIBLE)
+      views.setTextViewText(R.id.habit_icon, habit.icon)
+      return
+    }
+    views.setViewVisibility(R.id.habit_icon, View.GONE)
+    views.setViewVisibility(R.id.habit_icon_image, View.VISIBLE)
+    views.setImageViewResource(R.id.habit_icon_image, iconRes)
+    views.setInt(R.id.habit_icon_image, "setColorFilter", color)
   }
 
   override fun getLoadingView(): RemoteViews? = null
@@ -125,6 +149,7 @@ class HabitWidgetFactory(
           id = obj.getString("id"),
           name = obj.getString("name"),
           icon = obj.getString("icon"),
+          color = obj.optString("color").ifEmpty { null },
           actions = actions,
           isCompleted = obj.optBoolean("isCompleted", false),
       )

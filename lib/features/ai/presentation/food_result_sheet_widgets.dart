@@ -15,10 +15,22 @@ class ConfidenceBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final glass = Theme.of(context).extension<GlassTheme>()!;
     final l10n = context.l10n;
-    final (color, label) = switch (confidence) {
-      'high' => (glass.moneyAccent, l10n.aiConfidenceHigh),
-      'low' => (glass.moneySpending, l10n.aiConfidenceLow),
-      _ => (glass.accentAmber, l10n.aiConfidenceMedium),
+    final (color, icon, label) = switch (confidence) {
+      'high' => (
+        glass.moneyAccent,
+        Icons.check_circle_outline_rounded,
+        l10n.aiConfidenceHigh,
+      ),
+      'low' => (
+        glass.moneySpending,
+        Icons.error_outline_rounded,
+        l10n.aiConfidenceLow,
+      ),
+      _ => (
+        glass.accentAmber,
+        Icons.help_outline_rounded,
+        l10n.aiConfidenceMedium,
+      ),
     };
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -27,13 +39,20 @@ class ConfidenceBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: color.withValues(alpha: 0.3), width: 0.5),
       ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: color,
-          fontSize: 11,
-          fontWeight: FontWeight.w600,
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: color),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
       ),
     );
   }

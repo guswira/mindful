@@ -65,6 +65,7 @@ class FoodCheckerCard extends StatelessWidget {
                 width: double.infinity,
                 child: TintedPill(
                   label: l10n.aiCheckFoodCalories,
+                  icon: Icons.photo_camera_outlined,
                   color: glass.aiAccent,
                   onTap: onOpenCamera,
                 ),

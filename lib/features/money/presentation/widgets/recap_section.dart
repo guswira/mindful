@@ -100,7 +100,6 @@ class RecapSection extends ConsumerWidget {
               const SizedBox(height: Spacing.sm),
               Text(
                 l10n.moneyRecapTopCategory(
-                  categoryEmoji[spendingByCategory.first.$1] ?? '',
                   categoryLabel(l10n, spendingByCategory.first.$1),
                 ),
                 style: TextStyle(color: glass.textMuted, fontSize: 12),
@@ -112,6 +111,7 @@ class RecapSection extends ConsumerWidget {
                 alignment: Alignment.centerLeft,
                 child: TintedPill(
                   label: l10n.moneyAdviceButton,
+                  icon: Icons.auto_awesome_outlined,
                   color: glass.aiAccent,
                   onTap: () => requestMoneyAdvice(context),
                 ),
@@ -185,10 +185,7 @@ class _CategoryBarRow extends StatelessWidget {
       children: [
         Row(
           children: [
-            Text(
-              categoryEmoji[category] ?? '',
-              style: const TextStyle(fontSize: 13),
-            ),
+            Icon(categoryIcon(category), size: 14, color: glass.textSecondary),
             const SizedBox(width: Spacing.xs),
             Expanded(
               child: Text(

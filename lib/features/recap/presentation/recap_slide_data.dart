@@ -8,7 +8,7 @@ typedef RecapStat = ({String value, String label});
 class RecapSlideData {
   const RecapSlideData({
     required this.accent,
-    required this.emoji,
+    required this.icon,
     required this.title,
     required this.heroLabel,
     required this.motivation,
@@ -20,7 +20,9 @@ class RecapSlideData {
   });
 
   final Color accent;
-  final String emoji;
+
+  /// Flat icon on the slide's accent-tinted badge.
+  final IconData icon;
   final String title;
 
   /// Counted up from 0 on entry and shown via [formatHero]. When null,

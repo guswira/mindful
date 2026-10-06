@@ -89,7 +89,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aiResultDisclaimer =>
-      '⚠ AI estimates may vary based on portion size, preparation method, and ingredients.';
+      'AI estimates may vary based on portion size, preparation method, and ingredients.';
 
   @override
   String get aiLowConfidenceWarning =>
@@ -117,13 +117,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aiMacroFiber => 'Fiber';
 
   @override
-  String get aiConfidenceHigh => '✓ Confident';
+  String get aiConfidenceHigh => 'Confident';
 
   @override
-  String get aiConfidenceLow => '! Uncertain';
+  String get aiConfidenceLow => 'Uncertain';
 
   @override
-  String get aiConfidenceMedium => '~ Estimate';
+  String get aiConfidenceMedium => 'Estimate';
 
   @override
   String get aiCaloriesUnit => 'calories';
@@ -168,7 +168,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Point camera at a meal, snack or ingredient';
 
   @override
-  String get aiCheckFoodCalories => '📷  Check food calories';
+  String get aiCheckFoodCalories => 'Check food calories';
 
   @override
   String get aiChooseFromGallery => 'Choose from gallery';
@@ -241,13 +241,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'A manually triggered test notification, from Settings';
 
   @override
-  String get notifJournalMorningTitle => 'Good morning ☀️';
+  String get notifJournalMorningTitle => 'Good morning';
 
   @override
   String get notifJournalMorningBody => 'Time to write in your journal';
 
   @override
-  String get notifJournalEveningTitle => 'How was your day? 🌙';
+  String get notifJournalEveningTitle => 'How was your day?';
 
   @override
   String get notifJournalEveningBody => 'Write it down';
@@ -325,10 +325,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get widgetLabelShowMe => 'Show me:';
 
   @override
-  String get widgetChooseTasks => '✅ Todo';
+  String get widgetChooseTasks => 'Todo';
 
   @override
-  String get widgetChooseHabits => '💪 Routines';
+  String get widgetChooseHabits => 'Routines';
+
+  @override
+  String get widgetRoutineDone => 'Done';
+
+  @override
+  String get widgetRoutinesAllDone => 'All done';
+
+  @override
+  String get widgetNoRoutines => 'No routines yet';
 
   @override
   String widgetDoneCount(int done, int total) {
@@ -418,7 +427,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get habitNameHint => 'Habit name...';
 
   @override
-  String get habitEmptyList => 'No habits yet';
+  String get habitIntroTitle => 'Routines repeat every day';
+
+  @override
+  String get habitIntroBody =>
+      'Pick a small habit — a walk, water, reading — and check it off daily. Mindful tracks your streak and can remind you on the days you choose.';
+
+  @override
+  String get habitIntroAction => 'Add routine';
 
   @override
   String habitSyncFailed(String name, String error) {
@@ -430,7 +446,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String habitArchiveConfirmBody(String name) {
-    return '\"$name\" will be hidden from today\'s list.';
+    return '\"$name\" will be hidden from today\'s list. Find it under Archived in Routines.';
   }
 
   @override
@@ -473,13 +489,64 @@ class AppLocalizationsEn extends AppLocalizations {
   String get habitConvertSave => 'Save routine';
 
   @override
+  String habitArchivedLink(int count) {
+    return 'Archived ($count)';
+  }
+
+  @override
+  String get habitArchivedTitle => 'Archived routines';
+
+  @override
+  String get habitArchivedHint =>
+      'Hidden from today\'s list, history kept. Restore one to track it again.';
+
+  @override
+  String get habitArchivedEmpty => 'No archived routines';
+
+  @override
+  String get habitRestore => 'Restore';
+
+  @override
+  String get habitActionSummaryTitle => 'Actions this month';
+
+  @override
+  String habitActionSummaryCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count times',
+      one: '1 time',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get habitDayLoggedAs => 'Logged as';
+
+  @override
+  String get habitDayChangeTo => 'Change to';
+
+  @override
+  String get habitDayNotDone => 'Not done';
+
+  @override
+  String get habitActionRemoved => 'Removed action';
+
+  @override
   String get taskGroupUpcoming => 'Upcoming';
 
   @override
   String get taskGroupNoDate => 'No date';
 
   @override
-  String get taskEmptyList => 'No tasks yet';
+  String get taskIntroTitle => 'Clear your head, one task at a time';
+
+  @override
+  String get taskIntroBody =>
+      'Jot down what needs doing, give it a due date or a reminder, and break bigger jobs into subtasks. Today\'s tasks also show on your home screen.';
+
+  @override
+  String get taskIntroAction => 'Add task';
 
   @override
   String taskCompletedSection(int count) {
@@ -585,12 +652,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeSectionTodayTasks => 'Today\'s Todo';
 
   @override
-  String get homeSectionHabits => 'Routines';
-
-  @override
-  String get homeSectionJournal => 'Journal';
-
-  @override
   String get homeJournalPlanTitle => 'Write today\'s plan';
 
   @override
@@ -600,7 +661,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeJournalPlanAction => 'Start';
 
   @override
-  String get homeJournalReflectTitle => 'Review what happened';
+  String get homeJournalReflectTitle => 'Review today';
 
   @override
   String get homeJournalReflectSubtitle =>
@@ -610,24 +671,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeJournalReflectAction => 'Reflect';
 
   @override
-  String homeHabitsProgress(int done, int total) {
-    return '$done/$total';
-  }
-
-  @override
-  String get homeStreakJournalLabel => 'Journal streak';
-
-  @override
-  String get homeStreakHabitsLabel => 'Habits today';
-
-  @override
-  String get homeStreakTasksLabel => 'Tasks due';
-
-  @override
   String get homeTasksEmpty => 'What needs to be done today?';
-
-  @override
-  String get homeAddTask => 'Add task';
 
   @override
   String homeSyncFailed(String name, String error) {
@@ -635,13 +679,80 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get homeHabitsAllDone => 'All done! 🎉';
+  String get homeHabitsAllDone => 'All done!';
 
   @override
-  String get homeHabitsEmpty => 'Build your first habit';
+  String get homeBeMindfulIntro =>
+      'Mindful helps you slow down and live with intention — routines, tasks, money, food, breathing and journaling, all in one calm place. Try them one by one:';
 
   @override
-  String get homeHabitsStart => 'Start';
+  String get homeBuildFirstRoutine => 'Build your first routine';
+
+  @override
+  String get homeBuildFirstRoutineSubtitle =>
+      'Small daily habits add up over time.';
+
+  @override
+  String get homeBuildFirstRoutineAction => 'Build';
+
+  @override
+  String get homeMindfulSpendingTitle => 'Mindful with spending';
+
+  @override
+  String get homeMindfulSpendingSubtitle =>
+      'Record your spending to see where your money goes.';
+
+  @override
+  String get homeMindfulSpendingAction => 'Record';
+
+  @override
+  String get homeMindfulTaskTitle => 'Mindful with your time';
+
+  @override
+  String get homeMindfulTaskSubtitle =>
+      'Add a task so nothing slips through today.';
+
+  @override
+  String get homeMindfulTaskAction => 'Add';
+
+  @override
+  String get homeMindfulFoodTitle => 'Mindful with the food you eat';
+
+  @override
+  String get homeMindfulFoodSubtitle =>
+      'Snap a meal and let AI estimate its nutrition.';
+
+  @override
+  String get homeMindfulFoodAction => 'Scan';
+
+  @override
+  String get homeMindfulBreathingStepTitle => 'Mindful breathing';
+
+  @override
+  String get homeMindfulBreathingStepSubtitle =>
+      'Take a minute for a guided breath.';
+
+  @override
+  String get homeMindfulBreathingStepAction => 'Breathe';
+
+  @override
+  String get homeMindfulJournalTitle => 'Mindful with your thoughts';
+
+  @override
+  String get homeMindfulJournalSubtitle => 'Write your first journal entry.';
+
+  @override
+  String get homeMindfulJournalAction => 'Write';
+
+  @override
+  String get homeMindfulBudgetTitle => 'Mindful with your budget';
+
+  @override
+  String get homeMindfulBudgetSubtitle =>
+      'Set a budget and see what\'s left each day.';
+
+  @override
+  String get homeMindfulBudgetAction => 'Set';
 
   @override
   String get homeUnsyncedBanner => 'Some changes haven\'t synced yet';
@@ -652,14 +763,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String authSignInFailed(String error) {
     return 'Sign in failed: $error';
-  }
-
-  @override
-  String get journalTabTitle => 'Journal';
-
-  @override
-  String journalLoadFailed(String error) {
-    return 'Couldn\'t load entries: $error';
   }
 
   @override
@@ -676,9 +779,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get journalTitleHint => 'Title...';
-
-  @override
-  String get journalBodyHint => 'What\'s on your mind...';
 
   @override
   String get journalDeleteEntry => 'Delete entry';
@@ -712,10 +812,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get moneySaveChanges => 'Save changes';
 
   @override
-  String get moneyTypeToggleSpending => '💸 Spending';
+  String get moneyTypeToggleSpending => 'Spending';
 
   @override
-  String get moneyTypeToggleIncome => '💰 Income';
+  String get moneyTypeToggleIncome => 'Income';
 
   @override
   String get moneyKeypadBackspace => 'Delete';
@@ -768,7 +868,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get moneyAddIncome => '+ Income';
 
   @override
-  String get moneyEmptyBudgetPrompt => 'Set your budget to get started';
+  String get moneyBudgetIntroTitle => 'Set a budget';
+
+  @override
+  String get moneyBudgetIntroBody =>
+      'Choose a monthly or daily amount. Mindful shows what\'s left as you spend, so you know where you stand before the month runs out.';
 
   @override
   String get moneySetBudget => 'Set budget';
@@ -805,6 +909,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get moneyNoEntriesInPeriod => 'No entries in this period';
 
   @override
+  String get moneySpendingIntroTitle => 'Record your spending';
+
+  @override
+  String get moneySpendingIntroBody =>
+      'Log what you spend and earn in a few taps. Mindful groups it by day and category, so you can see where your money really goes.';
+
+  @override
+  String get moneySpendingIntroAction => 'Record spending';
+
+  @override
   String get moneyRecapTitle => 'Recap';
 
   @override
@@ -814,8 +928,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get moneyRecapNet => 'Net';
 
   @override
-  String moneyRecapTopCategory(String emoji, String category) {
-    return 'Top category: $emoji $category';
+  String moneyRecapTopCategory(String category) {
+    return 'Top category: $category';
   }
 
   @override
@@ -1035,7 +1149,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navTasks => 'Tasks & Routines';
 
   @override
-  String get navJournal => 'Journal';
+  String get navJournal => 'Mindfulness';
 
   @override
   String get navMoney => 'Money';
@@ -1062,7 +1176,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sharedUnsyncedLabel => 'Not synced yet';
 
   @override
-  String get moneyAdviceButton => '✨ AI advice';
+  String get moneyAdviceButton => 'AI advice';
 
   @override
   String get moneyAdviceTitle => 'AI spending advice';
@@ -1089,7 +1203,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get moneyAdviceDisclaimer =>
-      '⚠ Experimental AI advice. Use as a guide only, not financial advice.';
+      'Experimental AI advice. Use as a guide only, not financial advice.';
 
   @override
   String moneyAdvicePrompt(String data) {
@@ -1371,16 +1485,18 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get navExercise => 'Exercise';
+  String get exerciseHistory => 'History';
 
   @override
-  String get exerciseTitle => 'Exercise';
+  String exerciseShowAll(int count) {
+    return 'Show all ($count more)';
+  }
 
   @override
-  String get exerciseSubtitle => 'Slow down and breathe with intention.';
+  String get exerciseShowLess => 'Show less';
 
   @override
-  String get exerciseBreathingSection => 'Breathing';
+  String get exerciseBreathingSection => 'Breathing exercise';
 
   @override
   String get exerciseActivitySection => 'Activity';
@@ -1619,4 +1735,126 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get exerciseCalendarNext => 'Next month';
+
+  @override
+  String get moodHappy => 'Happy';
+
+  @override
+  String get moodNeutral => 'Neutral';
+
+  @override
+  String get moodSad => 'Sad';
+
+  @override
+  String get moodAnxious => 'Anxious';
+
+  @override
+  String get moodExcited => 'Excited';
+
+  @override
+  String get journalTypeReview => 'Today review';
+
+  @override
+  String get journalTypePlan => 'Plan';
+
+  @override
+  String get journalTypeGratitude => 'Gratitude';
+
+  @override
+  String get journalTypeReviewHint => 'How did today go?';
+
+  @override
+  String get journalTypePlanHint => 'What do you want to get done today?';
+
+  @override
+  String get journalTypeGratitudeHint => 'What are you grateful for today?';
+
+  @override
+  String get mindfulnessTabTitle => 'Mindfulness';
+
+  @override
+  String get journalTodaySection => 'Today\'s journal';
+
+  @override
+  String get journalWrite => 'Write';
+
+  @override
+  String get journalHistoryTitle => 'Journal history';
+
+  @override
+  String get journalHistoryMonthEmpty => 'No entries this month';
+
+  @override
+  String journalHistoryDayEmpty(String date) {
+    return '$date: no entries';
+  }
+
+  @override
+  String get exerciseActivityTitle => 'Exercise activity';
+
+  @override
+  String get homeAddTodo => 'Add todo';
+
+  @override
+  String get homeAddRoutine => 'Add routine';
+
+  @override
+  String get homeSectionMindfulness => 'Mindfulness';
+
+  @override
+  String get homeMindfulBreathingTitle => 'Breathing exercise';
+
+  @override
+  String get homeMindfulBreathingSubtitle => 'Slow down with a guided breath.';
+
+  @override
+  String get homeMindfulBreathingAction => 'Breathe';
+
+  @override
+  String get breathingPickerTitle => 'Choose a breathing exercise';
+
+  @override
+  String get loginTagline => 'Your day, a little more mindful.';
+
+  @override
+  String get loginFeatureJournalTitle => 'Daily journal';
+
+  @override
+  String get loginFeatureJournalBody =>
+      'Plan your morning, review your evening, and note what you\'re grateful for.';
+
+  @override
+  String get loginFeatureRoutinesTitle => 'Tasks & routines';
+
+  @override
+  String get loginFeatureRoutinesBody =>
+      'Build routines that stick and tick off tasks, with reminders that keep you on track.';
+
+  @override
+  String get loginFeatureMoneyTitle => 'Mindful spending';
+
+  @override
+  String get loginFeatureMoneyBody =>
+      'Record spending and income, and see how much of your budget is left.';
+
+  @override
+  String get loginFeatureBreathingTitle => 'Guided breathing';
+
+  @override
+  String get loginFeatureBreathingBody =>
+      'Slow down with breathing exercises, a voice guide, and calming ambience.';
+
+  @override
+  String get loginFeatureAiTitle => 'AI food check';
+
+  @override
+  String get loginFeatureAiBody =>
+      'Snap a photo of your meal for a quick nutrition estimate.';
+
+  @override
+  String get loginFeatureRecapTitle => 'Monthly recap';
+
+  @override
+  String get loginFeatureRecapBody =>
+      'Look back on your month, story-style, and keep the streak going.';
 }

@@ -65,6 +65,7 @@ class JournalRepository {
     required String body,
     String? title,
     Mood? mood,
+    JournalType type = JournalType.review,
     List<String> photoUrls = const [],
     DateTime? date,
   }) async {
@@ -76,6 +77,7 @@ class JournalRepository {
       title: title,
       body: body,
       mood: mood,
+      type: type,
       photoUrls: photoUrls,
       createdAt: now,
       updatedAt: now,

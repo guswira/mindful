@@ -96,7 +96,6 @@ RoutineRecap _routines(
     perfectDays: perfectDays,
     longestStreak: longestStreak,
     bestHabitName: best?.name,
-    bestHabitIcon: best?.icon,
     bestHabitCheckIns: bestCount,
   );
 }

@@ -12,6 +12,18 @@ Supabase primary database. Google Drive optional backup.
 - Exchange Google ID token for Supabase session
 - Only Supabase session maintained after login
 - Drive OAuth in Settings only, never at login
+- Sign-out (AuthNotifier.signOut) drops everything that belonged to the
+  account, so the next account on the device starts clean:
+    task/habit reminders cancelled + their ids freed
+      (NotificationService.forgetAllItemReminders)
+    every account Hive box cleared (AuthNotifier.userDataBoxNames: journal,
+      habits, habit logs, tasks, money entries, budget settings, breathing
+      sessions) — add any new account box there
+    SyncService recreated, so its 5-minute throttle can't skip the next
+      account's first sync
+    home/lock screen widgets redrawn from the empty cache
+  Device preferences (language, background, breathing sounds, journal
+  reminder toggles) are kept. Unsynced pending writes are dropped.
 
 ---
 
@@ -110,7 +122,7 @@ Text:
 
 Each feature has its own accent color used for:
 active nav icon, active nav dot, pill buttons, progress bars,
-checkbox fills, streak numbers, card highlights.
+checkbox fills, card highlights.
 
   homeAccent:    Color(0xFFFFFFFF)   white
   taskAccent:    Color(0xFF60A5FA)   blue
@@ -130,14 +142,20 @@ params: child, strong:bool, borderRadius:double, padding:EdgeInsets, margin:Edge
 Wrap all main screens in RepaintBoundary for Android BackdropFilter compatibility.
 Uses BackdropFilter.grouped (also GlassIconButton, ExperimentalBanner);
 BlobBackground wraps its content in a BackdropGroup, so all glass on a
-screen shares one backdrop read. Separate per-card BackdropFilters made
-cards flash see-through while scrolling on Android.
+screen shares one backdrop read (cheaper than one read per card).
+Android overscroll: MaterialApp.scrollBehavior = GlassScrollBehavior
+(shared/widgets/glass_scroll_behavior.dart) — glow instead of the M3
+stretch. The stretch wraps the scroll view in a filtered Transform while
+pulling past an edge, and BackdropFilters inside it can't see the
+background, so every card went see-through until release.
 
 ### TintedPill widget (shared/widgets/tinted_pill.dart)
-params: label:String, color:Color, onTap:VoidCallback?
+params: label:String, color:Color, onTap:VoidCallback?, icon:IconData?
 background: color.withOpacity(0.18)
 border: 0.5px color.withOpacity(0.25)
 text: color, 13px, weight 600, borderRadius 20
+optional leading icon 16px in color; label + icon centered when the pill
+  is given a tight width (full-width primary actions)
 
 ---
 
@@ -176,6 +194,23 @@ Retry on next open or connectivity restored.
 Subtle banner on HomeScreen if pending > 24h:
   "Some data hasn't synced. Tap to retry." → triggers manual sync.
 
+### Keeping screens in sync after a write
+Every screen showing a feature's data watches that feature's one list
+provider, and every write goes through (or invalidates) it — so adding,
+editing, completing or deleting anything updates Home, its tab, its
+detail view and the home/lock screen widgets at once:
+  tasks:    TaskTabController.save / complete / delete — reloads the list
+            + taskByIdProvider(id) + widgets. Sheets never write to
+            TaskRepository directly.
+  routines: HabitTabController (log/unlog/archive/restore/delete) or
+            ref.invalidate(habitTabControllerProvider) after a save;
+            habitByIdProvider and archivedHabitsProvider watch it, so the
+            detail screen follows.
+  money:    invalidate moneyEntriesProvider (whole family) +
+            remainingBudgetProvider; budget saves also monthly/daily
+            budget + budgetCurrency.
+  journal:  JournalEntries controller (create/update/delete).
+
 ### Backup — Drive (optional)
 Monthly auto + on-demand from Settings.
 JSON export to /AppFolder/backups/YYYY-MM/
@@ -191,10 +226,13 @@ create table journal_entries (
   user_id uuid references auth.users not null,
   date date not null, title text, body text not null,
   mood text, photo_urls text[],
+  type text not null default 'review',  -- 'review' | 'plan' | 'gratitude'
   sync_status text default 'synced',
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
+-- existing projects: alter table journal_entries
+--   add column type text not null default 'review';
 create table habits (
   id uuid primary key default gen_random_uuid(),
   user_id uuid references auth.users not null,
@@ -245,7 +283,8 @@ SplashScreen: if !hasSeenOnboarding → /onboarding
 3. "Build habits" — calendar with dots
 4. "To-do lists" — checklist with tick animations
 
-Custom pagination indicator: 4 icons 📈 📓 📅 ✅
+Custom pagination indicator: 4 flat icons (trending_up, menu_book,
+  calendar_month, checklist)
 Active: scale 1.4x + writeAccent underline dot pill
 Interpolated from AnimationController.value for fluid mid-swipe feel.
 
@@ -284,8 +323,31 @@ SplashScreen flow:
 2. check Supabase session → valid → /home/today
 3. else → /login
 
-LoginScreen:
-  "Sign in with Google" button only, deep blue background matching onboarding.
+LoginScreen (BlobBackground + RepaintBoundary):
+  top-right LoginLanguageButton (auth/presentation/widgets/): glass pill
+    Icons.language + the language on screen ("English" / "Bahasa Indonesia"); tap →
+    the same language sheet as Settings (shared/widgets/language_picker.dart
+    — pickAppLanguage), switches + persists instantly
+  "Mindful" title + tagline, then LoginFeatureCarousel
+  (auth/presentation/widgets/) — a swipeable feature tour, one slide per
+  feature in its tab accent, each a flat outlined Material icon (no
+  emoji — they render inconsistently across platforms):
+    journal menu_book_outlined, tasks & routines checklist_rounded,
+    money account_balance_wallet_outlined, breathing air_rounded,
+    AI food check restaurant_outlined, monthly recap
+    calendar_month_outlined
+    slide (LoginFeatureSlide): 48px icon in the accent, on an
+      accent-tinted 104px badge that breathes (idle controller
+      2400ms, repeat reverse) inside an orbit ring with 3 accent dots
+      (CustomPainter), title + body; badge/title/body parallax, shrink and
+      fade with the PageController's page mid-swipe
+    page indicator: dots, active 20px wide in the current slide's accent
+    auto-advances every 4s (wraps to the first), paused while dragging,
+    countdown restarts after a swipe
+    MediaQuery.disableAnimations → no idle motion, no auto-advance
+  "Sign in with Google" button full width at the bottom (only sign-in
+  option) — a full-width TintedPill (writeAccent, login icon) like every
+  other primary action; a small writeAccent spinner while signing in.
   Flow: google_sign_in → get idToken → supabase.auth.signInWithIdToken
   Drive NOT connected at login.
 
@@ -307,45 +369,85 @@ TOP BAR (not in a card):
       onTap → context.push('/settings')
       NO settings in bottom nav
 
-STREAK ROW (3 equal flex GlassCards in Row, borderRadius 14, padding 12):
-  card 1: journal streak number (writeAccent/teal), "Journal streak" label
-  card 2: "X/Y" habits (habitAccent/purple), "Habits today" label
-  card 3: tasks due count (taskAccent/blue), "Tasks due" label
-  all show 0 / "0/0" / 0 in empty state
+BE MINDFUL SECTION (BeMindfulSection — be_mindful_section.dart), above
+  Today's Todo — a step-by-step tour of every feature for new users:
+  no title — starts with a short intro to the app (13px textSecondary,
+    line height 1.5)
+  GlassCard of PromptRows (0.5px white7 dividers) — the next 2 steps not
+    tried yet, in this order; a step disappears once tried and the next
+    one takes its place:
+    1. eco_outlined habitAccent "Build your first routine" [Build] → AddHabitSheet
+         done: any (non-archived) routine
+    2. account_balance_wallet_outlined moneyAccent "Mindful with spending" [Record] → AddMoneySheet
+         (Spending) — done: any spending entry (income doesn't count)
+    3. checklist_rounded taskAccent "Mindful with your time" [Add] → AddTaskSheet
+         done: any task
+    4. restaurant_outlined aiAccent "Mindful with the food you eat" [Scan] → /home/ai
+         done: any food scan (recentScansProvider)
+    5. air_rounded exerciseAccent "Mindful breathing" [Breathe] →
+         pickBreathingExercise (BreathingPickerSheet → session)
+         done: any breathing session
+    6. menu_book_outlined journalAccent "Mindful with your thoughts" [Write] →
+         AddJournalSheet — done: any journal entry
+    7. track_changes_rounded moneyAccent "Mindful with your budget" [Set] →
+         BudgetSettingsSheet — done: a monthly or daily budget > 0
+  Ordering is pure (home/domain/be_mindful_steps.dart —
+  beMindfulProgress): a step still loading holds back the ones after it
+  (no rows jumping around); a step whose data failed to load (e.g. food
+  scans offline — Supabase only) is skipped. Nothing is persisted —
+  "tried" is read from the data itself. The whole section (with its 24px
+  gap) is hidden once every step is done.
 
-TODAY'S TASKS SECTION:
-  header: "Today's tasks" 16px white90 + "view all" 13px white35 → /home/tasks
-  GlassCard:
-    empty: dashed-border container "What needs to be done today?" white25
-    with data: up to 3 task rows (checkbox + name + due chip)
-    bottom row: + glass icon button left + TintedPill("Add task", taskAccent) right
-    "Add task" tap → AddTaskSheet bottom sheet
+TODAY'S TODO SECTION (TodayTodoCard — today_todo_card.dart):
+  header: "Today's Todo" 16px white90 + "view all" 13px white35 → /home/tasks
+  one GlassCard, tasks first then routines:
+    up to 3 incomplete tasks due today/overdue (TodayTaskRow: checkbox
+      taskAccent + name + due chip; tap → TaskDetailSheet)
+    0.5px white7 divider (only when both halves have rows)
+    today's routines not logged yet (TodayRoutineRow: icon, name, action
+      pills / "Done"). The icon is always in the routine's own color; the
+      pills are plain glass (RoutinePill,
+      habits/presentation/routine_pill.dart). Tap a pill → log it, and the
+      row leaves the card.
+    Done items (completed tasks, logged routines) are never shown on Home —
+      only on the Tasks & Routines tab, where they can be undone.
+    empty: dashed-border "What needs to be done today?" white25; once
+      every routine is logged and no task is due: celebration_outlined icon
+      + "All done!" instead
+    bottom Wrap (right-aligned, wraps on narrow screens):
+      TintedPill("Add todo", taskAccent) → AddTaskSheet
+      TintedPill("Add routine", habitAccent) → AddHabitSheet
+  Tasks and routines load independently (TaskTabController /
+  HabitTabController); a spinner only while both are loading.
 
-HABITS SECTION:
-  header: "Habits" + "view all" → /home/tasks (Tasks & Routines tab)
-  empty: GlassCard row — fire icon (habitAccent glass square) +
-    "Build your first habit" + TintedPill("Start", habitAccent)
-  with data: habit rows with inline action buttons (habitAccent)
-  "Start" tap → AddHabitSheet bottom sheet
-
-JOURNAL SECTION:
-  header: "Journal" + "view all" → /home/journal
-  GlassCard two rows + 0.5px white7 divider:
-    row 1: pencil icon (journalAccent glass square) +
-           "Write today's plan" / "Outline your goals..." +
-           TintedPill("Start", journalAccent)
-           tap → AddJournalSheet bottom sheet
-    row 2: book icon (habitAccent glass square) +
-           "Review what happened" / "Reflect on your day..." +
-           TintedPill("Reflect", taskAccent)
-           tap → AddJournalSheet bottom sheet
+MINDFULNESS SECTION (MindfulnessSection — mindfulness_section.dart):
+  header: "Mindfulness" + "view all" → /home/journal (Mindfulness tab)
+    (SectionHeader — shared/widgets/section_header.dart: 16px bold title
+    + optional muted 13px text action on the right; also used by the Mindfulness
+    tab's sections)
+  GlassCard three rows, 0.5px white7 dividers (rows 1–2 are
+  JournalPromptRows — journal/presentation/journal_prompt_rows.dart,
+  PromptRow + PromptRowDivider — shared with the Mindfulness tab's empty
+  "today" state):
+    row 1: edit_note_rounded (journalAccent square) "Write today's plan" /
+           "Outline your goals..." + TintedPill("Start", journalAccent)
+           → AddJournalSheet(initialType: plan)
+    row 2: nightlight_outlined (habitAccent square) "Review today" /
+           "Reflect on your day..." + TintedPill("Reflect", taskAccent)
+           → AddJournalSheet(initialType: review)
+    row 3: air_rounded (exerciseAccent square) "Breathing exercise" /
+           "Slow down with a guided breath." +
+           TintedPill("Breathe", exerciseAccent) → BreathingPickerSheet
+           (exercise/presentation/breathing_picker_sheet.dart: the 5
+           exercises with step summaries; pick one → push
+           /exercise/breathing/<name>)
 
 UNSYNCED BANNER (AnimatedSwitcher, only when pending > 24h):
   subtle glass strip: "Some data hasn't synced. Tap to retry."
   tap → sync_service.retryPending()
 
-MONTHLY RECAP BANNER (below the unsynced banner, above the streak row —
-  see Monthly Recap): last 3 days of a month through the 3rd of the next.
+MONTHLY RECAP BANNER (below the unsynced banner, above the remaining
+  budget card — see Monthly Recap): last 3 days of a month through the 3rd of the next.
 
 ---
 
@@ -380,8 +482,8 @@ _NavItem widget:
   active icon color (per tab):
     index 0 Home:              homeAccent    Color(0xFFFFFFFF) white
     index 1 Tasks & Routines:  taskAccent    Color(0xFF60A5FA) blue
-    index 2 Journal:           journalAccent Color(0xFFFCD34D) yellow
-    (+ Money, AI, Exercise — see Money Flow / AI Lab / Exercise)
+    index 2 Mindfulness:       journalAccent Color(0xFFFCD34D) yellow
+    (+ Money, AI — see Money Flow / AI Lab)
   inactive icon: Colors.white.withOpacity(0.28)
   active dot: AnimatedContainer width 16, height 4, borderRadius 2,
               color = tab accent color
@@ -390,15 +492,15 @@ _NavItem widget:
 Tab icons (outline style):
   Home:             Icons.home_outlined
   Tasks & Routines: Icons.checklist_outlined
-  Journal:          Icons.menu_book_outlined
+  Mindfulness:      Icons.menu_book_outlined
 
 Shell Scaffold body: Stack [ child, Positioned bottom:0 FloatingNavBar ]
 All tab screens: add bottom padding ≥ 88px so content clears the nav.
 
 Write button tap → showModalBottomSheet (glass):
-  ListTile "📓 Write journal" → AddJournalSheet()
-  ListTile "✅ Add task" → AddTaskSheet()
-  ListTile "💪 Add habit" → AddHabitSheet()
+  ListTile (each with its tab's nav icon + accent) "Write journal" →
+    AddJournalSheet(), "Add task" → AddTaskSheet(), "Add habit" →
+    AddHabitSheet()
 
 Write button long press → radial arc overlay:
   drag left → AddJournalSheet
@@ -416,6 +518,7 @@ AppBar: back arrow, date title, "⋯" more button (edit mode: delete via sheet)
 
 Body Column:
   Expanded SingleChildScrollView:
+    JournalTypeSelector (same chips as AddJournalSheet, pre-set to the entry's type)
     title TextField (optional, 20px white, no border)
     body TextField (required, autofocus:TRUE, 16px white80,
                     no border, maxLines:null)
@@ -424,7 +527,8 @@ Body Column:
 
   _MoodRow (sticky, outside scroll):
     GlassCard padding 8 12 margin 12 4 borderRadius 14
-    5 emoji buttons: 😊 😐 😢 😰 🤩
+    5 mood icon buttons (moodIcon: sentiment_satisfied_alt / neutral /
+    dissatisfied / mood_bad / very_satisfied, semantics label = mood name)
     selected: AnimatedScale 1.3x + journalAccent underline dot
     unselected: opacity 0.4
 
@@ -447,7 +551,13 @@ All "add" and "detail" actions use showModalBottomSheet:
 
 #### AddJournalSheet (lib/features/journal/presentation/add_journal_sheet.dart)
 Title: "What's going on"
-  body TextField autofocus:TRUE, 4+ lines, no border, white80
+  JournalTypeSelector (journal_type_selector.dart): chips
+    Today review (nightlight_outlined) / Plan (edit_note_rounded) /
+    Gratitude (volunteer_activism_outlined), icon + label, selected = journalAccent tint;
+    always one selected — initialType param, default review
+  body TextField autofocus:TRUE, 4+ lines, no border, white80,
+    hint follows the type ("How did today go?" / "What do you want to get
+    done today?" / "What are you grateful for today?")
   _MoodRow (same as editor, journalAccent)
   Row: photo button left + TintedPill("Save entry", journalAccent) right
   Padding bottom: MediaQuery.viewInsets.bottom (rides keyboard)
@@ -466,7 +576,7 @@ Title: "What to do"
 #### AddHabitSheet (lib/features/habits/presentation/add_habit_sheet.dart)
 Title: "Build new habit"
   name TextField autofocus:TRUE, 18px bold, habitAccent cursor
-  emoji icon grid (20 options, selected: habitAccent border + corner dot)
+  icon grid (20 presets, stored as emoji, drawn via HabitIcon; selected: habitAccent border + corner dot)
   color swatches row (7 colors, selected: scale 1.2 + white ring)
   reminder toggle + day chips (Mon–Sun multi-select, habitAccent active)
   + time picker when enabled
@@ -482,19 +592,61 @@ LinearProgressIndicator taskAccent.
 TintedPill("Mark as done", taskAccent) if not completed.
 
 #### JournalDetailSheet (lib/features/journal/presentation/journal_detail_sheet.dart)
-Shows date, mood emoji, title, full body (scrollable).
+Shows date, mood icon, type badge (icon + label, journalAccent), title,
+full body (scrollable).
 Photo thumbnails horizontal scroll → tap for full screen.
 "⋯" more → Edit (push /journal/:id/edit) / Delete (confirm).
 
 ---
 
-### 7. Daily Journal Tab (/home/journal)
+### 7. Mindfulness Tab (/home/journal)
 
-List entries grouped by month, newest first.
-GlassCard per entry: date, mood emoji, first line, photo thumbnail,
-unsynced dot if pending. journalAccent highlights.
-Search bar (glass input) at top.
-Tap card → JournalDetailSheet.
+Journal and Exercise share ONE tab — JournalTab
+(lib/features/journal/presentation/journal_tab.dart), titled
+"Mindfulness" (nav semantics label too). There is no separate exercise
+tab; /home/exercise just redirects here.
+
+Journal types (JournalType enum, journal_entry.dart — stored in
+`journal_entries.type`): review ("Today review", default), plan,
+gratitude. Rows without a value / unknown values read as review.
+
+BlobBackground + RepaintBoundary, ListView, bottom padding 88:
+  "Mindfulness" title
+  TODAY'S JOURNAL (JournalTodaySection, journal_today_section.dart):
+    SectionHeader: "Today's journal" (journalAccent) + "view all" right →
+      push /journal/history
+    horizontal ListView (132px tall) of today's entries, newest first —
+      JournalTodayCard (200 wide GlassCard): type badge, mood, first
+      3 lines of the body, time written, unsynced dot; tap →
+      JournalDetailSheet. Trailing "+ Write" card → AddJournalSheet.
+    empty: the same rows as home's Mindfulness card — GlassCard of
+      JournalPromptRows: "Write today's plan" (→ AddJournalSheet plan) /
+      "Review today" (→ AddJournalSheet review)
+  BREATHING (BreathingSection, exercise/presentation/widgets/
+    breathing_section.dart — see Exercise):
+    SectionHeader: "Breathing exercise" (exerciseAccent) + "History"
+      right → push /exercise/activity (stats + full calendar)
+    one GlassCard of BreathingExerciseRows (0.5px white7 dividers): the
+      first 3 exercises, then a "Show all (N more)" row (N = the rest,
+      currently 2) that expands the card to every exercise
+      (AnimatedSize); expanded it reads "Show less" and collapses again
+
+JournalHistoryScreen (/journal/history — full page, outside the shell):
+  AppBar back + "Journal history"; CustomScrollView:
+    JournalSearchField (glass input)
+    JournalCalendarCard — shared MonthCalendarHeader/MonthCalendarGrid
+      (shared/widgets/month_calendar.dart, also used by the exercise
+      calendar): Mon first, can't page past this month, days with entries
+      filled journalAccent (30% alpha, +15% per extra entry, max 75%),
+      today ringed
+    entries grouped by day ("Mon, Feb 2" headers), newest first:
+      no day selected → the shown month; tap a day → only that day
+      (tap again to clear); "No entries this month" / "Feb 2: no entries"
+    a search query hides the calendar and searches every month
+      (title + body, case-insensitive), headers then include the year
+  Grouping/filtering is pure (journal/domain/journal_grouping.dart).
+  GlassCard per entry: type badge, date, mood icon, first line, photo
+  thumbnail, unsynced dot. Tap → JournalDetailSheet.
 
 ---
 
@@ -513,13 +665,29 @@ Header: "Tasks & Routines" title + glass "+" button → small sheet:
 Body (one ListView, bottom padding 88):
   ROUTINES section (first — they repeat every day):
     "Routines" group label + GlassCard of today's active habit rows
-    (RoutineSection, habit_tab_list.dart); empty: "No habits yet"
-    each row: icon, name, action buttons (habitAccent), done checkmark
+    (RoutineSection, habit_tab_list.dart); empty: IntroCard eco_outlined
+      habitAccent "Routines repeat every day" + a short why (streaks,
+      reminders) + TintedPill("Add routine") → AddHabitSheet
+    each row: icon (always in the routine's color), name, action pills —
+      the same RoutinePill as home's TodayRoutineRow (logged one tinted in
+      the routine's own color — routineColorOf, habit_icon.dart)
     tapping the already-selected action (or "Done") undoes today's log
     tap row → HabitDetailScreen; long press → sheet: Edit / Archive / Delete
+    "Archived (N)" next to the label (only when N > 0) → ArchivedHabitsSheet
+      (archived_habits_sheet.dart): each archived habit with
+      TintedPill("Restore") + delete; tap row → its HabitDetailScreen.
+      Archive = hidden from today's list/widgets/recap + reminder cancelled,
+      history kept; Restore reschedules the reminder.
+    Delete removes the habit's habit_logs rows first, then the habit —
+      habit_logs.habit_id has no `on delete cascade`, so deleting a habit
+      with any log used to fail on the foreign key. Supabase first, then
+      Hive (habit + its logs), so a failed delete changes nothing and shows
+      a SnackBar.
   TASK sections (TaskSections, task_tab_list.dart):
     grouped Today / Upcoming / No date / Completed (collapsed)
-    empty: "Todo" label + GlassCard "No tasks yet"
+    empty: "Todo" label + IntroCard checklist_rounded taskAccent "Clear your head, one
+      task at a time" + a short why (due dates, reminders, subtasks, home
+      screen) + TintedPill("Add task") → AddTaskSheet
     glass rows: checkbox (taskAccent fill when checked) + name + due chip
     tap row → TaskDetailSheet
     long press → sheet: Edit / Convert to routine / Delete
@@ -541,8 +709,26 @@ Convert task → routine:
     only shows a SnackBar — the routine is already saved by then.
   Closing the sheet without saving keeps the task untouched.
 
-HabitDetailScreen (/habits/:id — full page):
+HabitDetailScreen (/habits/:id — full page, GlassPageScaffold so it
+  follows the app/custom background):
   monthly calendar, habitAccent dots, streak count, swipe months.
+  Habit with actions: each logged day shows the action's label (tiny
+    tinted tag in the habit color) instead of a dot, and below the
+    calendar a GlassCard "Actions this month" lists every action with how
+    many times it was done + a bar relative to the most-done one (actions
+    at 0 included; plain "Done" / "Removed action" rows only if present).
+    Counting is pure (habits/domain/habit_action_summary.dart).
+  Tap a day (any day up to today; future days aren't tappable) →
+    HabitDayLogSheet (habit_day_log_sheet.dart): date title, "Logged as"
+    + the current action ("Done" / "Not done" / "Removed action") and the
+    log's note, then "Change to" chips in the habit color — "Not done",
+    then each action (plain "Done" for a habit without actions; a
+    plain-done or removed-action log keeps its chip so it shows
+    selected) — and TintedPill("Save") at the bottom. Save with a change →
+    HabitDetailController.setDayLog: saves the log (same id + note, new
+    action) or deletes it for "Not done", updates the calendar in place,
+    refreshes today's routine list + home widgets. A failed Supabase
+    delete → SnackBar. Missed past days can be logged the same way.
 
 AddHabitSheet / edit: uses bottom sheet (see Add Sheets above).
 
@@ -590,9 +776,9 @@ Shortcut titles are localized (see Localization) and re-set whenever the
 app language changes.
 
 Long-press app icon:
-  📓 New Journal Entry → opens AddJournalSheet
-  ✅ New Task → opens AddTaskSheet
-  💪 New Habit → opens AddHabitSheet
+  New Journal Entry → opens AddJournalSheet
+  New Task → opens AddTaskSheet
+  New Habit → opens AddHabitSheet
 
 ---
 
@@ -625,7 +811,9 @@ User setup: Settings > Accessibility > Touch > Back Tap > Triple Tap >
 Intent titles/phrases are native (English only), like the home widgets'
 labels — out of scope for the Dart ARB files.
 
+---
 
+### 12. Home and Lock Screen Widgets (home_widget)
 
 widget_service.dart updates on every app open and after any write.
 Tasks and routines stay separate on the widgets (unlike the in-app
@@ -633,15 +821,114 @@ Tasks & Routines tab); `mindful://home/tasks` and `mindful://home/habits`
 both open that one tab, `mindful://open-habit` opens it then pushes
 /habits/:id.
 
-Small 2×2: date, journal streak (teal), habits X/Y (habitAccent)
-Medium 4×2: above + up to 3 incomplete tasks due today
-Android habit (routine) rows: a habit with actions shows up to 2 action
-  pills (tap → log that action); a habit with no actions shows an empty
-  habitAccent checkbox (tap → `mindful://log-habit?habitId=…`, logged as
-  plain "done"); done → filled check (tap → `mindful://unlog-habit?habitId=…`,
-  deletes today's log so it's undone — same for habits with actions).
-  Tapping the rest of an actionless row opens /habits/:id.
-iOS lock screen: circular habit count (habitAccent)
+Both platforms show the same two home screen widgets (Android is the
+reference; iOS mirrors its layout, colors and tap rules):
+
+Medium 4×2 (MindfulMediumWidget): two columns —
+  Routines: "Routines" (white60 12) + "X/Y done" (habitAccent 12), then a
+    row per routine (habit row below)
+  0.5px white10 divider
+  Todo: "Todo" + "X/Y done" (taskAccent), a row per task due today/overdue
+    (name + check glyph — taskAccent filled when done, white30 ring when
+    not; tap → `mindful://open-task?taskId=…` → TaskDetailSheet)
+  The Todo column + divider are hidden when no task is due, so routines
+  fill the width. Pencil circle button bottom-right (white10 fill, white15
+  border) → `mindful://open-write-sheet` (write options sheet).
+Small 2×2 (MindfulSmallWidget): chooser on first add — "Show me:" +
+  "Todo" (checklist icon) / "Routines" (self_improvement icon) pills; the
+  pick is saved as `smallWidgetMode`
+  (shared by every small widget; widget_service.dart keeps it and
+  defaults it to 'tasks' once the app has written data). Then: bold title
+  + accent "X/Y", the list (same rows as medium), "N remaining" footer
+  (white35 11).
+Habit (routine) rows: 30px habitAccent-tinted icon square (8 radius) +
+  name (white 14), then one of:
+    (icon, its square, pills and check all in the routine's own color —
+    shapes are white-at-alpha drawables recolored with setColorFilter,
+    since RemoteViews can't tint a background before API 31; iOS does the
+    same in WidgetRows.swift. habitAccent when the color won't parse.
+    Lock screen widgets stay monochrome — iOS tints them itself.)
+    done → filled check, tap → undo today's log
+      (`mindful://unlog-habit?habitId=…`) — same for habits with actions
+    has actions → up to 2 action pills (routine-color text on 10% tint,
+      15% border, radius 10), tap → log that action
+      (`mindful://log-habit?habitId=…&action_label=…`)
+    no actions → empty circle, tap → log plain "done"
+      (`mindful://log-habit?habitId=…`)
+  Tapping the rest of an actionless row opens /habits/:id
+  (`mindful://open-habit`).
+Copy (labels, "X/Y done", "N remaining", chooser) is pushed in the app
+  language by widget_service.dart (`label*` keys, ARB widget*).
+
+Android: those `mindful://` taps open the app, which logs/navigates in
+  navigateFromWidgetUri (sheet_navigation.dart). Lists scroll.
+
+iOS (ios/MindfulWidgets/ — the MindfulWidgetsExtension target's synced
+folder: every .swift file in it is compiled, nothing outside it is; iOS 17+):
+  Files: MindfulWidgets.swift (medium, small, circular count, bundle),
+    WidgetRows.swift (RoutineRow / TaskRow / ActionPill — the Android row
+    layouts), WidgetTheme.swift (colors.xml values + GlassWidgetBackground
+    = widget_glass_background.xml: base, teal/blue glows, frost, sheen,
+    hairline; opaque base, since iOS widgets can't show the wallpaper),
+    RoutineStore.swift (shared data + tap queue), RoutineIntents.swift,
+    RoutineLockScreenWidget.swift.
+  App Group `group.com.guswira.mindful.widget` — main() calls
+    HomeWidget.setAppGroupId on iOS (without it every iOS saveWidgetData
+    fails); both targets' entitlements list the group. Kinds match
+    WidgetProviderNames.iOS*: MindfulMediumWidget, MindfulSmallWidget,
+    MindfulLockScreenWidget, MindfulRoutineLockScreenWidget.
+  Differences from Android (platform limits):
+    routine controls are interactive Button(intent:)s — they log in place
+      without opening the app (LogRoutineIntent / UnlogRoutineIntent),
+      same outcome as Android's log-habit / unlog-habit
+    no scrolling: medium shows 3 rows per column, small 2
+    1 action pill instead of 2 in a half-width column (small widget, or
+      medium next to Todo) so the name stays readable; 2 when routines
+      have the full medium width
+    small widgets can't route per-row links: tap → widgetURL
+      `mindful://home/tasks` / `home/habits`; the chooser pills are a
+      ChooseSmallWidgetModeIntent
+    links carry a `homeWidget` query item — home_widget only forwards URLs
+      that have one; the `mindful` scheme is registered in Runner/Info.plist
+    counts are recomputed from the routines ("X/Y done" from the
+      `labelDoneCountFormat` / `labelRemainingFormat` templates), since a
+      tap changes them before the app rewrites the labels
+
+iOS routines lock screen widget (RoutineLockScreenWidget.swift, no
+  Android counterpart — Android has no lock screen widgets):
+  Same row rules as above, monochrome lock screen style.
+  Edit Widget → pick a routine (SelectRoutineIntent, options = today's
+    routines), or leave it empty.
+  Rectangular, routine picked: "<icon> <name>" + its control (check /
+    circle); not done with actions → up to 2 action pills underneath;
+    done via an action → that action's name underneath.
+  Rectangular, nothing picked (or the picked routine was deleted/archived):
+    "Routines X/Y" + the first 2 routines, not-done first, each with its
+    control; "All done" / "No routines yet".
+  Circular: the picked routine (else the next not-done one) — its icon in a
+    ring, tap → plain "done" / undo.
+  Taps outside a button → `mindful://home/habits`.
+  Circular count gauge (MindfulLockScreenWidget): routines X/Y.
+
+How an iOS routine tap reaches the data — the extension can't reach
+  Hive/Supabase:
+  RoutineStore flips the routine in the shared `habits` JSON (+ habitsDone)
+  so every widget redraws right away, and appends {habitId, date
+  yyyy-MM-dd, actionLabel|null, undo} to `pendingHabitLogs`. Actions are
+  matched by label (`habits` rows carry completedActionLabel).
+  The app replays the queue (widget_habit_log_sync.dart —
+  listenForWidgetHabitLogs, iOS only) once signed in and on every resume:
+  clears it first, then HabitTabController.logAction / unlog with
+  `on: date`, so a tap at 23:59 still lands on that day. Unknown habits
+  are skipped; an unknown action label logs plain "done".
+  Midnight: `habitsDate` (stamped by widget_service.dart) older than today
+  reads as nothing done, and timelines reload at midnight.
+Android widget background (res/drawable/widget_glass_background.xml):
+  the GlassCard look rebuilt as a layer-list, since RemoteViews can't blur
+  the wallpaper — 70% GlassTheme.background base, teal (top-right) and
+  blue (bottom-left) radial glows like BlobBackground, 6% white frost
+  (cardColor), top sheen, 0.5dp 12% white hairline (cardBorder), 18dp
+  radius. Colors in res/values/colors.xml (widget_glass_*).
 
 ---
 
@@ -701,17 +988,18 @@ and are out of scope for the Dart ARB files.
 /splash            → SplashScreen
 /onboarding        → OnboardingScreen  (no auth redirect)
 /login             → LoginScreen
-/home              → HomeScreen shell (FloatingNavBar, 6 tabs)
+/home              → HomeScreen shell (FloatingNavBar, 5 tabs)
   /home/today      → HomeTab  (default)
   /home/tasks      → PlanTab  (tasks + routines)
-  /home/journal    → JournalTab
+  /home/journal    → JournalTab  (Mindfulness: journal + breathing)
   /home/money      → MoneyTab
   /home/ai         → AITab
-  /home/exercise   → ExerciseTab
+/journal/history   → JournalHistoryScreen (calendar + by-date list, full page)
 /journal/:id/edit  → JournalEditorScreen  (edit only, full page)
 /habits/:id        → HabitDetailScreen    (calendar, full page)
 /settings          → SettingsScreen
 /recap/:month      → MonthlyRecapScreen  (slideshow, full page; month = yyyy-MM)
+/exercise/activity → ExerciseActivityScreen (stats + calendar, full page)
 /exercise/breathing/:exercise → BreathingSessionScreen (full page;
                      exercise = BreathingExercise.name, unknown → equal)
 ```
@@ -720,6 +1008,8 @@ REMOVED routes (replaced by bottom sheets):
   /journal/new, /journal/:id, /habits/new, /habits/:id/edit,
   /tasks/new, /tasks/:id, /tasks/:id/edit
 REMOVED: /home/habits (merged into /home/tasks — see Tasks & Routines)
+REMOVED: /home/exercise shell tab (merged into /home/journal — kept only as
+  a redirect to /home/journal)
 
 Redirects:
   unauthenticated → /login (except /onboarding)
@@ -729,7 +1019,29 @@ Redirects:
 
 ## UI conventions
 
-- Floating island nav bar — 6 tabs, NO profile tab, NO labels
+- No emoji in the UI — flat Material icons (outlined / rounded), tinted
+  with the feature accent. Emoji render differently per platform and
+  can't be tinted. Copy strings carry no emoji either (notification
+  titles, widget labels, disclaimers); where an app screen showed one, a
+  small icon sits next to the text instead. The one exception is data:
+  A routine's icon, action chips/pills and logged/check state use its own
+  user-picked color (`habits.color`, routineColorOf), not habitAccent —
+  habitAccent is only the fallback and the Routines section accent.
+  Routine icons are still stored as their preset emoji (`habits.icon`,
+  Drive backups, the widgets' `habits` JSON) and every surface maps the
+  20 presets to a flat icon, ignoring U+FE0F; a non-preset emoji is
+  drawn as-is:
+    app      HabitIcon (habits/presentation/habit_icon.dart) — Material
+             icon in the routine's color
+    Android  RoutineIcons.kt → res/drawable/ic_routine_*.xml (the same
+             Material icons, copied from the SDK's icon library),
+             tinted with the routine's color via setColorFilter
+    iOS      RoutineIcon.swift → matching SF Symbols (routine color on the
+             home widget, monochrome on the lock screen; the Edit Widget
+             picker shows the symbol too)
+  Keep the three maps in sync when adding a preset. Icon maps: moodIcon / journalTypeIcon (journal_labels.dart),
+  categoryIcon (money_labels.dart).
+- Floating island nav bar — 5 tabs, NO profile tab, NO labels
 - Settings accessed via gear icon top-right of HomeScreen only
 - Each tab has its own accent color (see Feature accent colors)
 - Write button bottom-right of nav row — always teal gradient
@@ -743,11 +1055,21 @@ Redirects:
 - GlassCard for all content cards throughout app
 - BlobBackground on all main screens
 - RepaintBoundary wrapping all screens (Android BackdropFilter fix)
+- Full-page screens outside the shell (habit detail, journal editor,
+  journal history, exercise activity) use GlassPageScaffold
+  (shared/widgets/glass_page_scaffold.dart): transparent AppBar
+  (no scrolled-under tint) with extendBodyBehindAppBar over BlobBackground,
+  body in SafeArea — so the bar shows the blobs/custom photo instead of a
+  plain dark strip
 - Unsynced dot: small subtle, never disruptive
 - Write button long press: radial arc overlay for quick access
 - Full-page exceptions to "detail views are sheets": habit calendar, the
-  monthly recap slideshow and a breathing session
+  monthly recap slideshow, a breathing session, the journal history and
+  the exercise activity calendar
 - ShakeWidget on empty required field submit attempt
+- Empty feature lists use IntroCard (shared/widgets/intro_card.dart) — a
+  brief introduction to the feature + the action that starts it — never a
+  bare "No X yet" line (routines, tasks, budget, money entries)
 
 ---
 
@@ -795,22 +1117,32 @@ lib/
 │   │       ├── splash_screen.dart
 │   │       └── login_screen.dart
 │   ├── home/
+│   │   ├── domain/be_mindful_steps.dart ← tour step order (pure)
 │   │   └── presentation/
 │   │       ├── home_screen.dart
 │   │       └── widgets/
 │   │           ├── greeting_header.dart    ← includes settings gear
+│           ├── be_mindful_section.dart ← feature tour, 2 steps at a time
 │   │           ├── quote_widget.dart
-│   │           ├── streak_row.dart
-│   │           ├── today_tasks_strip.dart
-│   │           ├── upcoming_habits_strip.dart
-│   │           └── journal_section.dart
+│   │   │           ├── today_todo_card.dart     ← tasks + routines + add buttons
+│   │           ├── today_task_row.dart
+│   │           ├── today_routine_row.dart
+│   │           └── mindfulness_section.dart ← plan / review / breathing
 │   ├── journal/
 │   │   ├── data/
 │   │   │   ├── journal_repository.dart
 │   │   │   └── supabase_journal_datasource.dart
-│   │   ├── domain/journal_entry.dart
+│   │   ├── domain/
+│   │   │   ├── journal_entry.dart          ← + JournalType
+│   │   │   └── journal_grouping.dart       ← by-day/month/search (pure)
 │   │   └── presentation/
-│   │       ├── journal_tab.dart
+│   │       ├── journal_tab.dart            ← Mindfulness tab
+│   │       ├── journal_today_section.dart  ← today strip / prompts + view all
+│   │       ├── journal_prompt_rows.dart    ← plan / review rows (home + tab)
+│   │       ├── journal_history_screen.dart ← full page calendar + list
+│   │       ├── journal_calendar_card.dart
+│   │       ├── journal_type_selector.dart
+│   │       ├── journal_labels.dart         ← JournalType → copy
 │   │       ├── journal_detail_sheet.dart   ← bottom sheet
 │   │       ├── add_journal_sheet.dart      ← bottom sheet
 │   │       └── journal_editor_screen.dart  ← full page edit only
@@ -826,6 +1158,11 @@ lib/
 │   │       ├── habit_tab.dart          ← HabitTabController (today's habits)
 │   │       ├── habit_tab_list.dart     ← RoutineSection (used by PlanTab)
 │   │       ├── habit_detail_screen.dart    ← full page calendar
+│   │       ├── habit_action_summary_card.dart ← per-action monthly counts
+│   │       ├── habit_day_log_sheet.dart    ← tap a calendar day: view/change
+│   │       ├── archived_habits_sheet.dart  ← "Archived (N)" link + sheet
+│   │       ├── habit_manage_actions.dart   ← archive/restore/delete flows
+│   │       ├── widget_habit_log_sync.dart  ← replays iOS lock screen taps
 │   │       └── add_habit_sheet.dart        ← bottom sheet add + edit
 │   ├── tasks/
 │   │   ├── data/
@@ -857,6 +1194,8 @@ lib/
     │   ├── blob_background.dart     ← + custom photo + scrim layer
     │   ├── app_background_scope.dart ← custom photo path for BlobBackground
     │   ├── tinted_pill.dart
+    │   ├── intro_card.dart       ← empty state: icon + title + why + action
+    │   ├── section_header.dart   ← title + "view all"-style action
     │   ├── unsynced_badge.dart
     │   ├── floating_nav_bar.dart    ← island nav + write button
     │   └── shake_widget.dart        ← invalid field animation
@@ -875,17 +1214,28 @@ lib/
 
 ---
 
-## Notification icons (Android)
-- Small (status bar): `@drawable/ic_stat_notification` — white-on-transparent
-  silhouette of the app icon, set once in AndroidInitializationSettings.
+## App + notification icons ("Ripple Horizon" pack)
+Colors: background #1E3B3F, sun #D9824F, ripples #A9C7B5, horizon #F1E9D8.
+- iOS: assets/icon/app_icon.png (full-bleed 1024, no alpha) →
+  `dart run flutter_launcher_icons` (config in pubspec, ios only).
+- Android launcher: hand-made from the pack, committed directly —
+  mipmap-*/ic_launcher(.png|_round.png|_foreground.png),
+  mipmap-anydpi-v26/ic_launcher(_round).xml (adaptive: background
+  @color/ic_launcher_background, themed-icon monochrome
+  @drawable/ic_launcher_monochrome vector). flutter_launcher_icons has
+  `android: false` so it never overwrites them. Manifest sets icon +
+  roundIcon.
+- Notification small (status bar): `@drawable/ic_stat_notification` —
+  white-on-transparent sunrise silhouette (pack's ic_stat_notify PNGs),
+  set once in AndroidInitializationSettings, tinted `color:` #D9824F
+  (`notification_accent`) on every AndroidNotificationDetails.
   Never `@mipmap/ic_launcher`: Android draws small icons from alpha only,
   so the opaque launcher icon shows as a solid white blob.
-- Large (inside the notification): `@drawable-nodpi/ic_notification_large`
-  — the full-colour app icon, on every AndroidNotificationDetails.
-- Both listed in res/raw/keep.xml so release resource shrinking keeps them
-  (the plugin looks them up by name).
-- If assets/icon/app_icon.png changes, regenerate both.
-- iOS uses the app icon automatically.
+- Notification large: `@drawable-nodpi/ic_notification_large` — the app
+  icon at 256px, on every AndroidNotificationDetails.
+- Both notification icons listed in res/raw/keep.xml so release resource
+  shrinking keeps them (the plugin looks them up by name).
+- Web: web/favicon.png + web/icons/Icon-*.png from the pack.
 
 ## Notification IDs
 - 1001 journal 8am, 1002 journal 10pm
@@ -1048,6 +1398,9 @@ BUDGET CARD (GlassCard strong, top):
     "Income" — total income this period (moneyAccent tinted)
     "Remaining" — budget - spent + income (white or red if negative)
   settings icon top-right → opens BudgetSettingsSheet
+  no budget set (neither monthly nor daily): IntroCard track_changes_rounded moneyAccent
+    "Set a budget" + a short why + TintedPill("Set budget") →
+    BudgetSettingsSheet, in place of the gauges
 
 REMAINING BUDGET INDICATOR (between budget card and list):
   if remaining > 0:
@@ -1061,7 +1414,8 @@ PERIOD SELECTOR (glass pill toggle):
   selected pill: moneyAccent tinted
   filters the entry list below
 
-ADD BUTTONS ROW:
+ADD BUTTONS ROW (hidden until the first entry exists — the empty state's
+  "Record your spending" intro already offers adding one):
   Row:
     TintedPill("+ Spending", Colors.redAccent) flex 1
       onTap → AddMoneySheet(defaultType: spending)
@@ -1070,12 +1424,16 @@ ADD BUTTONS ROW:
       onTap → AddMoneySheet(defaultType: income)
 
 ENTRY LIST (grouped by date, newest first):
+  no entries at all: IntroCard account_balance_wallet_outlined moneyAccent "Record your spending" +
+    a short why + TintedPill("Record spending") → AddMoneySheet
+    (Spending), in place of the period pills + list
+  income but no spending yet: the same IntroCard above the pills + list
   date header: Text "Today" / "Yesterday" / "Mon, Oct 26" white45 12px
   each entry GlassCard:
     Row:
       category icon circle (36px):
-        spending: red tinted glass + category emoji
-        income: moneyAccent tinted glass + category emoji
+        spending: red tinted glass + categoryIcon
+        income: moneyAccent tinted glass + categoryIcon
       Column flex:
         Text category 14px white85 bold
         Text note 12px white45 if exists
@@ -1098,12 +1456,12 @@ RECAP SECTION (below list, collapsible):
       net: income - spending, color based on positive/negative
     top spending category highlighted
     AI advice button (bottom of the recap, only if any entry exists):
-      TintedPill("✨ AI advice", aiAccent) → MoneyAdviceSheet (see AI Advice)
+      TintedPill("AI advice", aiAccent, icon: auto_awesome_outlined) → MoneyAdviceSheet (see AI Advice)
 
 ### AI Advice (MoneyAdviceSheet)
 
 lib/features/money/presentation/money_advice_sheet.dart
-Opened from the Recap section's "✨ AI advice" pill. Experimental, uses
+Opened from the Recap section's "AI advice" pill. Experimental, uses
 the same Gemini setup as AI Lab (see AI Lab Feature GeminiService).
 
 Data sent (money_advice_summary.dart — buildMoneyAdviceSummary):
@@ -1148,7 +1506,8 @@ notification mechanism as the food scan (see AI Lab Food Scan Flow):
   4. success: cancel the notification, show MoneyAdviceSheet(advice):
        title row, "Overview" summary, "Where your money goes" bullets
        (moneySpending), "How to save" bullets (moneyAccent), footer
-       "⚠ Experimental AI advice... not financial advice." white30 11px
+       info_outline icon + "Experimental AI advice... not financial advice."
+       white30 11px
      final failure: cancel the notification; if the sheet was already
        dismissed for a retry, also show a failure notification (id 4003)
        with a "Retry" action — it and the body reopen /home/money (the user
@@ -1226,7 +1585,7 @@ on save: upsert budget_settings in Supabase
 
 ### Home Screen — Money Flow integration
 
-REMAINING BUDGET WIDGET (after streak row, before tasks):
+REMAINING BUDGET WIDGET (after the recap banner, before Be mindful):
   GlassCard compact (padding 12 16):
   Row:
     Column:
@@ -1247,10 +1606,10 @@ REMAINING BUDGET WIDGET (after streak row, before tasks):
 Update write button bottom sheet and radial arc:
 
 showModalBottomSheet write options (4 items now):
-  📓 Write journal → AddJournalSheet
-  ✅ Add task → AddTaskSheet
-  💪 Add habit → AddHabitSheet
-  💰 Add money → AddMoneySheet(defaultType: spending)
+  Write journal → AddJournalSheet
+  Add task → AddTaskSheet
+  Add habit → AddHabitSheet
+  Add money → AddMoneySheet(defaultType: spending)
 
 Radial arc (hold+drag) directions update:
   LEFT → AddJournalSheet
@@ -1259,7 +1618,7 @@ Radial arc (hold+drag) directions update:
   RIGHT → AddMoneySheet(defaultType: spending)
 
 App shortcuts (quick_actions) — add:
-  💰 Add Money → AddMoneySheet(defaultType: spending)
+  Add Money → AddMoneySheet(defaultType: spending)
 
 ### Folder structure additions
 
@@ -1496,7 +1855,7 @@ FOOD CALORIE CHECKER SECTION:
       Text "Point camera at a meal, snack, or ingredient"
            13px white45 textAlign center
       SizedBox 20
-      TintedPill("📷 Check food calories", aiAccent,
+      TintedPill("Check food calories", aiAccent, icon: photo_camera_outlined,
         onTap: _openCamera)
       SizedBox 8
       TextButton "Choose from gallery" aiAccent 13px
@@ -1512,7 +1871,7 @@ SCAN HISTORY SECTION:
   if has scans:
     list of FoodScanCard widgets (last 10 scans)
     each card GlassCard:
-      Row: food emoji (🍽 default) + foodName 14px white80
+      Row: restaurant_outlined icon (aiAccent) + foodName 14px white80
            Spacer + calories bold aiAccent + "kcal" white45 12px
       Text servingNote 11px white35 if exists
       Text formatted date 11px white30
@@ -1611,7 +1970,8 @@ GlassCard strong:
           Text analysis.servingNote 12px white40
       confidence badge:
         Container padding 4 10 borderRadius 20:
-          high: moneyAccent bg + "✓ High confidence"
+          high: moneyAccent bg + check_circle_outline + "Confident"
+          (medium: help_outline "Estimate", low: error_outline "Uncertain")
           medium: amber bg + "~ Medium"
           low: red bg + "! Low confidence"
 
@@ -1654,7 +2014,7 @@ GlassCard strong:
   SizedBox 20
 
   DISCLAIMER:
-    Text "⚠ AI estimates vary. Actual values depend on"
+    info_outline icon + Text "AI estimates vary. Actual values depend on"
          "preparation, portion size, and ingredients."
          11px white30 textAlign center
 
@@ -1668,7 +2028,7 @@ GlassCard strong:
       onTap: _saveScan → pop
 
   confidence == 'low': show extra warning above buttons:
-    Text "⚠ Low confidence — photo may be unclear"
+    Text "Low confidence — photo may be unclear"
          12px red textAlign center
 
 ### Folder structure additions
@@ -1702,13 +2062,12 @@ Add to glass_theme.dart:
 
 ### Nav bar update
 
-6 tabs total:
-  0 Home              white
-  1 Tasks & Routines  taskAccent blue   (routine rows inside keep habitAccent)
-  2 Journal           journalAccent yellow
-  3 Money             moneyAccent green
-  4 AI                aiAccent indigo
-  5 Exercise          exerciseAccent pink (see Exercise)
+5 tabs total:
+  0 Home                white
+  1 Tasks & Routines    taskAccent blue   (routine rows inside keep habitAccent)
+  2 Mindfulness         journalAccent yellow (exercise half keeps exerciseAccent)
+  3 Money               moneyAccent green
+  4 AI                  aiAccent indigo
 
 Icon size 20px.
 
@@ -1817,7 +2176,8 @@ Full page, BlobBackground + RepaintBoundary. 6 slides (recap_slides.dart):
   5. AI Lab — aiAccent, hero: food scans
   6. Outro — writeAccent, "Keep going!", TintedPill("Done") closes
 
-Slide layout (RecapSlide): emoji badge (accent-tinted 72px square) +
+Slide layout (RecapSlide): icon badge (34px icon in the accent on an
+  accent-tinted 72px square) +
   uppercase section label (accent), hero value (48px bold white, counts up
   from 0 over 1.2s) + label, Wrap of small GlassCard stat chips (value in
   accent), strong GlassCard with the motivation line.
@@ -1863,13 +2223,14 @@ lib/features/recap/
 
 ## 16. Exercise
 
-A calm practice tab, starting with guided breathing. Feature accent:
+Calm practice, starting with guided breathing — the lower half of the
+Mindfulness tab (see section 7). Feature accent:
 exerciseAccent: Color(0xFFF9A8D4) — soft pink (in GlassTheme).
 
 ### Nav + routes
 
-Floating nav, 6th tab: index 5, Icons.self_improvement_outlined,
-exerciseAccent. Shell branch /home/exercise → ExerciseTab.
+No nav tab of its own — BreathingSection sits on the Mindfulness
+tab (/home/journal). Activity: /exercise/activity → ExerciseActivityScreen.
 Session: /exercise/breathing/:exercise → BreathingSessionScreen (full page,
 outside the shell — the nav bar is hidden during a session).
 
@@ -1892,26 +2253,31 @@ BreathingPattern (domain/breathing_pattern.dart) = ordered BreathPhases;
 Customize: inhale/exhale 1–20s, hold/hold-after 0–20s (0 skips the step).
 Defaults 4 / 2 / 6 / 0. Edited in CustomPatternSheet (− / + steppers per
 step, "One cycle: Ns", TintedPill("Save pattern")), opened from the edit
-icon on the Customize card.
+icon on the Customize tile.
 
-### Exercise tab (/home/exercise)
+### Breathing section (on /home/journal) + activity screen
 
-BlobBackground + RepaintBoundary, CustomScrollView, bottom padding 88:
-  "Exercise" title + "Slow down and breathe with intention."
-  BREATHING section — SliverList of BreathingExerciseCard (GlassCard):
-    icon square (exerciseAccent), name, one-line purpose, step summary
-    ("Inhale 4s · Hold 7s · Release 8s", exerciseAccent),
-    TintedPill("Start"); Customize also has an edit icon.
-    Tap card or Start → push /exercise/breathing/<name>.
-  ACTIVITY section:
+BreathingSection (widgets/breathing_section.dart), under today's journal:
+  SectionHeader "Breathing exercise" (exerciseAccent) + "History" right →
+    push /exercise/activity
+  one GlassCard listing the first 3 exercises (collapsedCount) +
+    "Show all (N more)" / "Show less" toggle row — rows are
+    BreathingExerciseRow: icon square (exerciseAccent), name, step
+    summary ("Inhale 4s · Hold 7s · Release 8s", exerciseAccent),
+    TintedPill("Breathe", exerciseAccent) like home's Mindfulness card
+    (Customize: an edit icon → CustomPatternSheet before the pill).
+    Tap row → push /exercise/breathing/<name>.
+
+ExerciseActivityScreen (/exercise/activity — full page, outside the shell):
+  AppBar back + "Exercise activity", BlobBackground + RepaintBoundary:
     ExerciseStatsRow — 3 GlassCards: Sessions (all-time), Time spent
       ("45s" / "12m" / "1h 5m"), Day streak (consecutive days ending today,
       or yesterday so it doesn't read 0 before today's session).
-    ExerciseCalendarCard — month grid (Mon first), prev/next (can't go
-      past this month); each day circle tinted exerciseAccent by time
-      spent (25% → 75% alpha at 10+ min), today ringed in accent. Tap a day
-      → "Oct 2: 2 sessions · 6m" below the grid; tap again (or no
-      selection) → "This month: N sessions · T".
+    ExerciseCalendarCard — month grid (Mon first, shared MonthCalendarGrid),
+      prev/next (can't go past this month); each day circle tinted
+      exerciseAccent by time spent (25% → 75% alpha at 10+ min), today
+      ringed in accent. Tap a day → "Oct 2: 2 sessions · 6m" below the
+      grid; tap again (or no selection) → "This month: N sessions · T".
 
 ### BreathingSessionScreen
 
@@ -2021,7 +2387,7 @@ lib/features/exercise/
     breathing_preferences.dart          ← + AmbienceTrack, CustomBreathing
     exercise_stats.dart                 ← totals, streak, per-day
   presentation/
-    exercise_tab.dart
+    exercise_activity_screen.dart       ← /exercise/activity
     exercise_providers.dart             ← sessions, stats, preferences
     breathing_session_screen.dart
     breathing_session_controller.dart   ← Ticker + voice + ambience
@@ -2030,7 +2396,8 @@ lib/features/exercise/
     sound_settings_sheet.dart
     custom_pattern_sheet.dart
     widgets/
-      breathing_exercise_card.dart
+      breathing_section.dart            ← on the Mindfulness tab
+      breathing_exercise_row.dart       ← list row
       breathing_circle.dart / breathing_circle_painter.dart
       session_top_bar.dart / session_stats_row.dart / session_controls.dart
       exercise_stats_row.dart
@@ -2038,7 +2405,7 @@ lib/features/exercise/
 ```
 
 Copy: all in the ARB files (`exercise*`, `breathing*`, `sound*`,
-`ambience*`, `customPattern*`, `navExercise`).
+`ambience*`, `customPattern*`); journal side: `journal*`.
 
 ### What Exercise is NOT (v1)
 

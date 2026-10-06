@@ -68,10 +68,19 @@ class FoodResultSheet extends StatelessWidget {
             HealthNoteCard(note: note),
           ],
           const SizedBox(height: Spacing.md),
-          Text(
-            context.l10n.aiResultDisclaimer,
-            textAlign: TextAlign.center,
-            style: TextStyle(color: glass.textHint, fontSize: 11),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.info_outline_rounded, size: 13, color: glass.textHint),
+              const SizedBox(width: Spacing.xs),
+              Flexible(
+                child: Text(
+                  context.l10n.aiResultDisclaimer,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: glass.textHint, fontSize: 11),
+                ),
+              ),
+            ],
           ),
           if (analysis.confidence == 'low') ...[
             const SizedBox(height: Spacing.sm),

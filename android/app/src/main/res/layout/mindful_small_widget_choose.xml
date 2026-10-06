@@ -33,7 +33,9 @@
             android:paddingHorizontal="18dp"
             android:paddingVertical="12dp"
             android:background="@drawable/widget_choose_pill_background"
-            android:text="✅ Todo"
+            android:drawableStart="@drawable/ic_routine_checklist"
+            android:drawablePadding="6dp"
+            android:text="Todo"
             android:textAllCaps="false"
             android:textColor="@color/widget_text_primary"
             android:textSize="14sp" />
@@ -48,7 +50,9 @@
             android:paddingHorizontal="18dp"
             android:paddingVertical="12dp"
             android:background="@drawable/widget_choose_pill_background"
-            android:text="💪 Routines"
+            android:drawableStart="@drawable/ic_routine_self_improvement"
+            android:drawablePadding="6dp"
+            android:text="Routines"
             android:textAllCaps="false"
             android:textColor="@color/widget_text_primary"
             android:textSize="14sp" />

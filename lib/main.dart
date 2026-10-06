@@ -1,7 +1,10 @@
+import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:home_widget/home_widget.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:quick_actions/quick_actions.dart';
 
@@ -12,6 +15,7 @@ import 'core/l10n/l10n.dart';
 import 'core/router/app_intent_actions.dart';
 import 'core/router/router.dart';
 import 'features/habits/data/habit_reminders_controller.dart';
+import 'features/habits/presentation/widget_habit_log_sync.dart';
 import 'features/settings/data/journal_reminders_controller.dart';
 import 'features/tasks/data/task_reminders_controller.dart';
 import 'shared/services/notification_service.dart';
@@ -26,6 +30,11 @@ Future<void> main() async {
   // Date symbols for every supported locale, so DateFormat works in
   // Bahasa even outside a widget (notifications, the home widget).
   await initializeDateFormatting();
+  // Before anything touches home_widget — building the router below asks
+  // it for the launching widget URL, which throws on iOS without a group.
+  if (Platform.isIOS) {
+    await HomeWidget.setAppGroupId(WidgetProviderNames.iOSAppGroupId);
+  }
 
   // Built here, rather than left for MaterialApp.router's own
   // ProviderScope to create, so the quick_actions callback below can push
@@ -57,6 +66,10 @@ Future<void> main() async {
   await _setShortcutItems(quickActions);
   // iOS App Intents ("Add spending") — for Shortcuts, Siri and Back Tap.
   listenForAppIntentActions(router);
+  if (Platform.isIOS) {
+    // Routine taps on the iOS lock screen widget, queued while closed.
+    listenForWidgetHabitLogs(container);
+  }
 
   // Copy baked into things outside the widget tree — shortcut titles and
   // already-scheduled notifications — would otherwise stay in the old

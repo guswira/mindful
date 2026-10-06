@@ -19,7 +19,7 @@ void main() {
         ),
       );
 
-  testWidgets('shows the 6 tab icons and the write button', (tester) async {
+  testWidgets('shows the 5 tab icons and the write button', (tester) async {
     await tester.pumpWidget(buildBar(0, (_) {}));
 
     expect(find.byIcon(Icons.home_outlined), findsOneWidget);
@@ -28,7 +28,8 @@ void main() {
     expect(find.byIcon(Icons.menu_book_outlined), findsOneWidget);
     expect(find.byIcon(Icons.account_balance_wallet_outlined), findsOneWidget);
     expect(find.byIcon(Icons.auto_awesome_outlined), findsOneWidget);
-    expect(find.byIcon(Icons.self_improvement_outlined), findsOneWidget);
+    // Exercise lives inside the Mindfulness tab now.
+    expect(find.byIcon(Icons.self_improvement_outlined), findsNothing);
     expect(find.byIcon(Icons.edit_outlined), findsOneWidget);
   });
 
@@ -62,13 +63,13 @@ void main() {
     expect(tapped, 4);
   });
 
-  testWidgets('tapping the exercise tab icon reports index 5', (tester) async {
+  testWidgets('tapping the journal tab icon reports index 2', (tester) async {
     int? tapped;
     await tester.pumpWidget(buildBar(0, (index) => tapped = index));
 
-    await tester.tap(find.byIcon(Icons.self_improvement_outlined));
+    await tester.tap(find.byIcon(Icons.menu_book_outlined));
     await tester.pump();
 
-    expect(tapped, 5);
+    expect(tapped, 2);
   });
 }

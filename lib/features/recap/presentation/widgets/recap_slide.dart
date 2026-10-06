@@ -69,7 +69,7 @@ class _SectionBadge extends StatelessWidget {
               width: 0.5,
             ),
           ),
-          child: Text(data.emoji, style: const TextStyle(fontSize: 34)),
+          child: Icon(data.icon, size: 34, color: data.accent),
         ),
         const SizedBox(height: Spacing.md - 4),
         Text(

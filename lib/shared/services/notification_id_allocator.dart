@@ -9,6 +9,7 @@ abstract class NotificationIdStore {
   Future<void> put(String key, int value);
   Future<void> delete(String key);
   Iterable<int> get values;
+  Iterable<String> get keys;
 }
 
 /// Assigns each item a stable notification-id slot within a fixed range,
@@ -65,6 +66,10 @@ class NotificationIdAllocator {
     );
   }
 
+  /// Every item that currently holds a slot — a snapshot, so callers can
+  /// [release] while iterating it.
+  List<String> get itemIds => _store.keys.toList();
+
   /// Frees [itemId]'s slot so a future item can reuse it — call only once
   /// the item is permanently deleted, not merely when its reminder is
   /// turned off (the same item should keep the same id if it gets a
@@ -90,6 +95,9 @@ class HiveNotificationIdStore implements NotificationIdStore {
 
   @override
   Iterable<int> get values => _box.values;
+
+  @override
+  Iterable<String> get keys => _box.keys.cast<String>();
 }
 
 /// [NotificationIdStore] backed by a plain in-memory map — [NotificationService]'s
@@ -109,4 +117,7 @@ class InMemoryNotificationIdStore implements NotificationIdStore {
 
   @override
   Iterable<int> get values => _values.values;
+
+  @override
+  Iterable<String> get keys => _values.keys;
 }

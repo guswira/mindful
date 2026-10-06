@@ -83,8 +83,8 @@ void main() {
     (tester) async {
       await tester.pumpWidget(buildSheet());
 
-      expect(find.text('💸 Spending'), findsOneWidget);
-      expect(find.text('💰 Income'), findsOneWidget);
+      expect(find.text('Spending'), findsOneWidget);
+      expect(find.text('Income'), findsOneWidget);
       expect(find.text('Food'), findsOneWidget);
       expect(find.text('Salary'), findsNothing);
       expect(find.widgetWithText(TintedPill, 'Save'), findsOneWidget);
@@ -117,7 +117,7 @@ void main() {
   testWidgets('switching to income swaps the category list', (tester) async {
     await tester.pumpWidget(buildSheet());
 
-    await tester.tap(find.text('💰 Income'));
+    await tester.tap(find.text('Income'));
     await tester.pump();
 
     expect(find.text('Salary'), findsOneWidget);

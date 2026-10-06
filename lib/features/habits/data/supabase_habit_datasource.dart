@@ -26,10 +26,15 @@ class SupabaseHabitDatasource {
     await _client.from(SupabaseConstants.habitsTable).upsert(habit.toJson());
   }
 
-  /// Deletes the habit with [habitId], and its logs (`habit_logs.habit_id`
-  /// references `habits` — deletion is handled by the schema's cascade, if
-  /// configured; otherwise logs are pruned separately by the caller).
+  /// Deletes the habit with [habitId] and all of its logs. The logs go
+  /// first: `habit_logs.habit_id` references `habits` without
+  /// `on delete cascade`, so deleting a habit that has any log fails with a
+  /// foreign-key violation otherwise.
   Future<void> deleteHabit(String habitId) async {
+    await _client
+        .from(SupabaseConstants.habitLogsTable)
+        .delete()
+        .eq('habit_id', habitId);
     await _client
         .from(SupabaseConstants.habitsTable)
         .delete()

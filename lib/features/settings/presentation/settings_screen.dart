@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/constants/spacing.dart';
-import '../../../core/l10n/app_language.dart';
 import '../../../core/l10n/app_language_controller.dart';
 import '../../../core/l10n/l10n.dart';
 import '../../../shared/services/drive_service.dart';
+import '../../../shared/widgets/language_picker.dart';
 import '../../auth/domain/auth_state.dart';
 import '../data/journal_reminders_controller.dart';
 import 'background_section.dart';
@@ -100,60 +100,14 @@ class _AccountSection extends ConsumerWidget {
 class _LanguageSection extends ConsumerWidget {
   const _LanguageSection();
 
-  /// "System default (English)" etc. — names the language the device
-  /// currently resolves to, so "system" isn't a mystery choice.
-  static String _systemLabel(AppLocalizations l10n) {
-    final deviceLocale = resolveAppLocale(
-      WidgetsBinding.instance.platformDispatcher.locale,
-    );
-    final deviceLanguage = switch (deviceLocale.languageCode) {
-      'id' => l10n.languageNameBahasa,
-      _ => l10n.languageNameEnglish,
-    };
-    return l10n.settingsLanguageSystemWithCurrent(deviceLanguage);
-  }
-
-  static String _label(AppLocalizations l10n, AppLanguage language) =>
-      switch (language) {
-        AppLanguage.system => _systemLabel(l10n),
-        AppLanguage.english => l10n.languageNameEnglish,
-        AppLanguage.bahasa => l10n.languageNameBahasa,
-      };
-
-  Future<void> _pickLanguage(
-    BuildContext context,
-    WidgetRef ref,
-    AppLanguage current,
-  ) async {
-    final l10n = context.l10n;
-    final picked = await showModalBottomSheet<AppLanguage>(
-      context: context,
-      builder: (context) => SafeArea(
-        child: ListView(
-          shrinkWrap: true,
-          children: [
-            for (final language in AppLanguage.values)
-              ListTile(
-                title: Text(_label(l10n, language)),
-                trailing: language == current ? const Icon(Icons.check) : null,
-                onTap: () => Navigator.pop(context, language),
-              ),
-          ],
-        ),
-      ),
-    );
-    if (picked == null || !context.mounted) return;
-    await ref.read(appLanguageControllerProvider.notifier).select(picked);
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final language = ref.watch(appLanguageControllerProvider);
     return ListTile(
       leading: const Icon(Icons.language),
       title: Text(context.l10n.settingsLanguageTitle),
-      subtitle: Text(_label(context.l10n, language)),
-      onTap: () => _pickLanguage(context, ref, language),
+      subtitle: Text(appLanguageLabel(context.l10n, language)),
+      onTap: () => pickAppLanguage(context, ref),
     );
   }
 }

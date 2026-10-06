@@ -42,7 +42,7 @@
   },
   "aiScanSaved": "Scan saved!",
   "aiMainIngredients": "Main ingredients",
-  "aiResultDisclaimer": "⚠ AI estimates may vary based on portion size, preparation method, and ingredients.",
+  "aiResultDisclaimer": "AI estimates may vary based on portion size, preparation method, and ingredients.",
   "aiLowConfidenceWarning": "Low confidence — try a clearer, closer photo.",
   "aiDismiss": "Dismiss",
   "aiDiscard": "Discard",
@@ -51,9 +51,9 @@
   "aiMacroCarbs": "Carbs",
   "aiMacroFat": "Fat",
   "aiMacroFiber": "Fiber",
-  "aiConfidenceHigh": "✓ Confident",
-  "aiConfidenceLow": "! Uncertain",
-  "aiConfidenceMedium": "~ Estimate",
+  "aiConfidenceHigh": "Confident",
+  "aiConfidenceLow": "Uncertain",
+  "aiConfidenceMedium": "Estimate",
   "aiCaloriesUnit": "calories",
   "aiPerServing": "per serving",
   "aiAnalyzingTitle": "Analyzing your food...",
@@ -67,7 +67,7 @@
   "aiFoodCheckerSubtitle": "Take a photo of your food to get an AI-powered nutrition estimate.",
   "aiScanYourFood": "Scan your food",
   "aiScanYourFoodHint": "Point camera at a meal, snack or ingredient",
-  "aiCheckFoodCalories": "📷  Check food calories",
+  "aiCheckFoodCalories": "Check food calories",
   "aiChooseFromGallery": "Choose from gallery",
   "aiUnknownFood": "Unknown food",
   "aiKcal": "kcal",
@@ -89,9 +89,9 @@
   "notifTestBody": "If you see this, notification delivery works on this device.",
   "notifDebugChannelName": "Debug test notifications",
   "notifDebugChannelDescription": "A manually triggered test notification, from Settings",
-  "notifJournalMorningTitle": "Good morning ☀️",
+  "notifJournalMorningTitle": "Good morning",
   "notifJournalMorningBody": "Time to write in your journal",
-  "notifJournalEveningTitle": "How was your day? 🌙",
+  "notifJournalEveningTitle": "How was your day?",
   "notifJournalEveningBody": "Write it down",
   "notifJournalChannelName": "Journal reminders",
   "notifJournalChannelDescription": "Daily journaling reminders",
@@ -122,8 +122,11 @@
   "widgetLabelTasks": "Todo",
   "widgetLabelHabits": "Routines",
   "widgetLabelShowMe": "Show me:",
-  "widgetChooseTasks": "✅ Todo",
-  "widgetChooseHabits": "💪 Routines",
+  "widgetChooseTasks": "Todo",
+  "widgetChooseHabits": "Routines",
+  "widgetRoutineDone": "Done",
+  "widgetRoutinesAllDone": "All done",
+  "widgetNoRoutines": "No routines yet",
   "widgetDoneCount": "{done}/{total} done",
   "@widgetDoneCount": {
     "placeholders": {
@@ -181,7 +184,9 @@
     }
   },
   "habitNameHint": "Habit name...",
-  "habitEmptyList": "No habits yet",
+  "habitIntroTitle": "Routines repeat every day",
+  "habitIntroBody": "Pick a small habit — a walk, water, reading — and check it off daily. Mindful tracks your streak and can remind you on the days you choose.",
+  "habitIntroAction": "Add routine",
   "habitSyncFailed": "Could not sync \"{name}\": {error}",
   "@habitSyncFailed": {
     "placeholders": {
@@ -194,7 +199,7 @@
     }
   },
   "habitArchiveConfirmTitle": "Archive habit?",
-  "habitArchiveConfirmBody": "\"{name}\" will be hidden from today's list.",
+  "habitArchiveConfirmBody": "\"{name}\" will be hidden from today's list. Find it under Archived in Routines.",
   "@habitArchiveConfirmBody": {
     "placeholders": {
       "name": {
@@ -234,9 +239,36 @@
     }
   },
   "habitConvertSave": "Save routine",
+  "habitArchivedLink": "Archived ({count})",
+  "@habitArchivedLink": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "habitArchivedTitle": "Archived routines",
+  "habitArchivedHint": "Hidden from today's list, history kept. Restore one to track it again.",
+  "habitArchivedEmpty": "No archived routines",
+  "habitRestore": "Restore",
+  "habitActionSummaryTitle": "Actions this month",
+  "habitActionSummaryCount": "{count, plural, =1{1 time} other{{count} times}}",
+  "@habitActionSummaryCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "habitDayLoggedAs": "Logged as",
+  "habitDayChangeTo": "Change to",
+  "habitDayNotDone": "Not done",
+  "habitActionRemoved": "Removed action",
   "taskGroupUpcoming": "Upcoming",
   "taskGroupNoDate": "No date",
-  "taskEmptyList": "No tasks yet",
+  "taskIntroTitle": "Clear your head, one task at a time",
+  "taskIntroBody": "Jot down what needs doing, give it a due date or a reminder, and break bigger jobs into subtasks. Today's tasks also show on your home screen.",
+  "taskIntroAction": "Add task",
   "taskCompletedSection": "Completed ({count})",
   "@taskCompletedSection": {
     "placeholders": {
@@ -325,30 +357,13 @@
     }
   },
   "homeSectionTodayTasks": "Today's Todo",
-  "homeSectionHabits": "Routines",
-  "homeSectionJournal": "Journal",
   "homeJournalPlanTitle": "Write today's plan",
   "homeJournalPlanSubtitle": "Outline your goals for a focused day.",
   "homeJournalPlanAction": "Start",
-  "homeJournalReflectTitle": "Review what happened",
+  "homeJournalReflectTitle": "Review today",
   "homeJournalReflectSubtitle": "Reflect on your day's accomplishments.",
   "homeJournalReflectAction": "Reflect",
-  "homeHabitsProgress": "{done}/{total}",
-  "@homeHabitsProgress": {
-    "placeholders": {
-      "done": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
-  "homeStreakJournalLabel": "Journal streak",
-  "homeStreakHabitsLabel": "Habits today",
-  "homeStreakTasksLabel": "Tasks due",
   "homeTasksEmpty": "What needs to be done today?",
-  "homeAddTask": "Add task",
   "homeSyncFailed": "Could not sync \"{name}\": {error}",
   "@homeSyncFailed": {
     "placeholders": {
@@ -360,22 +375,33 @@
       }
     }
   },
-  "homeHabitsAllDone": "All done! 🎉",
-  "homeHabitsEmpty": "Build your first habit",
-  "homeHabitsStart": "Start",
+  "homeHabitsAllDone": "All done!",
+  "homeBeMindfulIntro": "Mindful helps you slow down and live with intention — routines, tasks, money, food, breathing and journaling, all in one calm place. Try them one by one:",
+  "homeBuildFirstRoutine": "Build your first routine",
+  "homeBuildFirstRoutineSubtitle": "Small daily habits add up over time.",
+  "homeBuildFirstRoutineAction": "Build",
+  "homeMindfulSpendingTitle": "Mindful with spending",
+  "homeMindfulSpendingSubtitle": "Record your spending to see where your money goes.",
+  "homeMindfulSpendingAction": "Record",
+  "homeMindfulTaskTitle": "Mindful with your time",
+  "homeMindfulTaskSubtitle": "Add a task so nothing slips through today.",
+  "homeMindfulTaskAction": "Add",
+  "homeMindfulFoodTitle": "Mindful with the food you eat",
+  "homeMindfulFoodSubtitle": "Snap a meal and let AI estimate its nutrition.",
+  "homeMindfulFoodAction": "Scan",
+  "homeMindfulBreathingStepTitle": "Mindful breathing",
+  "homeMindfulBreathingStepSubtitle": "Take a minute for a guided breath.",
+  "homeMindfulBreathingStepAction": "Breathe",
+  "homeMindfulJournalTitle": "Mindful with your thoughts",
+  "homeMindfulJournalSubtitle": "Write your first journal entry.",
+  "homeMindfulJournalAction": "Write",
+  "homeMindfulBudgetTitle": "Mindful with your budget",
+  "homeMindfulBudgetSubtitle": "Set a budget and see what's left each day.",
+  "homeMindfulBudgetAction": "Set",
   "homeUnsyncedBanner": "Some changes haven't synced yet",
   "authSignInWithGoogle": "Sign in with Google",
   "authSignInFailed": "Sign in failed: {error}",
   "@authSignInFailed": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "journalTabTitle": "Journal",
-  "journalLoadFailed": "Couldn't load entries: {error}",
-  "@journalLoadFailed": {
     "placeholders": {
       "error": {
         "type": "String"
@@ -387,7 +413,6 @@
   "journalPhotoCamera": "Camera",
   "journalPhotoGallery": "Gallery",
   "journalTitleHint": "Title...",
-  "journalBodyHint": "What's on your mind...",
   "journalDeleteEntry": "Delete entry",
   "journalAddSheetTitle": "What's going on",
   "journalSaveEntry": "Save entry",
@@ -398,8 +423,8 @@
   "moneyCategoryHeading": "Category",
   "moneyNoteHint": "Add a note...",
   "moneySaveChanges": "Save changes",
-  "moneyTypeToggleSpending": "💸 Spending",
-  "moneyTypeToggleIncome": "💰 Income",
+  "moneyTypeToggleSpending": "Spending",
+  "moneyTypeToggleIncome": "Income",
   "moneyKeypadBackspace": "Delete",
   "moneyDateChange": "Change",
   "moneyTypeSpending": "Spending",
@@ -423,7 +448,8 @@
   "moneyTabTitle": "Cashflow",
   "moneyAddSpending": "+ Spending",
   "moneyAddIncome": "+ Income",
-  "moneyEmptyBudgetPrompt": "Set your budget to get started",
+  "moneyBudgetIntroTitle": "Set a budget",
+  "moneyBudgetIntroBody": "Choose a monthly or daily amount. Mindful shows what's left as you spend, so you know where you stand before the month runs out.",
   "moneySetBudget": "Set budget",
   "moneySetMonthly": "Set Monthly",
   "moneySetDaily": "Set Daily",
@@ -454,15 +480,15 @@
   "moneyPeriodThisMonth": "This Month",
   "moneyPeriodAll": "All",
   "moneyNoEntriesInPeriod": "No entries in this period",
+  "moneySpendingIntroTitle": "Record your spending",
+  "moneySpendingIntroBody": "Log what you spend and earn in a few taps. Mindful groups it by day and category, so you can see where your money really goes.",
+  "moneySpendingIntroAction": "Record spending",
   "moneyRecapTitle": "Recap",
   "moneyRecapNoSpending": "No spending yet this period",
   "moneyRecapNet": "Net",
-  "moneyRecapTopCategory": "Top category: {emoji} {category}",
+  "moneyRecapTopCategory": "Top category: {category}",
   "@moneyRecapTopCategory": {
     "placeholders": {
-      "emoji": {
-        "type": "String"
-      },
       "category": {
         "type": "String"
       }
@@ -656,7 +682,7 @@
   "settingsDebugScheduleTest": "Schedule test notification (5 min)",
   "navHome": "Home",
   "navTasks": "Tasks & Routines",
-  "navJournal": "Journal",
+  "navJournal": "Mindfulness",
   "navMoney": "Money",
   "navAi": "AI Lab",
   "writeButtonLabel": "Write",
@@ -665,7 +691,7 @@
   "writeNewHabit": "New habit",
   "writeNewMoneyEntry": "New money entry",
   "sharedUnsyncedLabel": "Not synced yet",
-  "moneyAdviceButton": "✨ AI advice",
+  "moneyAdviceButton": "AI advice",
   "moneyAdviceTitle": "AI spending advice",
   "moneyAdviceLoading": "Looking at your spending...",
   "moneyAdviceSummary": "Overview",
@@ -673,7 +699,7 @@
   "moneyAdviceTips": "How to save",
   "moneyAdviceNoEntries": "Add some spending or income first to get advice.",
   "moneyAdviceUnreadable": "Couldn't read the AI's advice. Try again.",
-  "moneyAdviceDisclaimer": "⚠ Experimental AI advice. Use as a guide only, not financial advice.",
+  "moneyAdviceDisclaimer": "Experimental AI advice. Use as a guide only, not financial advice.",
   "moneyAdvicePrompt": "You are a friendly personal finance advisor. Below is a summary of the user's recorded spending and income.\n\n{data}\n\nAnalyze where most of their spending comes from, and how they can save and optimize it.\nReply in English.\nRespond with a single JSON object only — no markdown, no explanation, no code blocks — with exactly these keys:\n\"summary\": a string of two or three sentences on the overall picture,\n\"spendingInsights\": an array of 2 to 4 strings, each about one top spending category, with its amount and share of total spending,\n\"savingTips\": an array of 3 to 5 strings, each a concrete, actionable tip to save or optimize spending, specific to this data.",
   "@moneyAdvicePrompt": {
     "placeholders": {
@@ -828,10 +854,17 @@
       }
     }
   },
-  "navExercise": "Exercise",
-  "exerciseTitle": "Exercise",
-  "exerciseSubtitle": "Slow down and breathe with intention.",
-  "exerciseBreathingSection": "Breathing",
+  "exerciseHistory": "History",
+  "exerciseShowAll": "Show all ({count} more)",
+  "@exerciseShowAll": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "exerciseShowLess": "Show less",
+  "exerciseBreathingSection": "Breathing exercise",
   "exerciseActivitySection": "Activity",
   "breathingEqualName": "Equal Breathing",
   "breathingEqualDescription": "Inhale and release for the same count to steady your mind.",
@@ -1009,5 +1042,50 @@
     }
   },
   "exerciseCalendarPrevious": "Previous month",
-  "exerciseCalendarNext": "Next month"
+  "exerciseCalendarNext": "Next month",
+  "moodHappy": "Happy",
+  "moodNeutral": "Neutral",
+  "moodSad": "Sad",
+  "moodAnxious": "Anxious",
+  "moodExcited": "Excited",
+  "journalTypeReview": "Today review",
+  "journalTypePlan": "Plan",
+  "journalTypeGratitude": "Gratitude",
+  "journalTypeReviewHint": "How did today go?",
+  "journalTypePlanHint": "What do you want to get done today?",
+  "journalTypeGratitudeHint": "What are you grateful for today?",
+  "mindfulnessTabTitle": "Mindfulness",
+  "journalTodaySection": "Today's journal",
+  "journalWrite": "Write",
+  "journalHistoryTitle": "Journal history",
+  "journalHistoryMonthEmpty": "No entries this month",
+  "journalHistoryDayEmpty": "{date}: no entries",
+  "@journalHistoryDayEmpty": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "exerciseActivityTitle": "Exercise activity",
+  "homeAddTodo": "Add todo",
+  "homeAddRoutine": "Add routine",
+  "homeSectionMindfulness": "Mindfulness",
+  "homeMindfulBreathingTitle": "Breathing exercise",
+  "homeMindfulBreathingSubtitle": "Slow down with a guided breath.",
+  "homeMindfulBreathingAction": "Breathe",
+  "breathingPickerTitle": "Choose a breathing exercise",
+  "loginTagline": "Your day, a little more mindful.",
+  "loginFeatureJournalTitle": "Daily journal",
+  "loginFeatureJournalBody": "Plan your morning, review your evening, and note what you're grateful for.",
+  "loginFeatureRoutinesTitle": "Tasks & routines",
+  "loginFeatureRoutinesBody": "Build routines that stick and tick off tasks, with reminders that keep you on track.",
+  "loginFeatureMoneyTitle": "Mindful spending",
+  "loginFeatureMoneyBody": "Record spending and income, and see how much of your budget is left.",
+  "loginFeatureBreathingTitle": "Guided breathing",
+  "loginFeatureBreathingBody": "Slow down with breathing exercises, a voice guide, and calming ambience.",
+  "loginFeatureAiTitle": "AI food check",
+  "loginFeatureAiBody": "Snap a photo of your meal for a quick nutrition estimate.",
+  "loginFeatureRecapTitle": "Monthly recap",
+  "loginFeatureRecapBody": "Look back on your month, story-style, and keep the streak going."
 }

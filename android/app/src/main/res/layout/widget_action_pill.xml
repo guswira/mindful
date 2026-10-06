@@ -1,13 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- A routine action pill. The shape sits in its own ImageView so it can
+     be tinted with the routine's color (RemoteViews can't tint a
+     background before API 31); the label is colored in code too. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/pill_label"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_marginStart="6dp"
-    android:paddingHorizontal="12dp"
-    android:paddingVertical="7dp"
-    android:background="@drawable/widget_action_pill_background"
-    android:textColor="@color/widget_habit_accent"
-    android:textSize="12sp"
-    tools:text="Gym" />
+    android:layout_marginStart="6dp">
+
+    <ImageView
+        android:id="@+id/pill_background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="fitXY"
+        android:src="@drawable/widget_action_pill_shape"
+        android:contentDescription="@null" />
+
+    <TextView
+        android:id="@+id/pill_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="7dp"
+        android:textColor="@color/widget_habit_accent"
+        android:textSize="12sp"
+        tools:text="Gym" />
+</FrameLayout>

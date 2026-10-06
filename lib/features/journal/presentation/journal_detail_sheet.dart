@@ -7,8 +7,9 @@ import '../../../core/constants/spacing.dart';
 import '../../../core/l10n/l10n.dart';
 import '../data/journal_entries_controller.dart';
 import '../domain/journal_entry.dart';
+import 'journal_labels.dart';
 import 'journal_photo_viewer.dart';
-import 'journal_tab_list.dart' show JournalPhotoThumbnail;
+import 'journal_tab_list.dart' show JournalPhotoThumbnail, JournalTypeBadge;
 
 enum _MoreAction { edit, delete }
 
@@ -117,8 +118,13 @@ class JournalDetailSheet extends ConsumerWidget {
                 style: const TextStyle(color: Colors.white60, fontSize: 14),
               ),
               const Spacer(),
-              if (entry.mood != null) ...[
-                Text(entry.mood!.emoji, style: const TextStyle(fontSize: 22)),
+              if (entry.mood case final mood?) ...[
+                Icon(
+                  moodIcon(mood),
+                  size: 22,
+                  color: Colors.white70,
+                  semanticLabel: context.l10n.moodName(mood),
+                ),
                 const SizedBox(width: Spacing.sm),
               ],
               IconButton(
@@ -127,6 +133,7 @@ class JournalDetailSheet extends ConsumerWidget {
               ),
             ],
           ),
+          JournalTypeBadge(type: entry.type),
           const SizedBox(height: Spacing.md),
           if (entry.title case final title? when title.isNotEmpty) ...[
             Text(

@@ -25,4 +25,29 @@ void main() {
 
     expect(tapped, isTrue);
   });
+
+  testWidgets('full width centers the label, with an optional icon', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: 300,
+            child: TintedPill(
+              label: 'Sign in',
+              color: Colors.teal,
+              icon: Icons.login,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byIcon(Icons.login), findsOneWidget);
+    final pill = tester.getRect(find.byType(TintedPill));
+    final content = tester.getRect(find.byType(Row));
+    expect(pill.width, 300);
+    expect(content.center.dx, closeTo(pill.center.dx, 0.5));
+  });
 }

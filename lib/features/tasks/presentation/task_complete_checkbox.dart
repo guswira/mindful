@@ -9,12 +9,17 @@ class TaskCompleteCheckbox extends StatefulWidget {
     required this.value,
     required this.onChanged,
     this.activeColor,
+    this.materialTapTargetSize,
     super.key,
   });
 
   final bool value;
   final ValueChanged<bool>? onChanged;
   final Color? activeColor;
+
+  /// Pass [MaterialTapTargetSize.shrinkWrap] to drop the 48px padding when
+  /// the checkbox has to line up with a smaller leading slot.
+  final MaterialTapTargetSize? materialTapTargetSize;
 
   @override
   State<TaskCompleteCheckbox> createState() => _TaskCompleteCheckboxState();
@@ -53,6 +58,7 @@ class _TaskCompleteCheckboxState extends State<TaskCompleteCheckbox>
       child: Checkbox(
         value: widget.value,
         activeColor: widget.activeColor,
+        materialTapTargetSize: widget.materialTapTargetSize,
         onChanged: _handleChanged,
       ),
     );

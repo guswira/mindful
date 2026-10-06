@@ -5,6 +5,7 @@ import '../../../core/theme/glass_theme.dart';
 import '../../../shared/widgets/glass_card.dart';
 import '../../../shared/widgets/tinted_pill.dart';
 import '../domain/journal_entry.dart';
+import 'journal_labels.dart';
 
 /// Sticky mood picker: 5 emoji buttons, the selected one scaled up with a
 /// journalAccent underline dot. See SPEC.md Journal Editor Screen.
@@ -66,7 +67,12 @@ class _MoodButton extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(mood.emoji, style: const TextStyle(fontSize: 26)),
+              Icon(
+                moodIcon(mood),
+                size: 26,
+                color: isSelected ? activeColor : Colors.white,
+                semanticLabel: context.l10n.moodName(mood),
+              ),
               const SizedBox(height: 4),
               Container(
                 width: 4,

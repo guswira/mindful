@@ -159,7 +159,7 @@ class _JournalEntryProviderElement
   String get id => (origin as JournalEntryProvider).id;
 }
 
-String _$journalEntriesHash() => r'3a25a7e1738fd3d10932b987e01fe721377cd048';
+String _$journalEntriesHash() => r'b29d435a5c305480456d28c0d47113922ed9a3db';
 
 /// Journal entries, newest first — cache-backed with Supabase sync.
 ///

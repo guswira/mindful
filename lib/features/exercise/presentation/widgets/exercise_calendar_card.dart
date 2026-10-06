@@ -5,6 +5,7 @@ import '../../../../core/constants/spacing.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/glass_theme.dart';
 import '../../../../shared/widgets/glass_card.dart';
+import '../../../../shared/widgets/month_calendar.dart';
 import '../../domain/exercise_stats.dart';
 import '../breathing_labels.dart';
 import 'exercise_calendar_grid.dart';
@@ -70,26 +71,10 @@ class _ExerciseCalendarCardState extends State<ExerciseCalendarCard> {
       padding: const EdgeInsets.fromLTRB(12, Spacing.sm, 12, Spacing.md),
       child: Column(
         children: [
-          Row(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.chevron_left),
-                tooltip: l10n.exerciseCalendarPrevious,
-                onPressed: () => _changeMonth(-1),
-              ),
-              Expanded(
-                child: Text(
-                  DateFormat.yMMMM().format(_month),
-                  textAlign: TextAlign.center,
-                  style: textTheme.titleMedium?.copyWith(color: Colors.white),
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.chevron_right),
-                tooltip: l10n.exerciseCalendarNext,
-                onPressed: _isCurrentMonth ? null : () => _changeMonth(1),
-              ),
-            ],
+          MonthCalendarHeader(
+            month: _month,
+            onPrevious: () => _changeMonth(-1),
+            onNext: _isCurrentMonth ? null : () => _changeMonth(1),
           ),
           ExerciseCalendarGrid(
             month: _month,

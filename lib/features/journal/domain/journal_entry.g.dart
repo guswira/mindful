@@ -16,6 +16,13 @@ _JournalEntry _$JournalEntryFromJson(Map<String, dynamic> json) =>
       updatedAt: DateTime.parse(json['updated_at'] as String),
       title: json['title'] as String?,
       mood: $enumDecodeNullable(_$MoodEnumMap, json['mood']),
+      type:
+          $enumDecodeNullable(
+            _$JournalTypeEnumMap,
+            json['type'],
+            unknownValue: JournalType.review,
+          ) ??
+          JournalType.review,
       photoUrls:
           (json['photo_urls'] as List<dynamic>?)
               ?.map((e) => e as String)
@@ -36,6 +43,7 @@ Map<String, dynamic> _$JournalEntryToJson(_JournalEntry instance) =>
       'updated_at': instance.updatedAt.toIso8601String(),
       'title': instance.title,
       'mood': _$MoodEnumMap[instance.mood],
+      'type': _$JournalTypeEnumMap[instance.type]!,
       'photo_urls': instance.photoUrls,
       'sync_status': _$SyncStatusEnumMap[instance.syncStatus]!,
     };
@@ -46,6 +54,12 @@ const _$MoodEnumMap = {
   Mood.sad: 'sad',
   Mood.anxious: 'anxious',
   Mood.excited: 'excited',
+};
+
+const _$JournalTypeEnumMap = {
+  JournalType.review: 'review',
+  JournalType.plan: 'plan',
+  JournalType.gratitude: 'gratitude',
 };
 
 const _$SyncStatusEnumMap = {

@@ -31,7 +31,11 @@ class FoodScanCard extends StatelessWidget {
                 color: glass.aiAccent.withValues(alpha: 0.10),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Text('🍽', style: TextStyle(fontSize: 20)),
+              child: Icon(
+                Icons.restaurant_outlined,
+                size: 20,
+                color: glass.aiAccent,
+              ),
             ),
             const SizedBox(width: Spacing.sm),
             Expanded(

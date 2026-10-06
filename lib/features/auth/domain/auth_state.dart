@@ -1,12 +1,18 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hive/hive.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../shared/services/notification_service.dart';
 import '../../../shared/services/sync_service.dart';
+import '../../../shared/services/widget_service.dart';
+import '../../exercise/data/breathing_session_repository.dart';
 import '../../habits/data/habit_repository.dart';
 import '../../journal/data/journal_repository.dart';
+import '../../money/data/money_repository.dart';
+import '../../tasks/data/task_repository.dart';
 import '../data/auth_repository.dart';
 
 part 'auth_state.freezed.dart';
@@ -74,21 +80,55 @@ class AuthNotifier extends _$AuthNotifier {
     }
   }
 
-  /// Signs out, clears the local Hive cache, and returns the app to the
-  /// unauthenticated state.
+  /// Hive boxes holding the signed-in account's data. Every one is emptied
+  /// on sign-out — a box missed here shows the previous account's data to
+  /// whoever signs in next, since sync merges into the cache rather than
+  /// replacing it.
+  ///
+  /// Device preferences (language, background, breathing sound settings)
+  /// live in secure storage, not here, and survive a sign-out on purpose.
+  static const List<String> userDataBoxNames = [
+    JournalRepository.boxName,
+    HabitRepository.habitsBoxName,
+    HabitRepository.habitLogsBoxName,
+    TaskRepository.boxName,
+    MoneyRepository.entriesBoxName,
+    MoneyRepository.settingsBoxName,
+    BreathingSessionRepository.boxName,
+  ];
+
+  /// Signs out, then drops everything that belonged to the account: its
+  /// task/habit reminders, the local Hive cache and the home/lock screen
+  /// widgets' copy of it.
+  ///
+  /// Unsynced (pending) local writes are lost — they'd otherwise be
+  /// uploaded later under whichever account signs in next.
   Future<void> signOut() async {
     final repository = ref.read(authRepositoryProvider);
     await repository.signOut();
+    await _forgetReminders();
     await _clearLocalCache();
+    // SyncService skips a sync within 5 minutes of the last one — a fresh
+    // instance makes sure the next account pulls its data straight away.
+    ref.invalidate(syncServiceProvider);
     state = const AuthState.unauthenticated();
+    await refreshWidgetsBestEffort(
+      () => ref.read(widgetServiceProvider.future),
+    );
+  }
+
+  Future<void> _forgetReminders() async {
+    try {
+      final notifications = await ref.read(notificationServiceProvider.future);
+      await notifications.forgetAllItemReminders();
+    } catch (error) {
+      // Best-effort: signing out must still succeed without notifications.
+      debugPrint('Could not cancel reminders on sign-out: $error');
+    }
   }
 
   Future<void> _clearLocalCache() async {
-    for (final boxName in const [
-      JournalRepository.boxName,
-      HabitRepository.habitsBoxName,
-      HabitRepository.habitLogsBoxName,
-    ]) {
+    for (final boxName in userDataBoxNames) {
       final box = Hive.isBoxOpen(boxName)
           ? Hive.box<dynamic>(boxName)
           : await Hive.openBox<dynamic>(boxName);

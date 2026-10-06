@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:mindful/core/theme/glass_theme.dart';
+import 'package:mindful/features/ai/data/food_scan_repository.dart';
+import 'package:mindful/features/exercise/presentation/exercise_providers.dart';
 import 'package:mindful/features/habits/presentation/habit_tab.dart';
 import 'package:mindful/features/home/presentation/home_tab.dart';
 import 'package:mindful/features/home/presentation/widgets/unsynced_banner.dart';
@@ -29,13 +31,11 @@ class _EmptyJournalEntries extends JournalEntries {
 }
 
 void main() {
-  testWidgets('shows the greeting, empty sections and journal section', (
-    tester,
-  ) async {
+  testWidgets("shows Be mindful, Today's Todo and Mindfulness", (tester) async {
     // The default test surface is only 600 logical pixels tall, so the
     // journal section (near the bottom of the scroll view) would
     // otherwise be built-but-offstage and invisible to `find.text`.
-    tester.view.physicalSize = const Size(1080, 3600);
+    tester.view.physicalSize = const Size(1080, 4800);
     tester.view.devicePixelRatio = 3;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
@@ -53,6 +53,9 @@ void main() {
           // boxes, which aren't initialized here.
           monthlyBudgetProvider.overrideWith((ref) async => null),
           dailyBudgetProvider.overrideWith((ref) async => null),
+          moneyEntriesProvider(null).overrideWith((ref) async => const []),
+          recentScansProvider.overrideWith((ref) async => const []),
+          breathingSessionsProvider.overrideWith((ref) async => const []),
         ],
         child: MaterialApp(
           theme: ThemeData(extensions: [GlassTheme.dark()]),
@@ -63,7 +66,12 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('What needs to be done today?'), findsOneWidget);
-    expect(find.text('Build your first habit'), findsOneWidget);
+    expect(find.text('Add todo'), findsOneWidget);
+    expect(find.text('Add routine'), findsOneWidget);
+    expect(find.text('Mindfulness'), findsOneWidget);
     expect(find.text("Write today's plan"), findsOneWidget);
+    expect(find.text('Breathing exercise'), findsOneWidget);
+    expect(find.text('Build your first routine'), findsOneWidget);
+    expect(find.text('Mindful with spending'), findsOneWidget);
   });
 }

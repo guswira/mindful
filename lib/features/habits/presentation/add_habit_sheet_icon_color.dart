@@ -4,8 +4,10 @@ import '../../../core/constants/spacing.dart';
 import '../../../core/theme/glass_theme.dart';
 import '../../../shared/widgets/glass_card.dart';
 import 'habit_form.dart' show parseHexColor;
+import 'habit_icon.dart';
 
-/// Common habit emoji offered by [HabitIconGrid].
+/// Preset routine icons offered by [HabitIconGrid] — stored as these emoji
+/// and drawn as flat icons by [HabitIcon].
 const List<String> habitSheetIconPresets = [
   '💪',
   '🏃',
@@ -42,7 +44,7 @@ const List<String> habitSheetColorPresets = [
   '#FFB347',
 ];
 
-/// Grid of emoji swatches for picking a habit's icon, per the bottom-sheet
+/// Grid of icon swatches for picking a habit's icon, per the bottom-sheet
 /// design rules.
 class HabitIconGrid extends StatelessWidget {
   const HabitIconGrid({
@@ -91,7 +93,13 @@ class _IconSwatch extends StatelessWidget {
       child: SizedBox(
         width: 40,
         height: 40,
-        child: Center(child: Text(emoji, style: const TextStyle(fontSize: 22))),
+        child: Center(
+          child: HabitIcon(
+            icon: emoji,
+            size: 22,
+            color: selected ? glass.habitAccent : glass.textSecondary,
+          ),
+        ),
       ),
     );
     return GestureDetector(

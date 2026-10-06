@@ -25,6 +25,11 @@ void main() {
   });
 
   testWidgets('App launches to a blank splash screen', (tester) async {
+    // Signed out, the app lands on the login screen, whose feature tour
+    // animates forever — pumpAndSettle would never settle with it running.
+    tester.platformDispatcher.accessibilityFeaturesTestValue =
+        const FakeAccessibilityFeatures(disableAnimations: true);
+    addTearDown(tester.platformDispatcher.clearAccessibilityFeaturesTestValue);
     await tester.pumpWidget(const ProviderScope(child: App()));
     await tester.pumpAndSettle();
 

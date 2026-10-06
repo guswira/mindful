@@ -58,9 +58,10 @@ class MoneyDetailSheet extends ConsumerWidget {
           const SizedBox(height: Spacing.xs),
           Row(
             children: [
-              Text(
-                categoryEmoji[entry.category] ?? '',
-                style: const TextStyle(fontSize: 16),
+              Icon(
+                categoryIcon(entry.category),
+                size: 18,
+                color: glass.textSecondary,
               ),
               const SizedBox(width: Spacing.xs),
               Text(

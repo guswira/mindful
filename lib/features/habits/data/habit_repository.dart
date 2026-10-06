@@ -15,8 +15,9 @@ part 'habit_repository.g.dart';
 /// Habit + habit log CRUD, backed by a Hive cache and synced to Supabase.
 ///
 /// Reads and the cache-mutating methods never touch the network by
-/// themselves — [saveHabit]/[deleteHabit]/[saveLog]/[deleteLog] write to
-/// cache first, then push to Supabase, per SPEC.md's storage strategy.
+/// themselves — [saveHabit]/[saveLog]/[deleteLog] write to cache first,
+/// then push to Supabase, per SPEC.md's storage strategy ([deleteHabit] is
+/// the exception — see its doc).
 /// Habits have no `sync_status` column in the schema, so a failed habit
 /// sync is surfaced to the caller instead of retried; habit logs do have
 /// one, so a failed log sync is swallowed and marked
@@ -73,11 +74,18 @@ class HabitRepository {
     await _datasource.saveHabit(habit);
   }
 
-  /// Removes the habit with [habitId] from the cache, then Supabase.
-  /// Throws if the Supabase sync fails — see class doc.
+  /// Removes the habit with [habitId] and its logs from Supabase, then the
+  /// cache. Supabase goes first, unlike the other writes: a failed delete
+  /// throws with the cache untouched, instead of the habit vanishing until
+  /// the next refresh quietly brings it back.
   Future<void> deleteHabit(String habitId) async {
-    await _habitsBox.delete(habitId);
     await _datasource.deleteHabit(habitId);
+    await _habitsBox.delete(habitId);
+    await _habitLogsBox.deleteAll(
+      _habitLogsBox.keys
+          .where((key) => key is String && key.startsWith('${habitId}_'))
+          .toList(),
+    );
   }
 
   /// Every cached completion log, across all habits and months. Skips any
@@ -134,10 +142,15 @@ class HabitRepository {
   /// Replaces the cache with habits and this month's logs from Supabase.
   Future<void> refreshFromSupabase() async {
     final habits = await _datasource.fetchHabits();
-    await _habitsBox.clear();
-    for (final habit in habits) {
-      await _habitsBox.put(habit.id, habit.toJson());
-    }
+    // Put then prune rather than clear first, so a read mid-refresh never
+    // sees an empty cache.
+    await _habitsBox.putAll({
+      for (final habit in habits) habit.id: habit.toJson(),
+    });
+    final fresh = {for (final habit in habits) habit.id};
+    await _habitsBox.deleteAll(
+      _habitsBox.keys.where((key) => !fresh.contains(key)).toList(),
+    );
 
     final logs = await _datasource.fetchLogs(DateTime.now());
     for (final log in logs) {

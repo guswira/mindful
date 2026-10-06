@@ -39,7 +39,6 @@ class RoutineRecap {
     required this.perfectDays,
     required this.longestStreak,
     this.bestHabitName,
-    this.bestHabitIcon,
     this.bestHabitCheckIns = 0,
   });
 
@@ -56,7 +55,6 @@ class RoutineRecap {
   final int longestStreak;
 
   final String? bestHabitName;
-  final String? bestHabitIcon;
   final int bestHabitCheckIns;
 
   /// 0.0–1.0; 0 when there was nothing to check in.

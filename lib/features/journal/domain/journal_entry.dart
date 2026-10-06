@@ -11,21 +11,19 @@ part 'journal_entry.freezed.dart';
 part 'journal_entry.g.dart';
 
 /// A journal entry's self-reported emotional state.
-enum Mood {
-  happy,
-  neutral,
-  sad,
-  anxious,
-  excited;
+enum Mood { happy, neutral, sad, anxious, excited }
 
-  /// The emoji shown for this mood in pickers and entry cards.
-  String get emoji => switch (this) {
-    Mood.happy => '😊',
-    Mood.neutral => '😐',
-    Mood.sad => '😢',
-    Mood.anxious => '😰',
-    Mood.excited => '🤩',
-  };
+/// What a journal entry is for — picked when writing it.
+///
+/// Stored as its [JsonValue] in the `journal_entries.type` column. Entries
+/// written before types existed have no value and read as [review].
+enum JournalType {
+  @JsonValue('review')
+  review,
+  @JsonValue('plan')
+  plan,
+  @JsonValue('gratitude')
+  gratitude,
 }
 
 /// A single day's journal entry. See SPEC.md Data models.
@@ -43,6 +41,9 @@ abstract class JournalEntry with _$JournalEntry {
     @JsonKey(name: 'updated_at') required DateTime updatedAt,
     String? title,
     Mood? mood,
+    @JsonKey(unknownEnumValue: JournalType.review)
+    @Default(JournalType.review)
+    JournalType type,
     // Supabase Storage paths, e.g. `photos/{user_id}/{uuid}.jpg`.
     @JsonKey(name: 'photo_urls') @Default(<String>[]) List<String> photoUrls,
     @JsonKey(name: 'sync_status')

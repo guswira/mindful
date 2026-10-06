@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/glass_theme.dart';
@@ -7,6 +8,7 @@ import '../../../shared/widgets/glass_bottom_sheet.dart';
 import '../../../shared/widgets/tinted_pill.dart';
 import '../domain/entry_type.dart';
 import 'add_money_sheet.dart';
+import 'money_providers.dart';
 import 'widgets/budget_card.dart';
 import 'widgets/entry_list.dart';
 import 'widgets/recap_section.dart';
@@ -36,7 +38,6 @@ class MoneyTab extends StatelessWidget {
                       const BudgetCard(),
                       const SizedBox(height: 16),
                       const _AddButtonsRow(),
-                      const SizedBox(height: 16),
                       const RecapSection(),
                       const SizedBox(height: 16),
                       const EntryList(),
@@ -69,41 +70,50 @@ class _MoneyTabHeader extends StatelessWidget {
   }
 }
 
-class _AddButtonsRow extends StatelessWidget {
+/// "+ Spending" / "+ Income", hidden until the first entry exists — the
+/// empty state's "Record your spending" intro already offers adding one.
+class _AddButtonsRow extends ConsumerWidget {
   const _AddButtonsRow();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final entries = ref.watch(moneyEntriesProvider(null)).valueOrNull;
+    if (entries == null || entries.isEmpty) {
+      return const SizedBox.shrink();
+    }
     final glass = Theme.of(context).extension<GlassTheme>()!;
-    return Row(
-      children: [
-        Expanded(
-          child: Center(
-            child: TintedPill(
-              label: context.l10n.moneyAddSpending,
-              color: glass.moneySpending,
-              onTap: () => showGlassBottomSheet(
-                context: context,
-                builder: (_) => const AddMoneySheet(),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Row(
+        children: [
+          Expanded(
+            child: Center(
+              child: TintedPill(
+                label: context.l10n.moneyAddSpending,
+                color: glass.moneySpending,
+                onTap: () => showGlassBottomSheet(
+                  context: context,
+                  builder: (_) => const AddMoneySheet(),
+                ),
               ),
             ),
           ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Center(
-            child: TintedPill(
-              label: context.l10n.moneyAddIncome,
-              color: glass.moneyAccent,
-              onTap: () => showGlassBottomSheet(
-                context: context,
-                builder: (_) =>
-                    const AddMoneySheet(defaultType: EntryType.income),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Center(
+              child: TintedPill(
+                label: context.l10n.moneyAddIncome,
+                color: glass.moneyAccent,
+                onTap: () => showGlassBottomSheet(
+                  context: context,
+                  builder: (_) =>
+                      const AddMoneySheet(defaultType: EntryType.income),
+                ),
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

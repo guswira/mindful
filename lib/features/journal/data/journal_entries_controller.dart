@@ -37,6 +37,7 @@ class JournalEntries extends _$JournalEntries {
     required String body,
     String? title,
     Mood? mood,
+    JournalType type = JournalType.review,
     List<String> photoUrls = const [],
     DateTime? date,
   }) async {
@@ -47,12 +48,15 @@ class JournalEntries extends _$JournalEntries {
       body: body,
       title: title,
       mood: mood,
+      type: type,
       photoUrls: photoUrls,
       date: date,
     );
     ref.invalidateSelf();
     await future;
-    await refreshWidgetsBestEffort(() => ref.read(widgetServiceProvider.future));
+    await refreshWidgetsBestEffort(
+      () => ref.read(widgetServiceProvider.future),
+    );
   }
 
   /// Saves edits to [entry] and refreshes the list.
@@ -61,7 +65,9 @@ class JournalEntries extends _$JournalEntries {
     await repository.update(entry);
     ref.invalidateSelf();
     await future;
-    await refreshWidgetsBestEffort(() => ref.read(widgetServiceProvider.future));
+    await refreshWidgetsBestEffort(
+      () => ref.read(widgetServiceProvider.future),
+    );
   }
 
   /// Deletes [entry] and refreshes the list.
@@ -70,7 +76,9 @@ class JournalEntries extends _$JournalEntries {
     await repository.delete(entry);
     ref.invalidateSelf();
     await future;
-    await refreshWidgetsBestEffort(() => ref.read(widgetServiceProvider.future));
+    await refreshWidgetsBestEffort(
+      () => ref.read(widgetServiceProvider.future),
+    );
   }
 
   /// Uploads a photo for use in a not-yet-saved entry.

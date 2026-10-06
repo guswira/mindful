@@ -8,6 +8,7 @@ import 'core/router/router.dart';
 import 'core/theme/app_theme.dart';
 import 'features/settings/presentation/custom_background_controller.dart';
 import 'shared/widgets/app_background_scope.dart';
+import 'shared/widgets/glass_scroll_behavior.dart';
 
 /// Root widget — MaterialApp.router wired to [appRouterProvider],
 /// [AppTheme], and the language and background photo chosen in Settings.
@@ -39,6 +40,7 @@ class App extends ConsumerWidget {
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       localeResolutionCallback: _resolveLocale,
       routerConfig: ref.watch(appRouterProvider),
+      scrollBehavior: const GlassScrollBehavior(),
       builder: (context, child) => AppBackgroundScope(
         imagePath: backgroundPath,
         child: child ?? const SizedBox.shrink(),

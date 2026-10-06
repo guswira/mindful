@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:mindful/core/theme/app_theme.dart';
 import 'package:mindful/features/habits/domain/habit.dart';
+import 'package:mindful/features/habits/presentation/add_habit_sheet.dart';
 import 'package:mindful/features/habits/presentation/habit_tab.dart';
 import 'package:mindful/features/plan/presentation/plan_tab.dart';
 import 'package:mindful/features/tasks/domain/task.dart';
@@ -49,6 +50,7 @@ Widget _buildTab({
   List<Task> tasks = const [],
 }) => ProviderScope(
   overrides: [
+    archivedHabitsProvider.overrideWith((ref) async => const []),
     habitTabControllerProvider.overrideWith(
       () => _FakeHabitTabController(habits),
     ),
@@ -71,18 +73,33 @@ void main() {
     expect(find.text('Read a book'), findsOneWidget);
   });
 
-  testWidgets('shows both empty states when there is nothing yet', (
+  testWidgets('introduces routines and tasks when there is nothing yet', (
     tester,
   ) async {
     await tester.pumpWidget(_buildTab());
     await tester.pumpAndSettle();
 
-    expect(find.text('No habits yet'), findsOneWidget);
-    expect(find.text('No tasks yet'), findsOneWidget);
+    expect(find.text('Routines repeat every day'), findsOneWidget);
+    expect(find.text('Add routine'), findsOneWidget);
+    expect(find.text('Clear your head, one task at a time'), findsOneWidget);
+    expect(find.text('Add task'), findsOneWidget);
+  });
+
+  testWidgets('the routines intro opens the add habit sheet', (tester) async {
+    await tester.pumpWidget(_buildTab());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Add routine'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AddHabitSheet), findsOneWidget);
   });
 
   testWidgets('the "+" button offers adding a task or a habit', (tester) async {
-    await tester.pumpWidget(_buildTab());
+    // Non-empty, so the intro cards' own "Add task" pill isn't on screen.
+    await tester.pumpWidget(
+      _buildTab(habits: [(habit: _habit, todayLog: null)], tasks: [_task]),
+    );
     await tester.pumpAndSettle();
 
     await tester.tap(find.byIcon(Icons.add));

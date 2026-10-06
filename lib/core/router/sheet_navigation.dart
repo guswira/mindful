@@ -6,9 +6,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/habits/data/habit_repository.dart';
 import '../../features/habits/domain/habit.dart';
-import '../../features/habits/domain/habit_action.dart';
 import '../../features/habits/presentation/add_habit_sheet.dart';
 import '../../features/habits/presentation/habit_tab.dart';
+import '../../features/habits/presentation/widget_habit_log_sync.dart';
 import '../../features/journal/presentation/add_journal_sheet.dart';
 import '../../features/money/presentation/add_money_sheet.dart';
 import '../../features/tasks/presentation/add_task_sheet.dart';
@@ -90,17 +90,9 @@ Future<void> _logHabitFromWidget(
     return;
   }
 
-  HabitAction? action;
-  if (actionLabel != null) {
-    for (final candidate in habit.actions) {
-      if (candidate.label == actionLabel) {
-        action = candidate;
-        break;
-      }
-    }
-  }
-
-  await ref.read(habitTabControllerProvider.notifier).logAction(habit, action);
+  await ref
+      .read(habitTabControllerProvider.notifier)
+      .logAction(habit, habitActionByLabel(habit, actionLabel));
 }
 
 /// Undoes today's log for [habitId] — the widget's filled check. A

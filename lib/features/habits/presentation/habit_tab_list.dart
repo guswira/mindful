@@ -5,16 +5,17 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/spacing.dart';
 import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/glass_theme.dart';
-import '../../../shared/services/notification_service.dart';
-import '../../../shared/services/widget_service.dart';
 import '../../../shared/widgets/glass_bottom_sheet.dart';
 import '../../../shared/widgets/glass_card.dart';
 import '../../../shared/widgets/group_label.dart';
-import '../data/habit_repository.dart';
-import '../domain/habit.dart';
+import '../../../shared/widgets/intro_card.dart';
 import '../domain/habit_action.dart';
 import 'add_habit_sheet.dart';
+import 'archived_habits_sheet.dart';
+import 'habit_manage_actions.dart';
 import 'habit_tab.dart';
+import 'habit_icon.dart';
+import 'routine_pill.dart';
 
 /// The Tasks & Routines tab's routines section: a label plus [items]'
 /// active habits as glass rows, each with its action pills. Not scrollable
@@ -30,37 +31,50 @@ class RoutineSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        GroupLabel(context.l10n.habitTabTitle),
-        const SizedBox(height: Spacing.sm),
-        GlassCard(
-          padding: EdgeInsets.zero,
-          child: items.isEmpty
-              ? const _EmptyRoutines()
-              : Column(
-                  children: [
-                    for (var i = 0; i < items.length; i++) ...[
-                      if (i > 0) const _RowDivider(),
-                      _HabitRow(item: items[i]),
-                    ],
-                  ],
-                ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            GroupLabel(context.l10n.habitTabTitle),
+            const ArchivedHabitsLink(),
+          ],
         ),
+        const SizedBox(height: Spacing.sm),
+        if (items.isEmpty)
+          const _RoutinesIntro()
+        else
+          GlassCard(
+            padding: EdgeInsets.zero,
+            child: Column(
+              children: [
+                for (var i = 0; i < items.length; i++) ...[
+                  if (i > 0) const _RowDivider(),
+                  _HabitRow(item: items[i]),
+                ],
+              ],
+            ),
+          ),
       ],
     );
   }
 }
 
-class _EmptyRoutines extends StatelessWidget {
-  const _EmptyRoutines();
+/// Shown instead of the list until the first routine exists.
+class _RoutinesIntro extends StatelessWidget {
+  const _RoutinesIntro();
 
   @override
   Widget build(BuildContext context) {
     final glass = Theme.of(context).extension<GlassTheme>()!;
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Text(
-        context.l10n.habitEmptyList,
-        style: TextStyle(color: glass.textMuted, fontSize: 14),
+    final l10n = context.l10n;
+    return IntroCard(
+      icon: Icons.eco_outlined,
+      color: glass.habitAccent,
+      title: l10n.habitIntroTitle,
+      body: l10n.habitIntroBody,
+      actionLabel: l10n.habitIntroAction,
+      onAction: () => showGlassBottomSheet(
+        context: context,
+        builder: (_) => const AddHabitSheet(),
       ),
     );
   }
@@ -155,95 +169,10 @@ class _HabitRow extends ConsumerWidget {
           builder: (_) => AddHabitSheet(habit: habit),
         );
       case _HabitRowAction.archive:
-        await _archive(context, ref, habit);
+        await archiveHabitWithConfirm(context, ref, habit);
       case _HabitRowAction.delete:
-        await _delete(context, ref, habit);
+        await deleteHabitWithConfirm(context, ref, habit);
     }
-  }
-
-  Future<void> _archive(
-    BuildContext context,
-    WidgetRef ref,
-    Habit habit,
-  ) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(context.l10n.habitArchiveConfirmTitle),
-        content: Text(context.l10n.habitArchiveConfirmBody(habit.name)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(context.l10n.commonCancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(context.l10n.commonArchive),
-          ),
-        ],
-      ),
-    );
-    if (confirmed != true || !context.mounted) {
-      return;
-    }
-
-    final repository = await ref.read(habitRepositoryProvider.future);
-    await repository.saveHabit(habit.copyWith(archived: true));
-    await _cancelReminder(ref, habit.id);
-    ref.invalidate(habitTabControllerProvider);
-    await refreshWidgetsBestEffort(
-      () => ref.read(widgetServiceProvider.future),
-    );
-  }
-
-  Future<void> _delete(BuildContext context, WidgetRef ref, Habit habit) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(context.l10n.habitDeleteConfirmTitle),
-        content: Text(context.l10n.habitDeleteConfirmBody(habit.name)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(context.l10n.commonCancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(context.l10n.commonDelete),
-          ),
-        ],
-      ),
-    );
-    if (confirmed != true || !context.mounted) {
-      return;
-    }
-
-    final repository = await ref.read(habitRepositoryProvider.future);
-    await _forgetReminder(ref, habit.id);
-    await repository.deleteHabit(habit.id);
-    ref.invalidate(habitTabControllerProvider);
-    await refreshWidgetsBestEffort(
-      () => ref.read(widgetServiceProvider.future),
-    );
-  }
-
-  /// Cancels [habitId]'s reminder, keeping its notification id reserved —
-  /// used by "Archive", since the habit still exists and could get a
-  /// reminder again later.
-  Future<void> _cancelReminder(WidgetRef ref, String habitId) async {
-    final notificationService = await ref.read(
-      notificationServiceProvider.future,
-    );
-    await notificationService.cancelHabitReminder(habitId);
-  }
-
-  /// Cancels [habitId]'s reminder and frees its notification id block for
-  /// reuse — used by "Delete", which removes the habit itself.
-  Future<void> _forgetReminder(WidgetRef ref, String habitId) async {
-    final notificationService = await ref.read(
-      notificationServiceProvider.future,
-    );
-    await notificationService.forgetHabitReminder(habitId);
   }
 
   bool _isActionSelected(HabitAction action) =>
@@ -253,6 +182,7 @@ class _HabitRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final habit = item.habit;
     final isDone = item.todayLog != null;
+    final color = routineColorOf(context, habit);
 
     return Material(
       color: Colors.transparent,
@@ -263,7 +193,7 @@ class _HabitRow extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           child: Row(
             children: [
-              Text(habit.icon, style: const TextStyle(fontSize: 20)),
+              HabitIcon.of(habit),
               const SizedBox(width: Spacing.sm),
               Expanded(
                 child: Text(
@@ -274,20 +204,21 @@ class _HabitRow extends ConsumerWidget {
                 ),
               ),
               if (habit.actions.isEmpty)
-                _ActionChip(
+                RoutinePill(
                   label: context.l10n.commonDone,
+                  color: color,
                   selected: isDone,
-                  onSelected: () =>
-                      _handleTap(context, ref, null, selected: isDone),
+                  onTap: () => _handleTap(context, ref, null, selected: isDone),
                 )
               else
                 for (final action in habit.actions)
                   Padding(
-                    padding: const EdgeInsets.only(left: Spacing.xs),
-                    child: _ActionChip(
+                    padding: const EdgeInsets.only(left: 6),
+                    child: RoutinePill(
                       label: action.label,
+                      color: color,
                       selected: _isActionSelected(action),
-                      onSelected: () => _handleTap(
+                      onTap: () => _handleTap(
                         context,
                         ref,
                         action,
@@ -304,40 +235,3 @@ class _HabitRow extends ConsumerWidget {
 }
 
 enum _HabitRowAction { edit, archive, delete }
-
-class _ActionChip extends StatelessWidget {
-  const _ActionChip({
-    required this.label,
-    required this.selected,
-    required this.onSelected,
-  });
-
-  final String label;
-  final bool selected;
-  final VoidCallback onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    final glass = Theme.of(context).extension<GlassTheme>()!;
-    return ChoiceChip(
-      label: Text(label),
-      selected: selected,
-      onSelected: (_) => onSelected(),
-      showCheckmark: false,
-      visualDensity: VisualDensity.compact,
-      backgroundColor: glass.cardColor,
-      selectedColor: glass.habitAccent.withValues(alpha: 0.18),
-      side: BorderSide(
-        color: selected
-            ? glass.habitAccent.withValues(alpha: 0.25)
-            : glass.cardBorder,
-        width: 0.5,
-      ),
-      labelStyle: TextStyle(
-        color: selected ? glass.habitAccent : glass.textSecondary,
-        fontSize: 12,
-        fontWeight: FontWeight.w600,
-      ),
-    );
-  }
-}

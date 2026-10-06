@@ -6,8 +6,28 @@ part of 'habit_tab.dart';
 // RiverpodGenerator
 // **************************************************************************
 
+String _$archivedHabitsHash() => r'7dd984ddd1993bf49784e7a640d6098e22e12740';
+
+/// Archived habits, newest first — re-read whenever today's list reloads,
+/// so archiving/restoring/deleting moves a habit between the two at once.
+///
+/// Copied from [archivedHabits].
+@ProviderFor(archivedHabits)
+final archivedHabitsProvider = AutoDisposeFutureProvider<List<Habit>>.internal(
+  archivedHabits,
+  name: r'archivedHabitsProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$archivedHabitsHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef ArchivedHabitsRef = AutoDisposeFutureProviderRef<List<Habit>>;
 String _$habitTabControllerHash() =>
-    r'42a014ece9fbd287ee98438f14976e31919164f0';
+    r'0abddc945f1150c49e361efe44cec795dc2b2d66';
 
 /// Loads today's active habits and their completion status, and logs new
 /// completions to the cache (then Supabase, best-effort).

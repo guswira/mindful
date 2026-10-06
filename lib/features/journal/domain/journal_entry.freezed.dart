@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$JournalEntry {
 
- String get id;@JsonKey(name: 'user_id') String get userId; DateTime get date; String get body;@JsonKey(name: 'created_at') DateTime get createdAt;@JsonKey(name: 'updated_at') DateTime get updatedAt; String? get title; Mood? get mood;// Supabase Storage paths, e.g. `photos/{user_id}/{uuid}.jpg`.
+ String get id;@JsonKey(name: 'user_id') String get userId; DateTime get date; String get body;@JsonKey(name: 'created_at') DateTime get createdAt;@JsonKey(name: 'updated_at') DateTime get updatedAt; String? get title; Mood? get mood;@JsonKey(unknownEnumValue: JournalType.review) JournalType get type;// Supabase Storage paths, e.g. `photos/{user_id}/{uuid}.jpg`.
 @JsonKey(name: 'photo_urls') List<String> get photoUrls;@JsonKey(name: 'sync_status') SyncStatus get syncStatus;
 /// Create a copy of JournalEntry
 /// with the given fields replaced by the non-null parameter values.
@@ -29,16 +29,16 @@ $JournalEntryCopyWith<JournalEntry> get copyWith => _$JournalEntryCopyWithImpl<J
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is JournalEntry&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.date, date) || other.date == date)&&(identical(other.body, body) || other.body == body)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.title, title) || other.title == title)&&(identical(other.mood, mood) || other.mood == mood)&&const DeepCollectionEquality().equals(other.photoUrls, photoUrls)&&(identical(other.syncStatus, syncStatus) || other.syncStatus == syncStatus));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is JournalEntry&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.date, date) || other.date == date)&&(identical(other.body, body) || other.body == body)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.title, title) || other.title == title)&&(identical(other.mood, mood) || other.mood == mood)&&(identical(other.type, type) || other.type == type)&&const DeepCollectionEquality().equals(other.photoUrls, photoUrls)&&(identical(other.syncStatus, syncStatus) || other.syncStatus == syncStatus));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,userId,date,body,createdAt,updatedAt,title,mood,const DeepCollectionEquality().hash(photoUrls),syncStatus);
+int get hashCode => Object.hash(runtimeType,id,userId,date,body,createdAt,updatedAt,title,mood,type,const DeepCollectionEquality().hash(photoUrls),syncStatus);
 
 @override
 String toString() {
-  return 'JournalEntry(id: $id, userId: $userId, date: $date, body: $body, createdAt: $createdAt, updatedAt: $updatedAt, title: $title, mood: $mood, photoUrls: $photoUrls, syncStatus: $syncStatus)';
+  return 'JournalEntry(id: $id, userId: $userId, date: $date, body: $body, createdAt: $createdAt, updatedAt: $updatedAt, title: $title, mood: $mood, type: $type, photoUrls: $photoUrls, syncStatus: $syncStatus)';
 }
 
 
@@ -49,7 +49,7 @@ abstract mixin class $JournalEntryCopyWith<$Res>  {
   factory $JournalEntryCopyWith(JournalEntry value, $Res Function(JournalEntry) _then) = _$JournalEntryCopyWithImpl;
 @useResult
 $Res call({
- String id,@JsonKey(name: 'user_id') String userId, DateTime date, String body,@JsonKey(name: 'created_at') DateTime createdAt,@JsonKey(name: 'updated_at') DateTime updatedAt, String? title, Mood? mood,@JsonKey(name: 'photo_urls') List<String> photoUrls,@JsonKey(name: 'sync_status') SyncStatus syncStatus
+ String id,@JsonKey(name: 'user_id') String userId, DateTime date, String body,@JsonKey(name: 'created_at') DateTime createdAt,@JsonKey(name: 'updated_at') DateTime updatedAt, String? title, Mood? mood,@JsonKey(unknownEnumValue: JournalType.review) JournalType type,@JsonKey(name: 'photo_urls') List<String> photoUrls,@JsonKey(name: 'sync_status') SyncStatus syncStatus
 });
 
 
@@ -66,7 +66,7 @@ class _$JournalEntryCopyWithImpl<$Res>
 
 /// Create a copy of JournalEntry
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? userId = null,Object? date = null,Object? body = null,Object? createdAt = null,Object? updatedAt = null,Object? title = freezed,Object? mood = freezed,Object? photoUrls = null,Object? syncStatus = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? userId = null,Object? date = null,Object? body = null,Object? createdAt = null,Object? updatedAt = null,Object? title = freezed,Object? mood = freezed,Object? type = null,Object? photoUrls = null,Object? syncStatus = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
@@ -76,7 +76,8 @@ as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: 
 as DateTime,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,title: freezed == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String?,mood: freezed == mood ? _self.mood : mood // ignore: cast_nullable_to_non_nullable
-as Mood?,photoUrls: null == photoUrls ? _self.photoUrls : photoUrls // ignore: cast_nullable_to_non_nullable
+as Mood?,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
+as JournalType,photoUrls: null == photoUrls ? _self.photoUrls : photoUrls // ignore: cast_nullable_to_non_nullable
 as List<String>,syncStatus: null == syncStatus ? _self.syncStatus : syncStatus // ignore: cast_nullable_to_non_nullable
 as SyncStatus,
   ));
@@ -163,10 +164,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'user_id')  String userId,  DateTime date,  String body, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'updated_at')  DateTime updatedAt,  String? title,  Mood? mood, @JsonKey(name: 'photo_urls')  List<String> photoUrls, @JsonKey(name: 'sync_status')  SyncStatus syncStatus)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'user_id')  String userId,  DateTime date,  String body, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'updated_at')  DateTime updatedAt,  String? title,  Mood? mood, @JsonKey(unknownEnumValue: JournalType.review)  JournalType type, @JsonKey(name: 'photo_urls')  List<String> photoUrls, @JsonKey(name: 'sync_status')  SyncStatus syncStatus)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _JournalEntry() when $default != null:
-return $default(_that.id,_that.userId,_that.date,_that.body,_that.createdAt,_that.updatedAt,_that.title,_that.mood,_that.photoUrls,_that.syncStatus);case _:
+return $default(_that.id,_that.userId,_that.date,_that.body,_that.createdAt,_that.updatedAt,_that.title,_that.mood,_that.type,_that.photoUrls,_that.syncStatus);case _:
   return orElse();
 
 }
@@ -184,10 +185,10 @@ return $default(_that.id,_that.userId,_that.date,_that.body,_that.createdAt,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'user_id')  String userId,  DateTime date,  String body, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'updated_at')  DateTime updatedAt,  String? title,  Mood? mood, @JsonKey(name: 'photo_urls')  List<String> photoUrls, @JsonKey(name: 'sync_status')  SyncStatus syncStatus)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'user_id')  String userId,  DateTime date,  String body, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'updated_at')  DateTime updatedAt,  String? title,  Mood? mood, @JsonKey(unknownEnumValue: JournalType.review)  JournalType type, @JsonKey(name: 'photo_urls')  List<String> photoUrls, @JsonKey(name: 'sync_status')  SyncStatus syncStatus)  $default,) {final _that = this;
 switch (_that) {
 case _JournalEntry():
-return $default(_that.id,_that.userId,_that.date,_that.body,_that.createdAt,_that.updatedAt,_that.title,_that.mood,_that.photoUrls,_that.syncStatus);case _:
+return $default(_that.id,_that.userId,_that.date,_that.body,_that.createdAt,_that.updatedAt,_that.title,_that.mood,_that.type,_that.photoUrls,_that.syncStatus);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -204,10 +205,10 @@ return $default(_that.id,_that.userId,_that.date,_that.body,_that.createdAt,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, @JsonKey(name: 'user_id')  String userId,  DateTime date,  String body, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'updated_at')  DateTime updatedAt,  String? title,  Mood? mood, @JsonKey(name: 'photo_urls')  List<String> photoUrls, @JsonKey(name: 'sync_status')  SyncStatus syncStatus)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, @JsonKey(name: 'user_id')  String userId,  DateTime date,  String body, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'updated_at')  DateTime updatedAt,  String? title,  Mood? mood, @JsonKey(unknownEnumValue: JournalType.review)  JournalType type, @JsonKey(name: 'photo_urls')  List<String> photoUrls, @JsonKey(name: 'sync_status')  SyncStatus syncStatus)?  $default,) {final _that = this;
 switch (_that) {
 case _JournalEntry() when $default != null:
-return $default(_that.id,_that.userId,_that.date,_that.body,_that.createdAt,_that.updatedAt,_that.title,_that.mood,_that.photoUrls,_that.syncStatus);case _:
+return $default(_that.id,_that.userId,_that.date,_that.body,_that.createdAt,_that.updatedAt,_that.title,_that.mood,_that.type,_that.photoUrls,_that.syncStatus);case _:
   return null;
 
 }
@@ -219,7 +220,7 @@ return $default(_that.id,_that.userId,_that.date,_that.body,_that.createdAt,_tha
 @JsonSerializable()
 
 class _JournalEntry implements JournalEntry {
-  const _JournalEntry({required this.id, @JsonKey(name: 'user_id') required this.userId, required this.date, required this.body, @JsonKey(name: 'created_at') required this.createdAt, @JsonKey(name: 'updated_at') required this.updatedAt, this.title, this.mood, @JsonKey(name: 'photo_urls') final  List<String> photoUrls = const <String>[], @JsonKey(name: 'sync_status') this.syncStatus = SyncStatus.synced}): _photoUrls = photoUrls;
+  const _JournalEntry({required this.id, @JsonKey(name: 'user_id') required this.userId, required this.date, required this.body, @JsonKey(name: 'created_at') required this.createdAt, @JsonKey(name: 'updated_at') required this.updatedAt, this.title, this.mood, @JsonKey(unknownEnumValue: JournalType.review) this.type = JournalType.review, @JsonKey(name: 'photo_urls') final  List<String> photoUrls = const <String>[], @JsonKey(name: 'sync_status') this.syncStatus = SyncStatus.synced}): _photoUrls = photoUrls;
   factory _JournalEntry.fromJson(Map<String, dynamic> json) => _$JournalEntryFromJson(json);
 
 @override final  String id;
@@ -230,6 +231,7 @@ class _JournalEntry implements JournalEntry {
 @override@JsonKey(name: 'updated_at') final  DateTime updatedAt;
 @override final  String? title;
 @override final  Mood? mood;
+@override@JsonKey(unknownEnumValue: JournalType.review) final  JournalType type;
 // Supabase Storage paths, e.g. `photos/{user_id}/{uuid}.jpg`.
  final  List<String> _photoUrls;
 // Supabase Storage paths, e.g. `photos/{user_id}/{uuid}.jpg`.
@@ -254,16 +256,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _JournalEntry&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.date, date) || other.date == date)&&(identical(other.body, body) || other.body == body)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.title, title) || other.title == title)&&(identical(other.mood, mood) || other.mood == mood)&&const DeepCollectionEquality().equals(other._photoUrls, _photoUrls)&&(identical(other.syncStatus, syncStatus) || other.syncStatus == syncStatus));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _JournalEntry&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.date, date) || other.date == date)&&(identical(other.body, body) || other.body == body)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.title, title) || other.title == title)&&(identical(other.mood, mood) || other.mood == mood)&&(identical(other.type, type) || other.type == type)&&const DeepCollectionEquality().equals(other._photoUrls, _photoUrls)&&(identical(other.syncStatus, syncStatus) || other.syncStatus == syncStatus));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,userId,date,body,createdAt,updatedAt,title,mood,const DeepCollectionEquality().hash(_photoUrls),syncStatus);
+int get hashCode => Object.hash(runtimeType,id,userId,date,body,createdAt,updatedAt,title,mood,type,const DeepCollectionEquality().hash(_photoUrls),syncStatus);
 
 @override
 String toString() {
-  return 'JournalEntry(id: $id, userId: $userId, date: $date, body: $body, createdAt: $createdAt, updatedAt: $updatedAt, title: $title, mood: $mood, photoUrls: $photoUrls, syncStatus: $syncStatus)';
+  return 'JournalEntry(id: $id, userId: $userId, date: $date, body: $body, createdAt: $createdAt, updatedAt: $updatedAt, title: $title, mood: $mood, type: $type, photoUrls: $photoUrls, syncStatus: $syncStatus)';
 }
 
 
@@ -274,7 +276,7 @@ abstract mixin class _$JournalEntryCopyWith<$Res> implements $JournalEntryCopyWi
   factory _$JournalEntryCopyWith(_JournalEntry value, $Res Function(_JournalEntry) _then) = __$JournalEntryCopyWithImpl;
 @override @useResult
 $Res call({
- String id,@JsonKey(name: 'user_id') String userId, DateTime date, String body,@JsonKey(name: 'created_at') DateTime createdAt,@JsonKey(name: 'updated_at') DateTime updatedAt, String? title, Mood? mood,@JsonKey(name: 'photo_urls') List<String> photoUrls,@JsonKey(name: 'sync_status') SyncStatus syncStatus
+ String id,@JsonKey(name: 'user_id') String userId, DateTime date, String body,@JsonKey(name: 'created_at') DateTime createdAt,@JsonKey(name: 'updated_at') DateTime updatedAt, String? title, Mood? mood,@JsonKey(unknownEnumValue: JournalType.review) JournalType type,@JsonKey(name: 'photo_urls') List<String> photoUrls,@JsonKey(name: 'sync_status') SyncStatus syncStatus
 });
 
 
@@ -291,7 +293,7 @@ class __$JournalEntryCopyWithImpl<$Res>
 
 /// Create a copy of JournalEntry
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? userId = null,Object? date = null,Object? body = null,Object? createdAt = null,Object? updatedAt = null,Object? title = freezed,Object? mood = freezed,Object? photoUrls = null,Object? syncStatus = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? userId = null,Object? date = null,Object? body = null,Object? createdAt = null,Object? updatedAt = null,Object? title = freezed,Object? mood = freezed,Object? type = null,Object? photoUrls = null,Object? syncStatus = null,}) {
   return _then(_JournalEntry(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
@@ -301,7 +303,8 @@ as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: 
 as DateTime,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,title: freezed == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String?,mood: freezed == mood ? _self.mood : mood // ignore: cast_nullable_to_non_nullable
-as Mood?,photoUrls: null == photoUrls ? _self._photoUrls : photoUrls // ignore: cast_nullable_to_non_nullable
+as Mood?,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
+as JournalType,photoUrls: null == photoUrls ? _self._photoUrls : photoUrls // ignore: cast_nullable_to_non_nullable
 as List<String>,syncStatus: null == syncStatus ? _self.syncStatus : syncStatus // ignore: cast_nullable_to_non_nullable
 as SyncStatus,
   ));

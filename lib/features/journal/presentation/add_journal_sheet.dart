@@ -14,12 +14,18 @@ import '../data/journal_entries_controller.dart';
 import '../data/journal_photo_mime_type.dart';
 import '../domain/journal_entry.dart';
 import 'journal_editor_widgets.dart';
+import 'journal_labels.dart';
+import 'journal_type_selector.dart';
 
-/// Bottom sheet for a quick journal entry: body, mood and optional photos
-/// — no title, unlike the full editor. See SPEC.md Journal Editor Screen
-/// and the bottom-sheet design rules.
+/// Bottom sheet for a quick journal entry: type, body, mood and optional
+/// photos — no title, unlike the full editor. See SPEC.md Journal Editor
+/// Screen and the bottom-sheet design rules.
 class AddJournalSheet extends ConsumerStatefulWidget {
-  const AddJournalSheet({super.key});
+  const AddJournalSheet({this.initialType = JournalType.review, super.key});
+
+  /// Pre-selected type — the home screen's "Write today's plan" passes
+  /// [JournalType.plan]; everything else starts on today's review.
+  final JournalType initialType;
 
   @override
   ConsumerState<AddJournalSheet> createState() => _AddJournalSheetState();
@@ -30,6 +36,7 @@ class _AddJournalSheetState extends ConsumerState<AddJournalSheet> {
   final _bodyShake = GlobalKey<ShakeWidgetState>();
   final _picker = ImagePicker();
 
+  late JournalType _type = widget.initialType;
   Mood? _mood;
   final List<XFile> _newPhotos = [];
   bool _saving = false;
@@ -90,7 +97,12 @@ class _AddJournalSheetState extends ConsumerState<AddJournalSheet> {
         ),
       );
     }
-    await notifier.createEntry(body: body, mood: _mood, photoUrls: uploadedIds);
+    await notifier.createEntry(
+      body: body,
+      mood: _mood,
+      type: _type,
+      photoUrls: uploadedIds,
+    );
 
     if (!mounted) {
       return;
@@ -111,6 +123,11 @@ class _AddJournalSheetState extends ConsumerState<AddJournalSheet> {
             onClose: () => Navigator.pop(context),
           ),
           const SizedBox(height: Spacing.sm),
+          JournalTypeSelector(
+            selected: _type,
+            onChanged: (type) => setState(() => _type = type),
+          ),
+          const SizedBox(height: Spacing.sm),
           ShakeWidget(
             key: _bodyShake,
             child: TextField(
@@ -125,7 +142,7 @@ class _AddJournalSheetState extends ConsumerState<AddJournalSheet> {
                 height: 1.6,
               ),
               decoration: InputDecoration(
-                hintText: context.l10n.journalBodyHint,
+                hintText: context.l10n.journalTypeHint(_type),
                 hintStyle: TextStyle(color: glass.textHint),
                 border: InputBorder.none,
               ),

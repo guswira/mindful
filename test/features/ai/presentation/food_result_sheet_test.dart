@@ -36,7 +36,7 @@ void main() {
 
     expect(find.text('Grilled Chicken Salad'), findsOneWidget);
     expect(find.text('420'), findsOneWidget);
-    expect(find.text('✓ Confident'), findsOneWidget);
+    expect(find.text('Confident'), findsOneWidget);
     expect(find.text('35.0g'), findsOneWidget);
     expect(find.text('Chicken breast'), findsOneWidget);
     expect(find.text('A good source of lean protein.'), findsOneWidget);
@@ -71,7 +71,7 @@ void main() {
       buildSheet(analysis: _analysis.copyWith(confidence: 'low')),
     );
 
-    expect(find.text('! Uncertain'), findsOneWidget);
+    expect(find.text('Uncertain'), findsOneWidget);
     expect(
       find.text('Low confidence — try a clearer, closer photo.'),
       findsOneWidget,

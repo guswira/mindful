@@ -131,6 +131,7 @@ void main() {
         'actions': ['Gym'],
         'isCompleted': true,
         'completedAction': 'a1',
+        'completedActionLabel': 'Gym',
       },
       {
         'id': 'h2',
@@ -140,8 +141,28 @@ void main() {
         'actions': <String>[],
         'isCompleted': false,
         'completedAction': null,
+        'completedActionLabel': null,
       },
     ]);
+  });
+
+  test('stamps the habits with today\'s date', () async {
+    await service.updateWidgetData();
+
+    expect((saveCallFor('habitsDate').arguments as Map)['data'], '2026-03-10');
+  });
+
+  test('sends count templates for the iOS widgets to fill in', () async {
+    await service.updateWidgetData();
+
+    expect(
+      (saveCallFor('labelDoneCountFormat').arguments as Map)['data'],
+      '{done}/{total} done',
+    );
+    expect(
+      (saveCallFor('labelRemainingFormat').arguments as Map)['data'],
+      '{count} remaining',
+    );
   });
 
   test('sends today\'s tasks as JSON, done or not', () async {

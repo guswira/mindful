@@ -90,7 +90,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get aiResultDisclaimer =>
-      '⚠ Perkiraan AI bisa berbeda tergantung ukuran porsi, cara memasak, dan bahannya.';
+      'Perkiraan AI bisa berbeda tergantung ukuran porsi, cara memasak, dan bahannya.';
 
   @override
   String get aiLowConfidenceWarning =>
@@ -118,13 +118,13 @@ class AppLocalizationsId extends AppLocalizations {
   String get aiMacroFiber => 'Serat';
 
   @override
-  String get aiConfidenceHigh => '✓ Yakin';
+  String get aiConfidenceHigh => 'Yakin';
 
   @override
-  String get aiConfidenceLow => '! Kurang yakin';
+  String get aiConfidenceLow => 'Kurang yakin';
 
   @override
-  String get aiConfidenceMedium => '~ Perkiraan';
+  String get aiConfidenceMedium => 'Perkiraan';
 
   @override
   String get aiCaloriesUnit => 'kalori';
@@ -169,7 +169,7 @@ class AppLocalizationsId extends AppLocalizations {
       'Arahkan kamera ke makanan, camilan, atau bahan';
 
   @override
-  String get aiCheckFoodCalories => '📷  Cek kalori makanan';
+  String get aiCheckFoodCalories => 'Cek kalori makanan';
 
   @override
   String get aiChooseFromGallery => 'Pilih dari galeri';
@@ -244,13 +244,13 @@ class AppLocalizationsId extends AppLocalizations {
       'Notifikasi uji yang dipicu manual dari Pengaturan';
 
   @override
-  String get notifJournalMorningTitle => 'Selamat pagi ☀️';
+  String get notifJournalMorningTitle => 'Selamat pagi';
 
   @override
   String get notifJournalMorningBody => 'Waktunya menulis jurnal';
 
   @override
-  String get notifJournalEveningTitle => 'Gimana harimu? 🌙';
+  String get notifJournalEveningTitle => 'Gimana harimu?';
 
   @override
   String get notifJournalEveningBody => 'Tulis, yuk';
@@ -329,10 +329,19 @@ class AppLocalizationsId extends AppLocalizations {
   String get widgetLabelShowMe => 'Tampilkan:';
 
   @override
-  String get widgetChooseTasks => '✅ Tugas';
+  String get widgetChooseTasks => 'Tugas';
 
   @override
-  String get widgetChooseHabits => '💪 Rutinitas';
+  String get widgetChooseHabits => 'Rutinitas';
+
+  @override
+  String get widgetRoutineDone => 'Selesai';
+
+  @override
+  String get widgetRoutinesAllDone => 'Semua beres';
+
+  @override
+  String get widgetNoRoutines => 'Belum ada rutinitas';
 
   @override
   String widgetDoneCount(int done, int total) {
@@ -422,7 +431,14 @@ class AppLocalizationsId extends AppLocalizations {
   String get habitNameHint => 'Nama kebiasaan...';
 
   @override
-  String get habitEmptyList => 'Belum ada kebiasaan';
+  String get habitIntroTitle => 'Rutinitas berulang tiap hari';
+
+  @override
+  String get habitIntroBody =>
+      'Pilih kebiasaan kecil — jalan kaki, minum air, membaca — dan centang tiap hari. Mindful mencatat runtutanmu dan bisa mengingatkan di hari yang kamu pilih.';
+
+  @override
+  String get habitIntroAction => 'Tambah rutinitas';
 
   @override
   String habitSyncFailed(String name, String error) {
@@ -434,7 +450,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String habitArchiveConfirmBody(String name) {
-    return '\"$name\" akan disembunyikan dari daftar hari ini.';
+    return '\"$name\" akan disembunyikan dari daftar hari ini. Kamu bisa menemukannya di Diarsipkan, di bagian Rutinitas.';
   }
 
   @override
@@ -477,13 +493,63 @@ class AppLocalizationsId extends AppLocalizations {
   String get habitConvertSave => 'Simpan rutinitas';
 
   @override
+  String habitArchivedLink(int count) {
+    return 'Diarsipkan ($count)';
+  }
+
+  @override
+  String get habitArchivedTitle => 'Rutinitas diarsipkan';
+
+  @override
+  String get habitArchivedHint =>
+      'Disembunyikan dari daftar hari ini, riwayatnya tetap disimpan. Pulihkan untuk melacaknya lagi.';
+
+  @override
+  String get habitArchivedEmpty => 'Belum ada rutinitas yang diarsipkan';
+
+  @override
+  String get habitRestore => 'Pulihkan';
+
+  @override
+  String get habitActionSummaryTitle => 'Aksi bulan ini';
+
+  @override
+  String habitActionSummaryCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count kali',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get habitDayLoggedAs => 'Tercatat sebagai';
+
+  @override
+  String get habitDayChangeTo => 'Ubah ke';
+
+  @override
+  String get habitDayNotDone => 'Belum dilakukan';
+
+  @override
+  String get habitActionRemoved => 'Aksi yang dihapus';
+
+  @override
   String get taskGroupUpcoming => 'Mendatang';
 
   @override
   String get taskGroupNoDate => 'Tanpa tanggal';
 
   @override
-  String get taskEmptyList => 'Belum ada tugas';
+  String get taskIntroTitle => 'Kosongkan pikiran, satu tugas sekaligus';
+
+  @override
+  String get taskIntroBody =>
+      'Catat yang perlu dikerjakan, beri tenggat atau pengingat, dan pecah pekerjaan besar jadi subtugas. Tugas hari ini juga muncul di beranda.';
+
+  @override
+  String get taskIntroAction => 'Tambah tugas';
 
   @override
   String taskCompletedSection(int count) {
@@ -589,12 +655,6 @@ class AppLocalizationsId extends AppLocalizations {
   String get homeSectionTodayTasks => 'Tugas hari ini';
 
   @override
-  String get homeSectionHabits => 'Rutinitas';
-
-  @override
-  String get homeSectionJournal => 'Jurnal';
-
-  @override
   String get homeJournalPlanTitle => 'Tulis rencana hari ini';
 
   @override
@@ -605,7 +665,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get homeJournalPlanAction => 'Mulai';
 
   @override
-  String get homeJournalReflectTitle => 'Tinjau apa yang terjadi';
+  String get homeJournalReflectTitle => 'Tinjau hari ini';
 
   @override
   String get homeJournalReflectSubtitle => 'Renungkan pencapaianmu hari ini.';
@@ -614,24 +674,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get homeJournalReflectAction => 'Renungkan';
 
   @override
-  String homeHabitsProgress(int done, int total) {
-    return '$done/$total';
-  }
-
-  @override
-  String get homeStreakJournalLabel => 'Runtutan jurnal';
-
-  @override
-  String get homeStreakHabitsLabel => 'Kebiasaan hari ini';
-
-  @override
-  String get homeStreakTasksLabel => 'Tugas jatuh tempo';
-
-  @override
   String get homeTasksEmpty => 'Apa yang perlu dikerjakan hari ini?';
-
-  @override
-  String get homeAddTask => 'Tambah tugas';
 
   @override
   String homeSyncFailed(String name, String error) {
@@ -639,13 +682,80 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
-  String get homeHabitsAllDone => 'Semua beres! 🎉';
+  String get homeHabitsAllDone => 'Semua beres!';
 
   @override
-  String get homeHabitsEmpty => 'Bangun kebiasaan pertamamu';
+  String get homeBeMindfulIntro =>
+      'Mindful membantumu melambat dan hidup lebih terarah — rutinitas, tugas, keuangan, makanan, pernapasan, dan jurnal, semua di satu tempat yang tenang. Coba satu per satu:';
 
   @override
-  String get homeHabitsStart => 'Mulai';
+  String get homeBuildFirstRoutine => 'Bangun kebiasaan pertamamu';
+
+  @override
+  String get homeBuildFirstRoutineSubtitle =>
+      'Kebiasaan kecil tiap hari lama-lama jadi besar.';
+
+  @override
+  String get homeBuildFirstRoutineAction => 'Bangun';
+
+  @override
+  String get homeMindfulSpendingTitle => 'Bijak dalam pengeluaran';
+
+  @override
+  String get homeMindfulSpendingSubtitle =>
+      'Catat pengeluaranmu biar tahu ke mana uangmu pergi.';
+
+  @override
+  String get homeMindfulSpendingAction => 'Catat';
+
+  @override
+  String get homeMindfulTaskTitle => 'Bijak mengatur waktu';
+
+  @override
+  String get homeMindfulTaskSubtitle =>
+      'Tambah tugas biar nggak ada yang terlewat hari ini.';
+
+  @override
+  String get homeMindfulTaskAction => 'Tambah';
+
+  @override
+  String get homeMindfulFoodTitle => 'Sadar dengan makananmu';
+
+  @override
+  String get homeMindfulFoodSubtitle =>
+      'Foto makananmu dan biar AI memperkirakan gizinya.';
+
+  @override
+  String get homeMindfulFoodAction => 'Pindai';
+
+  @override
+  String get homeMindfulBreathingStepTitle => 'Bernapas dengan sadar';
+
+  @override
+  String get homeMindfulBreathingStepSubtitle =>
+      'Luangkan semenit untuk latihan napas terpandu.';
+
+  @override
+  String get homeMindfulBreathingStepAction => 'Bernapas';
+
+  @override
+  String get homeMindfulJournalTitle => 'Sadar dengan pikiranmu';
+
+  @override
+  String get homeMindfulJournalSubtitle => 'Tulis entri jurnal pertamamu.';
+
+  @override
+  String get homeMindfulJournalAction => 'Tulis';
+
+  @override
+  String get homeMindfulBudgetTitle => 'Bijak dengan anggaran';
+
+  @override
+  String get homeMindfulBudgetSubtitle =>
+      'Atur anggaran dan lihat sisanya tiap hari.';
+
+  @override
+  String get homeMindfulBudgetAction => 'Atur';
 
   @override
   String get homeUnsyncedBanner => 'Beberapa perubahan belum tersinkron';
@@ -656,14 +766,6 @@ class AppLocalizationsId extends AppLocalizations {
   @override
   String authSignInFailed(String error) {
     return 'Gagal masuk: $error';
-  }
-
-  @override
-  String get journalTabTitle => 'Jurnal';
-
-  @override
-  String journalLoadFailed(String error) {
-    return 'Gagal memuat catatan: $error';
   }
 
   @override
@@ -680,9 +782,6 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get journalTitleHint => 'Judul...';
-
-  @override
-  String get journalBodyHint => 'Apa yang kamu pikirkan...';
 
   @override
   String get journalDeleteEntry => 'Hapus catatan';
@@ -716,10 +815,10 @@ class AppLocalizationsId extends AppLocalizations {
   String get moneySaveChanges => 'Simpan perubahan';
 
   @override
-  String get moneyTypeToggleSpending => '💸 Pengeluaran';
+  String get moneyTypeToggleSpending => 'Pengeluaran';
 
   @override
-  String get moneyTypeToggleIncome => '💰 Pemasukan';
+  String get moneyTypeToggleIncome => 'Pemasukan';
 
   @override
   String get moneyKeypadBackspace => 'Hapus';
@@ -772,7 +871,11 @@ class AppLocalizationsId extends AppLocalizations {
   String get moneyAddIncome => '+ Pemasukan';
 
   @override
-  String get moneyEmptyBudgetPrompt => 'Atur anggaranmu untuk mulai';
+  String get moneyBudgetIntroTitle => 'Atur anggaran';
+
+  @override
+  String get moneyBudgetIntroBody =>
+      'Pilih jumlah bulanan atau harian. Mindful menunjukkan sisanya saat kamu belanja, jadi kamu tahu posisimu sebelum bulan berakhir.';
 
   @override
   String get moneySetBudget => 'Atur anggaran';
@@ -809,6 +912,16 @@ class AppLocalizationsId extends AppLocalizations {
   String get moneyNoEntriesInPeriod => 'Belum ada catatan di periode ini';
 
   @override
+  String get moneySpendingIntroTitle => 'Catat pengeluaranmu';
+
+  @override
+  String get moneySpendingIntroBody =>
+      'Catat pengeluaran dan pemasukan dalam beberapa ketukan. Mindful mengelompokkannya per hari dan kategori, jadi kamu tahu ke mana uangmu pergi.';
+
+  @override
+  String get moneySpendingIntroAction => 'Catat pengeluaran';
+
+  @override
   String get moneyRecapTitle => 'Rekap';
 
   @override
@@ -818,8 +931,8 @@ class AppLocalizationsId extends AppLocalizations {
   String get moneyRecapNet => 'Bersih';
 
   @override
-  String moneyRecapTopCategory(String emoji, String category) {
-    return 'Kategori teratas: $emoji $category';
+  String moneyRecapTopCategory(String category) {
+    return 'Kategori teratas: $category';
   }
 
   @override
@@ -1039,7 +1152,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get navTasks => 'Tugas & Rutinitas';
 
   @override
-  String get navJournal => 'Jurnal';
+  String get navJournal => 'Mindfulness';
 
   @override
   String get navMoney => 'Keuangan';
@@ -1066,7 +1179,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get sharedUnsyncedLabel => 'Belum tersinkron';
 
   @override
-  String get moneyAdviceButton => '✨ Saran AI';
+  String get moneyAdviceButton => 'Saran AI';
 
   @override
   String get moneyAdviceTitle => 'Saran pengeluaran AI';
@@ -1093,7 +1206,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get moneyAdviceDisclaimer =>
-      '⚠ Saran AI eksperimental. Pakai sebagai panduan saja, bukan nasihat keuangan.';
+      'Saran AI eksperimental. Pakai sebagai panduan saja, bukan nasihat keuangan.';
 
   @override
   String moneyAdvicePrompt(String data) {
@@ -1376,16 +1489,18 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
-  String get navExercise => 'Latihan';
+  String get exerciseHistory => 'Riwayat';
 
   @override
-  String get exerciseTitle => 'Latihan';
+  String exerciseShowAll(int count) {
+    return 'Lihat semua ($count lagi)';
+  }
 
   @override
-  String get exerciseSubtitle => 'Pelan-pelan, bernapaslah dengan sadar.';
+  String get exerciseShowLess => 'Tampilkan lebih sedikit';
 
   @override
-  String get exerciseBreathingSection => 'Pernapasan';
+  String get exerciseBreathingSection => 'Latihan napas';
 
   @override
   String get exerciseActivitySection => 'Aktivitas';
@@ -1607,4 +1722,127 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get exerciseCalendarNext => 'Bulan berikutnya';
+
+  @override
+  String get moodHappy => 'Senang';
+
+  @override
+  String get moodNeutral => 'Biasa saja';
+
+  @override
+  String get moodSad => 'Sedih';
+
+  @override
+  String get moodAnxious => 'Cemas';
+
+  @override
+  String get moodExcited => 'Semangat';
+
+  @override
+  String get journalTypeReview => 'Ulasan hari ini';
+
+  @override
+  String get journalTypePlan => 'Rencana';
+
+  @override
+  String get journalTypeGratitude => 'Syukur';
+
+  @override
+  String get journalTypeReviewHint => 'Gimana hari kamu tadi?';
+
+  @override
+  String get journalTypePlanHint => 'Apa yang mau kamu selesaikan hari ini?';
+
+  @override
+  String get journalTypeGratitudeHint => 'Apa yang kamu syukuri hari ini?';
+
+  @override
+  String get mindfulnessTabTitle => 'Mindfulness';
+
+  @override
+  String get journalTodaySection => 'Jurnal hari ini';
+
+  @override
+  String get journalWrite => 'Tulis';
+
+  @override
+  String get journalHistoryTitle => 'Riwayat jurnal';
+
+  @override
+  String get journalHistoryMonthEmpty => 'Belum ada entri bulan ini';
+
+  @override
+  String journalHistoryDayEmpty(String date) {
+    return '$date: belum ada entri';
+  }
+
+  @override
+  String get exerciseActivityTitle => 'Aktivitas latihan';
+
+  @override
+  String get homeAddTodo => 'Tambah tugas';
+
+  @override
+  String get homeAddRoutine => 'Tambah rutinitas';
+
+  @override
+  String get homeSectionMindfulness => 'Mindfulness';
+
+  @override
+  String get homeMindfulBreathingTitle => 'Latihan napas';
+
+  @override
+  String get homeMindfulBreathingSubtitle =>
+      'Tenangkan diri dengan napas terpandu.';
+
+  @override
+  String get homeMindfulBreathingAction => 'Mulai';
+
+  @override
+  String get breathingPickerTitle => 'Pilih latihan napas';
+
+  @override
+  String get loginTagline => 'Harimu, sedikit lebih mindful.';
+
+  @override
+  String get loginFeatureJournalTitle => 'Jurnal harian';
+
+  @override
+  String get loginFeatureJournalBody =>
+      'Rencanakan pagimu, renungkan malammu, dan catat hal yang kamu syukuri.';
+
+  @override
+  String get loginFeatureRoutinesTitle => 'Tugas & kebiasaan';
+
+  @override
+  String get loginFeatureRoutinesBody =>
+      'Bangun kebiasaan yang bertahan dan selesaikan tugas, dengan pengingat biar tetap di jalur.';
+
+  @override
+  String get loginFeatureMoneyTitle => 'Belanja dengan sadar';
+
+  @override
+  String get loginFeatureMoneyBody =>
+      'Catat pengeluaran dan pemasukan, dan lihat sisa anggaranmu.';
+
+  @override
+  String get loginFeatureBreathingTitle => 'Latihan napas terpandu';
+
+  @override
+  String get loginFeatureBreathingBody =>
+      'Tenangkan diri dengan latihan napas, panduan suara, dan suasana yang menenangkan.';
+
+  @override
+  String get loginFeatureAiTitle => 'Cek makanan dengan AI';
+
+  @override
+  String get loginFeatureAiBody =>
+      'Foto makananmu untuk perkiraan nutrisi yang cepat.';
+
+  @override
+  String get loginFeatureRecapTitle => 'Rekap bulanan';
+
+  @override
+  String get loginFeatureRecapBody =>
+      'Lihat kembali bulanmu ala story, dan jaga runtutanmu.';
 }
