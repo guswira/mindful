@@ -472,9 +472,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get planTabTitle => 'Tasks & Routines';
 
   @override
-  String get planAdd => 'Add task or habit';
-
-  @override
   String get taskConvertToRoutine => 'Convert to routine';
 
   @override
@@ -531,6 +528,42 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get habitActionRemoved => 'Removed action';
+
+  @override
+  String get habitSectionTags => 'Tags';
+
+  @override
+  String get habitTagsHint =>
+      'Optional — e.g. Heavy, Easy. Add them to any day from the routine\'s calendar.';
+
+  @override
+  String get habitAddTag => '+ Add tag';
+
+  @override
+  String get habitDayTags => 'Tags';
+
+  @override
+  String get habitTagSummaryTitle => 'Tags this month';
+
+  @override
+  String habitTagTimes(String label, int count) {
+    return '$label ×$count';
+  }
+
+  @override
+  String habitTagCount(int count) {
+    return '×$count';
+  }
+
+  @override
+  String habitTagDecrease(String label) {
+    return 'Less $label';
+  }
+
+  @override
+  String habitTagIncrease(String label) {
+    return 'More $label';
+  }
 
   @override
   String get taskGroupUpcoming => 'Upcoming';
@@ -609,6 +642,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get taskNotFound => 'Task not found';
+
+  @override
+  String get detailSelectHint =>
+      'Pick a task or routine to see its details here';
 
   @override
   String get taskMarkAsDone => 'Mark as done';
@@ -806,6 +843,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String get moneyCategoryHeading => 'Category';
 
   @override
+  String get moneySpendingTypeHeading => 'Spending type';
+
+  @override
+  String get moneySpendingTypeEveryday => 'Everyday';
+
+  @override
+  String get moneySpendingTypeWeekly => 'Weekly bill';
+
+  @override
+  String get moneySpendingTypeMonthly => 'Monthly bill';
+
+  @override
+  String get moneySpendingTypeYearly => 'Yearly bill';
+
+  @override
+  String get moneySpendingTypeEverydayHint => 'Counts toward every budget.';
+
+  @override
+  String get moneySpendingTypeWeeklyHint =>
+      'Skips your daily budget. Counts toward weekly, monthly and yearly.';
+
+  @override
+  String get moneySpendingTypeMonthlyHint =>
+      'Skips your daily and weekly budgets. Counts toward monthly and yearly.';
+
+  @override
+  String get moneySpendingTypeYearlyHint =>
+      'Only counts toward your yearly budget.';
+
+  @override
   String get moneyNoteHint => 'Add a note...';
 
   @override
@@ -836,6 +903,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get moneyBudgetDaily => 'Daily';
 
   @override
+  String get moneyBudgetWeekly => 'Weekly';
+
+  @override
+  String get moneyBudgetYearly => 'Yearly';
+
+  @override
   String get moneyBudgetSettingsTitle => 'Budget settings';
 
   @override
@@ -845,10 +918,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get moneyDailyBudget => 'Daily budget';
 
   @override
+  String get moneyWeeklyBudget => 'Weekly budget';
+
+  @override
+  String get moneyYearlyBudget => 'Yearly budget';
+
+  @override
   String get moneySaveMonthly => 'Save monthly';
 
   @override
   String get moneySaveDaily => 'Save daily';
+
+  @override
+  String get moneySaveWeekly => 'Save weekly';
+
+  @override
+  String get moneySaveYearly => 'Save yearly';
 
   @override
   String get moneyDeleteEntryTitle => 'Delete entry';
@@ -862,26 +947,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get moneyTabTitle => 'Cashflow';
 
   @override
-  String get moneyAddSpending => '+ Spending';
-
-  @override
-  String get moneyAddIncome => '+ Income';
-
-  @override
   String get moneyBudgetIntroTitle => 'Set a budget';
 
   @override
   String get moneyBudgetIntroBody =>
-      'Choose a monthly or daily amount. Mindful shows what\'s left as you spend, so you know where you stand before the month runs out.';
+      'Choose a daily, weekly, monthly or yearly amount. Mindful shows what\'s left as you spend, so you know where you stand before the period runs out.';
 
   @override
   String get moneySetBudget => 'Set budget';
 
   @override
-  String get moneySetMonthly => 'Set Monthly';
+  String get moneyBudgetHeading => 'Budget';
 
   @override
-  String get moneySetDaily => 'Set Daily';
+  String get moneyBudgetSettingsTooltip => 'Budget settings';
 
   @override
   String moneyBudgetOf(String currency, String amount) {
@@ -937,6 +1016,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get moneyDailyRemaining => 'Daily remaining';
+
+  @override
+  String get moneyWeeklyRemaining => 'Weekly remaining';
+
+  @override
+  String get moneyYearlyRemaining => 'Yearly remaining';
 
   @override
   String get moneyCategoryFood => 'Food';
@@ -1161,16 +1246,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get writeButtonLabel => 'Write';
 
   @override
-  String get writeNewJournalEntry => 'New journal entry';
+  String get writeNewJournalEntry => 'Write journal';
 
   @override
-  String get writeNewTask => 'New task';
+  String get writeNewTask => 'Do new task';
 
   @override
-  String get writeNewHabit => 'New habit';
+  String get writeNewHabit => 'Build new routine';
 
   @override
-  String get writeNewMoneyEntry => 'New money entry';
+  String get writeNewMoneyEntry => 'Record spending';
+
+  @override
+  String get writeTodayPlan => 'Write today\'s plan';
+
+  @override
+  String get writeReviewToday => 'Review today';
+
+  @override
+  String get writeGratitude => 'Gratitude journal';
+
+  @override
+  String get writeAddSpending => 'Add spending';
+
+  @override
+  String get writeAddIncome => 'Add income';
 
   @override
   String get sharedUnsyncedLabel => 'Not synced yet';

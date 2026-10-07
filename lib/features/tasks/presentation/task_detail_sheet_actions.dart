@@ -18,18 +18,23 @@ typedef TaskDetailResult = ({TaskDetailOutcome outcome, Task task});
 enum _MoreAction { edit, convertToRoutine, delete }
 
 /// Shows the overflow "Edit / Convert to routine / Delete" menu for [task]
-/// from [TaskDetailSheet] and handles the chosen action. Edit and convert
-/// pop [context] (the detail sheet itself) with a [TaskDetailResult], so
-/// its caller opens `AddTaskSheet` / `AddHabitSheet` from a context that's
-/// still mounted; delete confirms, then deletes and pops the detail sheet
-/// directly.
+/// from `TaskDetailView` and handles the chosen action. Edit and convert
+/// go to [onFollowUp] — the detail sheet pops with them as its
+/// [TaskDetailResult], so its caller opens `AddTaskSheet` /
+/// `AddHabitSheet` from a context that's still mounted; delete confirms,
+/// deletes, then calls [onDeleted].
 Future<void> showTaskMoreActions(
   BuildContext context,
   WidgetRef ref,
-  Task task,
-) async {
+  Task task, {
+  required ValueChanged<TaskDetailResult> onFollowUp,
+  required VoidCallback onDeleted,
+}) async {
   final action = await showModalBottomSheet<_MoreAction>(
     context: context,
+    // Above the nav bar when opened from the wide-screen detail pane,
+    // which sits inside the tab's own (lower) Navigator.
+    useRootNavigator: true,
     builder: (context) => SafeArea(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -61,17 +66,11 @@ Future<void> showTaskMoreActions(
   }
   switch (action) {
     case _MoreAction.edit:
-      Navigator.pop<TaskDetailResult>(context, (
-        outcome: TaskDetailOutcome.edit,
-        task: task,
-      ));
+      onFollowUp((outcome: TaskDetailOutcome.edit, task: task));
     case _MoreAction.convertToRoutine:
-      Navigator.pop<TaskDetailResult>(context, (
-        outcome: TaskDetailOutcome.convertToRoutine,
-        task: task,
-      ));
+      onFollowUp((outcome: TaskDetailOutcome.convertToRoutine, task: task));
     case _MoreAction.delete:
-      await _confirmDelete(context, ref, task);
+      await _confirmDelete(context, ref, task, onDeleted);
   }
 }
 
@@ -79,6 +78,7 @@ Future<void> _confirmDelete(
   BuildContext context,
   WidgetRef ref,
   Task task,
+  VoidCallback onDeleted,
 ) async {
   final confirmed = await showDialog<bool>(
     context: context,
@@ -103,6 +103,6 @@ Future<void> _confirmDelete(
 
   await ref.read(taskTabControllerProvider.notifier).delete(task.id);
   if (context.mounted) {
-    Navigator.pop(context);
+    onDeleted();
   }
 }

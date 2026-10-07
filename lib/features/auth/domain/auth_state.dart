@@ -78,7 +78,21 @@ class AuthNotifier extends _$AuthNotifier {
     } catch (_) {
       // Best-effort: retried on the next app open.
     }
+    // Screens read the cache as soon as they're shown — on a fresh install
+    // that's before the pull above filled it, so they'd stay empty. Every
+    // feature provider watches its repository, so this re-reads them all.
+    for (final repository in _syncedRepositoryProviders) {
+      ref.invalidate(repository);
+    }
   }
+
+  static final List<ProviderOrFamily> _syncedRepositoryProviders = [
+    journalRepositoryProvider,
+    habitRepositoryProvider,
+    taskRepositoryProvider,
+    moneyRepositoryProvider,
+    breathingSessionRepositoryProvider,
+  ];
 
   /// Hive boxes holding the signed-in account's data. Every one is emptied
   /// on sign-out — a box missed here shows the previous account's data to

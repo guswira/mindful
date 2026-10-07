@@ -15,15 +15,18 @@ class SheetHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Text(
-          title,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
+        // Expanded, so a long title (Bahasa, narrow screens) wraps instead
+        // of pushing the close button off the edge.
+        Expanded(
+          child: Text(
+            title,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
-        const Spacer(),
         IconButton(
           icon: const Icon(Icons.close),
           tooltip: context.l10n.commonClose,

@@ -31,11 +31,59 @@ String entryTypeLabel(AppLocalizations l10n, EntryType type) => switch (type) {
   EntryType.income => l10n.moneyTypeIncome,
 };
 
-/// "Monthly" / "Daily".
+/// "Daily" / "Weekly" / "Monthly" / "Yearly".
 String budgetTypeLabel(AppLocalizations l10n, BudgetType type) =>
     switch (type) {
-      BudgetType.monthly => l10n.moneyBudgetMonthly,
       BudgetType.daily => l10n.moneyBudgetDaily,
+      BudgetType.weekly => l10n.moneyBudgetWeekly,
+      BudgetType.monthly => l10n.moneyBudgetMonthly,
+      BudgetType.yearly => l10n.moneyBudgetYearly,
+    };
+
+/// "Daily budget" etc. — a section title on [BudgetSettingsSheet] and the
+/// Cashflow tab's "set budget" card.
+String budgetTitle(AppLocalizations l10n, BudgetType type) => switch (type) {
+  BudgetType.daily => l10n.moneyDailyBudget,
+  BudgetType.weekly => l10n.moneyWeeklyBudget,
+  BudgetType.monthly => l10n.moneyMonthlyBudget,
+  BudgetType.yearly => l10n.moneyYearlyBudget,
+};
+
+/// "Daily remaining" etc. — a row on the home screen's budget card.
+String budgetRemainingLabel(AppLocalizations l10n, BudgetType type) =>
+    switch (type) {
+      BudgetType.daily => l10n.moneyDailyRemaining,
+      BudgetType.weekly => l10n.moneyWeeklyRemaining,
+      BudgetType.monthly => l10n.moneyMonthlyRemaining,
+      BudgetType.yearly => l10n.moneyYearlyRemaining,
+    };
+
+/// "Save daily" etc. — a section's save pill on [BudgetSettingsSheet].
+String budgetSaveLabel(AppLocalizations l10n, BudgetType type) =>
+    switch (type) {
+      BudgetType.daily => l10n.moneySaveDaily,
+      BudgetType.weekly => l10n.moneySaveWeekly,
+      BudgetType.monthly => l10n.moneySaveMonthly,
+      BudgetType.yearly => l10n.moneySaveYearly,
+    };
+
+/// Spending-type chip label for a [MoneyEntry.budgetPeriod] — null is an
+/// everyday expense.
+String budgetPeriodLabel(AppLocalizations l10n, BudgetType? period) =>
+    switch (period) {
+      null || BudgetType.daily => l10n.moneySpendingTypeEveryday,
+      BudgetType.weekly => l10n.moneySpendingTypeWeekly,
+      BudgetType.monthly => l10n.moneySpendingTypeMonthly,
+      BudgetType.yearly => l10n.moneySpendingTypeYearly,
+    };
+
+/// One line on which budgets a spending entry with [period] counts toward.
+String budgetPeriodHint(AppLocalizations l10n, BudgetType? period) =>
+    switch (period) {
+      null || BudgetType.daily => l10n.moneySpendingTypeEverydayHint,
+      BudgetType.weekly => l10n.moneySpendingTypeWeeklyHint,
+      BudgetType.monthly => l10n.moneySpendingTypeMonthlyHint,
+      BudgetType.yearly => l10n.moneySpendingTypeYearlyHint,
     };
 
 /// Flat icon for a money [category]; a generic one for unknown values.

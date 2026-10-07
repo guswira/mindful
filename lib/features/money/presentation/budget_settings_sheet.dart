@@ -12,6 +12,7 @@ import '../domain/budget_settings.dart';
 import '../domain/budget_type.dart';
 import 'amount_input_formatter.dart';
 import 'budget_settings_sheet_widgets.dart';
+import 'money_labels.dart';
 import 'money_providers.dart';
 
 /// USD/EUR/GBP/etc currency codes offered by [BudgetSettingsSheet]'s
@@ -29,21 +30,16 @@ const List<String> availableCurrencies = [
   'CAD',
 ];
 
-/// Bottom sheet to independently set the monthly and daily budget amounts,
-/// sharing one currency between them. See SPEC.md Money Flow Feature
-/// Budget Settings Sheet and the bottom-sheet design rules.
+/// Bottom sheet to independently set the daily, weekly, monthly and yearly
+/// budget amounts, sharing one currency between them. See SPEC.md Money
+/// Flow Feature Budget Settings Sheet and the bottom-sheet design rules.
 ///
-/// Passing [monthlySettings]/[dailySettings] pre-fills each section and
-/// switches its save to an update.
+/// Each budget already in [settings] pre-fills its section and switches
+/// its save to an update.
 class BudgetSettingsSheet extends ConsumerStatefulWidget {
-  const BudgetSettingsSheet({
-    this.monthlySettings,
-    this.dailySettings,
-    super.key,
-  });
+  const BudgetSettingsSheet({this.settings = const {}, super.key});
 
-  final BudgetSettings? monthlySettings;
-  final BudgetSettings? dailySettings;
+  final Map<BudgetType, BudgetSettings> settings;
 
   @override
   ConsumerState<BudgetSettingsSheet> createState() =>
@@ -51,31 +47,30 @@ class BudgetSettingsSheet extends ConsumerStatefulWidget {
 }
 
 class _BudgetSettingsSheetState extends ConsumerState<BudgetSettingsSheet> {
-  final _monthlyAmountController = TextEditingController();
-  final _dailyAmountController = TextEditingController();
+  /// One amount field per budget, indexed by [BudgetType.index].
+  final _controllers = [
+    for (final _ in BudgetType.values) TextEditingController(),
+  ];
+  final _saving = <BudgetType>{};
   late String _currency;
-  bool _isSavingMonthly = false;
-  bool _isSavingDaily = false;
 
   @override
   void initState() {
     super.initState();
-    _currency =
-        widget.monthlySettings?.currency ??
-        widget.dailySettings?.currency ??
-        'IDR';
-    if (widget.monthlySettings case final settings? when settings.amount > 0) {
-      _monthlyAmountController.text = formatAmountForInput(settings.amount);
-    }
-    if (widget.dailySettings case final settings? when settings.amount > 0) {
-      _dailyAmountController.text = formatAmountForInput(settings.amount);
+    _currency = widget.settings.values.firstOrNull?.currency ?? 'IDR';
+    for (final MapEntry(key: type, value: settings)
+        in widget.settings.entries) {
+      if (settings.amount > 0) {
+        _controllers[type.index].text = formatAmountForInput(settings.amount);
+      }
     }
   }
 
   @override
   void dispose() {
-    _monthlyAmountController.dispose();
-    _dailyAmountController.dispose();
+    for (final controller in _controllers) {
+      controller.dispose();
+    }
     super.dispose();
   }
 
@@ -106,27 +101,17 @@ class _BudgetSettingsSheetState extends ConsumerState<BudgetSettingsSheet> {
   }
 
   Future<void> _save(BudgetType type) async {
-    final controller = type == BudgetType.monthly
-        ? _monthlyAmountController
-        : _dailyAmountController;
-    final amount = double.tryParse(ungroupDigits(controller.text.trim())) ?? 0;
-    // Skip saving a section left at 0/empty — the other section may still
+    final text = _controllers[type.index].text.trim();
+    final amount = double.tryParse(ungroupDigits(text)) ?? 0;
+    // Skip saving a section left at 0/empty — another section may still
     // be mid-edit and shouldn't be blocked on this one having a value.
     if (amount <= 0) {
       return;
     }
 
-    setState(() {
-      if (type == BudgetType.monthly) {
-        _isSavingMonthly = true;
-      } else {
-        _isSavingDaily = true;
-      }
-    });
+    setState(() => _saving.add(type));
 
-    final existing = type == BudgetType.monthly
-        ? widget.monthlySettings
-        : widget.dailySettings;
+    final existing = widget.settings[type];
     final settings = existing == null
         ? BudgetSettings(
             id: const Uuid().v4(),
@@ -145,21 +130,14 @@ class _BudgetSettingsSheetState extends ConsumerState<BudgetSettingsSheet> {
     final repository = await ref.read(moneyRepositoryProvider.future);
     await repository.setCurrency(_currency);
     await repository.saveBudgetSettings(settings);
-    ref.invalidate(monthlyBudgetProvider);
-    ref.invalidate(dailyBudgetProvider);
+    ref.invalidate(budgetsProvider);
     ref.invalidate(budgetCurrencyProvider);
     ref.invalidate(remainingBudgetProvider);
 
     if (!mounted) {
       return;
     }
-    setState(() {
-      if (type == BudgetType.monthly) {
-        _isSavingMonthly = false;
-      } else {
-        _isSavingDaily = false;
-      }
-    });
+    setState(() => _saving.remove(type));
   }
 
   @override
@@ -175,28 +153,22 @@ class _BudgetSettingsSheetState extends ConsumerState<BudgetSettingsSheet> {
             onClose: () => Navigator.pop(context),
           ),
           const SizedBox(height: Spacing.md),
-          BudgetSection(
-            label: l10n.moneyMonthlyBudget,
-            currency: _currency,
-            onPickCurrency: _pickCurrency,
-            controller: _monthlyAmountController,
-            saveLabel: l10n.moneySaveMonthly,
-            isSaving: _isSavingMonthly,
-            onSave: () => _save(BudgetType.monthly),
-          ),
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 16),
-            child: Divider(color: Colors.white10, height: 1),
-          ),
-          BudgetSection(
-            label: l10n.moneyDailyBudget,
-            currency: _currency,
-            onPickCurrency: _pickCurrency,
-            controller: _dailyAmountController,
-            saveLabel: l10n.moneySaveDaily,
-            isSaving: _isSavingDaily,
-            onSave: () => _save(BudgetType.daily),
-          ),
+          for (final type in BudgetType.values) ...[
+            if (type != BudgetType.values.first)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: Spacing.md),
+                child: Divider(color: Colors.white10, height: 1),
+              ),
+            BudgetSection(
+              label: budgetTitle(l10n, type),
+              currency: _currency,
+              onPickCurrency: _pickCurrency,
+              controller: _controllers[type.index],
+              saveLabel: budgetSaveLabel(l10n, type),
+              isSaving: _saving.contains(type),
+              onSave: () => _save(type),
+            ),
+          ],
         ],
       ),
     );
@@ -207,14 +179,10 @@ class _BudgetSettingsSheetState extends ConsumerState<BudgetSettingsSheet> {
 /// budget card's settings gear icon.
 void showBudgetSettingsSheet(
   BuildContext context, {
-  BudgetSettings? monthlySettings,
-  BudgetSettings? dailySettings,
+  Map<BudgetType, BudgetSettings> settings = const {},
 }) {
   showGlassBottomSheet(
     context: context,
-    builder: (_) => BudgetSettingsSheet(
-      monthlySettings: monthlySettings,
-      dailySettings: dailySettings,
-    ),
+    builder: (_) => BudgetSettingsSheet(settings: settings),
   );
 }

@@ -944,12 +944,6 @@ abstract class AppLocalizations {
   /// **'Tasks & Routines'**
   String get planTabTitle;
 
-  /// No description provided for @planAdd.
-  ///
-  /// In en, this message translates to:
-  /// **'Add task or habit'**
-  String get planAdd;
-
   /// No description provided for @taskConvertToRoutine.
   ///
   /// In en, this message translates to:
@@ -1039,6 +1033,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Removed action'**
   String get habitActionRemoved;
+
+  /// No description provided for @habitSectionTags.
+  ///
+  /// In en, this message translates to:
+  /// **'Tags'**
+  String get habitSectionTags;
+
+  /// No description provided for @habitTagsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional — e.g. Heavy, Easy. Add them to any day from the routine\'s calendar.'**
+  String get habitTagsHint;
+
+  /// No description provided for @habitAddTag.
+  ///
+  /// In en, this message translates to:
+  /// **'+ Add tag'**
+  String get habitAddTag;
+
+  /// No description provided for @habitDayTags.
+  ///
+  /// In en, this message translates to:
+  /// **'Tags'**
+  String get habitDayTags;
+
+  /// No description provided for @habitTagSummaryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tags this month'**
+  String get habitTagSummaryTitle;
+
+  /// No description provided for @habitTagTimes.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} ×{count}'**
+  String habitTagTimes(String label, int count);
+
+  /// No description provided for @habitTagCount.
+  ///
+  /// In en, this message translates to:
+  /// **'×{count}'**
+  String habitTagCount(int count);
+
+  /// No description provided for @habitTagDecrease.
+  ///
+  /// In en, this message translates to:
+  /// **'Less {label}'**
+  String habitTagDecrease(String label);
+
+  /// No description provided for @habitTagIncrease.
+  ///
+  /// In en, this message translates to:
+  /// **'More {label}'**
+  String habitTagIncrease(String label);
 
   /// No description provided for @taskGroupUpcoming.
   ///
@@ -1177,6 +1225,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Task not found'**
   String get taskNotFound;
+
+  /// No description provided for @detailSelectHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a task or routine to see its details here'**
+  String get detailSelectHint;
 
   /// No description provided for @taskMarkAsDone.
   ///
@@ -1526,6 +1580,60 @@ abstract class AppLocalizations {
   /// **'Category'**
   String get moneyCategoryHeading;
 
+  /// No description provided for @moneySpendingTypeHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Spending type'**
+  String get moneySpendingTypeHeading;
+
+  /// No description provided for @moneySpendingTypeEveryday.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyday'**
+  String get moneySpendingTypeEveryday;
+
+  /// No description provided for @moneySpendingTypeWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly bill'**
+  String get moneySpendingTypeWeekly;
+
+  /// No description provided for @moneySpendingTypeMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly bill'**
+  String get moneySpendingTypeMonthly;
+
+  /// No description provided for @moneySpendingTypeYearly.
+  ///
+  /// In en, this message translates to:
+  /// **'Yearly bill'**
+  String get moneySpendingTypeYearly;
+
+  /// No description provided for @moneySpendingTypeEverydayHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Counts toward every budget.'**
+  String get moneySpendingTypeEverydayHint;
+
+  /// No description provided for @moneySpendingTypeWeeklyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Skips your daily budget. Counts toward weekly, monthly and yearly.'**
+  String get moneySpendingTypeWeeklyHint;
+
+  /// No description provided for @moneySpendingTypeMonthlyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Skips your daily and weekly budgets. Counts toward monthly and yearly.'**
+  String get moneySpendingTypeMonthlyHint;
+
+  /// No description provided for @moneySpendingTypeYearlyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Only counts toward your yearly budget.'**
+  String get moneySpendingTypeYearlyHint;
+
   /// No description provided for @moneyNoteHint.
   ///
   /// In en, this message translates to:
@@ -1586,6 +1694,18 @@ abstract class AppLocalizations {
   /// **'Daily'**
   String get moneyBudgetDaily;
 
+  /// No description provided for @moneyBudgetWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly'**
+  String get moneyBudgetWeekly;
+
+  /// No description provided for @moneyBudgetYearly.
+  ///
+  /// In en, this message translates to:
+  /// **'Yearly'**
+  String get moneyBudgetYearly;
+
   /// No description provided for @moneyBudgetSettingsTitle.
   ///
   /// In en, this message translates to:
@@ -1604,6 +1724,18 @@ abstract class AppLocalizations {
   /// **'Daily budget'**
   String get moneyDailyBudget;
 
+  /// No description provided for @moneyWeeklyBudget.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly budget'**
+  String get moneyWeeklyBudget;
+
+  /// No description provided for @moneyYearlyBudget.
+  ///
+  /// In en, this message translates to:
+  /// **'Yearly budget'**
+  String get moneyYearlyBudget;
+
   /// No description provided for @moneySaveMonthly.
   ///
   /// In en, this message translates to:
@@ -1615,6 +1747,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Save daily'**
   String get moneySaveDaily;
+
+  /// No description provided for @moneySaveWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Save weekly'**
+  String get moneySaveWeekly;
+
+  /// No description provided for @moneySaveYearly.
+  ///
+  /// In en, this message translates to:
+  /// **'Save yearly'**
+  String get moneySaveYearly;
 
   /// No description provided for @moneyDeleteEntryTitle.
   ///
@@ -1634,18 +1778,6 @@ abstract class AppLocalizations {
   /// **'Cashflow'**
   String get moneyTabTitle;
 
-  /// No description provided for @moneyAddSpending.
-  ///
-  /// In en, this message translates to:
-  /// **'+ Spending'**
-  String get moneyAddSpending;
-
-  /// No description provided for @moneyAddIncome.
-  ///
-  /// In en, this message translates to:
-  /// **'+ Income'**
-  String get moneyAddIncome;
-
   /// No description provided for @moneyBudgetIntroTitle.
   ///
   /// In en, this message translates to:
@@ -1655,7 +1787,7 @@ abstract class AppLocalizations {
   /// No description provided for @moneyBudgetIntroBody.
   ///
   /// In en, this message translates to:
-  /// **'Choose a monthly or daily amount. Mindful shows what\'s left as you spend, so you know where you stand before the month runs out.'**
+  /// **'Choose a daily, weekly, monthly or yearly amount. Mindful shows what\'s left as you spend, so you know where you stand before the period runs out.'**
   String get moneyBudgetIntroBody;
 
   /// No description provided for @moneySetBudget.
@@ -1664,17 +1796,17 @@ abstract class AppLocalizations {
   /// **'Set budget'**
   String get moneySetBudget;
 
-  /// No description provided for @moneySetMonthly.
+  /// No description provided for @moneyBudgetHeading.
   ///
   /// In en, this message translates to:
-  /// **'Set Monthly'**
-  String get moneySetMonthly;
+  /// **'Budget'**
+  String get moneyBudgetHeading;
 
-  /// No description provided for @moneySetDaily.
+  /// No description provided for @moneyBudgetSettingsTooltip.
   ///
   /// In en, this message translates to:
-  /// **'Set Daily'**
-  String get moneySetDaily;
+  /// **'Budget settings'**
+  String get moneyBudgetSettingsTooltip;
 
   /// No description provided for @moneyBudgetOf.
   ///
@@ -1771,6 +1903,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Daily remaining'**
   String get moneyDailyRemaining;
+
+  /// No description provided for @moneyWeeklyRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly remaining'**
+  String get moneyWeeklyRemaining;
+
+  /// No description provided for @moneyYearlyRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'Yearly remaining'**
+  String get moneyYearlyRemaining;
 
   /// No description provided for @moneyCategoryFood.
   ///
@@ -2148,26 +2292,56 @@ abstract class AppLocalizations {
   /// No description provided for @writeNewJournalEntry.
   ///
   /// In en, this message translates to:
-  /// **'New journal entry'**
+  /// **'Write journal'**
   String get writeNewJournalEntry;
 
   /// No description provided for @writeNewTask.
   ///
   /// In en, this message translates to:
-  /// **'New task'**
+  /// **'Do new task'**
   String get writeNewTask;
 
   /// No description provided for @writeNewHabit.
   ///
   /// In en, this message translates to:
-  /// **'New habit'**
+  /// **'Build new routine'**
   String get writeNewHabit;
 
   /// No description provided for @writeNewMoneyEntry.
   ///
   /// In en, this message translates to:
-  /// **'New money entry'**
+  /// **'Record spending'**
   String get writeNewMoneyEntry;
+
+  /// No description provided for @writeTodayPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Write today\'s plan'**
+  String get writeTodayPlan;
+
+  /// No description provided for @writeReviewToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Review today'**
+  String get writeReviewToday;
+
+  /// No description provided for @writeGratitude.
+  ///
+  /// In en, this message translates to:
+  /// **'Gratitude journal'**
+  String get writeGratitude;
+
+  /// No description provided for @writeAddSpending.
+  ///
+  /// In en, this message translates to:
+  /// **'Add spending'**
+  String get writeAddSpending;
+
+  /// No description provided for @writeAddIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Add income'**
+  String get writeAddIncome;
 
   /// No description provided for @sharedUnsyncedLabel.
   ///

@@ -11,15 +11,17 @@ import '../../../shared/widgets/sheet_header.dart';
 import '../../../shared/widgets/tinted_pill.dart';
 import '../../auth/domain/auth_state.dart';
 import '../data/money_repository.dart';
+import '../domain/budget_type.dart';
 import '../domain/entry_type.dart';
 import '../domain/money_entry.dart';
 import 'add_money_sheet_widgets.dart';
 import 'amount_input_formatter.dart';
 import 'amount_keypad.dart';
 import 'money_providers.dart';
+import 'spending_type_picker.dart';
 
 /// Bottom sheet to create or edit a money entry: type, amount, category,
-/// note and date. See SPEC.md Money Flow Feature Add Money Sheet and the
+/// spending type (which budgets it counts toward), note and date. See SPEC.md Money Flow Feature Add Money Sheet and the
 /// bottom-sheet design rules.
 ///
 /// Passing [entry] pre-fills the form and switches saving to an update;
@@ -45,6 +47,7 @@ class _AddMoneySheetState extends ConsumerState<AddMoneySheet> {
   final _amountFocus = FocusNode();
   final _noteController = TextEditingController();
   late String _selectedCategory;
+  BudgetType? _budgetPeriod;
   DateTime _selectedDate = DateTime.now();
   bool _isSaving = false;
 
@@ -54,6 +57,7 @@ class _AddMoneySheetState extends ConsumerState<AddMoneySheet> {
     final entry = widget.entry;
     _type = entry?.type ?? widget.defaultType;
     _selectedCategory = entry?.category ?? _categoriesFor(_type).first;
+    _budgetPeriod = entry?.budgetPeriod;
     if (entry != null) {
       _amountController.text = formatAmountForInput(entry.amount);
       _noteController.text = entry.note ?? '';
@@ -114,6 +118,8 @@ class _AddMoneySheetState extends ConsumerState<AddMoneySheet> {
       _selectedDate.month,
       _selectedDate.day,
     );
+    // Income never counts against a budget, so it has no spending type.
+    final budgetPeriod = _type == EntryType.spending ? _budgetPeriod : null;
     final existing = widget.entry;
     final entry = existing == null
         ? MoneyEntry(
@@ -123,6 +129,7 @@ class _AddMoneySheetState extends ConsumerState<AddMoneySheet> {
             amount: amount,
             category: _selectedCategory,
             note: note.isEmpty ? null : note,
+            budgetPeriod: budgetPeriod,
             date: date,
             createdAt: now,
             updatedAt: now,
@@ -132,6 +139,7 @@ class _AddMoneySheetState extends ConsumerState<AddMoneySheet> {
             amount: amount,
             category: _selectedCategory,
             note: note.isEmpty ? null : note,
+            budgetPeriod: budgetPeriod,
             date: date,
             updatedAt: now,
           );
@@ -194,6 +202,13 @@ class _AddMoneySheetState extends ConsumerState<AddMoneySheet> {
             onChanged: (category) =>
                 setState(() => _selectedCategory = category),
           ),
+          if (_type == EntryType.spending) ...[
+            const SizedBox(height: Spacing.md),
+            SpendingTypePicker(
+              selected: _budgetPeriod,
+              onChanged: (period) => setState(() => _budgetPeriod = period),
+            ),
+          ],
           const SizedBox(height: Spacing.sm),
           TextField(
             controller: _noteController,

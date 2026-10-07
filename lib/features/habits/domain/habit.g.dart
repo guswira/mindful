@@ -27,6 +27,9 @@ _Habit _$HabitFromJson(Map<String, dynamic> json) => _Habit(
           .toList() ??
       const <HabitAction>[],
   archived: json['archived'] as bool? ?? false,
+  tags: (json['tags'] as List<dynamic>?)
+      ?.map((e) => HabitTag.fromJson(e as Map<String, dynamic>))
+      .toList(),
 );
 
 Map<String, dynamic> _$HabitToJson(_Habit instance) => <String, dynamic>{
@@ -40,4 +43,6 @@ Map<String, dynamic> _$HabitToJson(_Habit instance) => <String, dynamic>{
   'reminder_time': const TimeOfDayConverter().toJson(instance.reminderTime),
   'actions': instance.actions.map((e) => e.toJson()).toList(),
   'archived': instance.archived,
+  if (instance.tags?.map((e) => e.toJson()).toList() case final value?)
+    'tags': value,
 };

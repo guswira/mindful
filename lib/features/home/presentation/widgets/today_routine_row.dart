@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/l10n/l10n.dart';
+import '../../../../shared/widgets/detail_selection.dart';
 import '../../../habits/domain/habit_action.dart';
 import '../../../habits/presentation/habit_tab.dart';
 import '../../../habits/presentation/habit_icon.dart';
+import '../../../habits/presentation/open_routine_detail.dart';
 import '../../../habits/presentation/routine_pill.dart';
 import 'today_task_row.dart' show todayRowLeadingGap, todayRowLeadingWidth;
 
@@ -12,7 +14,8 @@ import 'today_task_row.dart' show todayRowLeadingGap, todayRowLeadingWidth;
 /// and one pill per action (or "Done"). Home only lists routines not logged
 /// yet, so tapping a pill logs it and the row leaves the card; a logged
 /// item (shown tinted, tap to undo) only appears on the Tasks & Routines
-/// tab.
+/// tab. Tapping the rest of the row opens its calendar
+/// ([openRoutineDetail]).
 class TodayRoutineRow extends ConsumerWidget {
   const TodayRoutineRow({required this.item, super.key});
 
@@ -52,49 +55,61 @@ class TodayRoutineRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final habit = item.habit;
     final color = routineColorOf(context, habit);
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        children: [
-          SizedBox(
-            width: todayRowLeadingWidth,
-            child: Center(
-              child: HabitIcon(icon: habit.icon, color: color),
+    // Marks the routine shown in the detail pane.
+    final selected = DetailSelectionScope.isSelected(
+      context,
+      RoutineDetailSelection(habit.id),
+    );
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => openRoutineDetail(context, habit.id),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: Row(
+          children: [
+            SizedBox(
+              width: todayRowLeadingWidth,
+              child: Center(
+                child: HabitIcon(icon: habit.icon, color: color),
+              ),
             ),
-          ),
-          const SizedBox(width: todayRowLeadingGap),
-          Expanded(
-            child: Text(
-              habit.name,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 14, color: Colors.white),
-            ),
-          ),
-          if (habit.actions.isEmpty)
-            RoutinePill(
-              label: context.l10n.commonDone,
-              color: color,
-              selected: _isDone,
-              onTap: () => _handleTap(context, ref, null, selected: _isDone),
-            )
-          else
-            for (final action in habit.actions)
-              Padding(
-                padding: const EdgeInsets.only(left: 6),
-                child: RoutinePill(
-                  label: action.label,
-                  color: color,
-                  selected: _isSelected(action),
-                  onTap: () => _handleTap(
-                    context,
-                    ref,
-                    action,
-                    selected: _isSelected(action),
-                  ),
+            const SizedBox(width: todayRowLeadingGap),
+            Expanded(
+              child: Text(
+                habit.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: selected ? color : Colors.white,
                 ),
               ),
-        ],
+            ),
+            if (habit.actions.isEmpty)
+              RoutinePill(
+                label: context.l10n.commonDone,
+                color: color,
+                selected: _isDone,
+                onTap: () => _handleTap(context, ref, null, selected: _isDone),
+              )
+            else
+              for (final action in habit.actions)
+                Padding(
+                  padding: const EdgeInsets.only(left: 6),
+                  child: RoutinePill(
+                    label: action.label,
+                    color: color,
+                    selected: _isSelected(action),
+                    onTap: () => _handleTap(
+                      context,
+                      ref,
+                      action,
+                      selected: _isSelected(action),
+                    ),
+                  ),
+                ),
+          ],
+        ),
       ),
     );
   }

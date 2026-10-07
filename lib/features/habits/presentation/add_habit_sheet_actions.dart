@@ -5,13 +5,14 @@ import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/glass_theme.dart';
 import '../../../shared/widgets/glass_card.dart';
 import '../domain/habit_action.dart';
+import '../domain/habit_tag.dart';
 import 'habit_form.dart' show generateHabitFormId;
 
 /// Inline-editable custom action rows shown under "Custom actions" in
 /// [AddHabitSheet] — each action is its own text field, added and removed
 /// directly in place. Leaving the list empty gives the habit a single
 /// "Done" button, per SPEC.md Habit Tracker.
-class HabitActionsInlineEditor extends StatefulWidget {
+class HabitActionsInlineEditor extends StatelessWidget {
   const HabitActionsInlineEditor({
     required this.actions,
     required this.onChanged,
@@ -22,15 +23,76 @@ class HabitActionsInlineEditor extends StatefulWidget {
   final ValueChanged<List<HabitAction>> onChanged;
 
   @override
-  State<HabitActionsInlineEditor> createState() =>
-      _HabitActionsInlineEditorState();
+  Widget build(BuildContext context) {
+    return _LabelListEditor<HabitAction>(
+      items: actions,
+      onChanged: onChanged,
+      idOf: (action) => action.id,
+      labelOf: (action) => action.label,
+      relabel: (action, label) => action.copyWith(label: label),
+      create: () => HabitAction(id: generateHabitFormId(), label: ''),
+      addLabel: context.l10n.habitAddAction,
+    );
+  }
 }
 
-class _HabitActionsInlineEditorState extends State<HabitActionsInlineEditor> {
+/// Inline-editable tag rows shown under "Tags" in [AddHabitSheet], edited
+/// the same way as [HabitActionsInlineEditor]. Tags are optional and apply
+/// to every action — see SPEC.md Tasks & Routines.
+class HabitTagsInlineEditor extends StatelessWidget {
+  const HabitTagsInlineEditor({
+    required this.tags,
+    required this.onChanged,
+    super.key,
+  });
+
+  final List<HabitTag> tags;
+  final ValueChanged<List<HabitTag>> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return _LabelListEditor<HabitTag>(
+      items: tags,
+      onChanged: onChanged,
+      idOf: (tag) => tag.id,
+      labelOf: (tag) => tag.label,
+      relabel: (tag, label) => tag.copyWith(label: label),
+      create: () => HabitTag(id: generateHabitFormId(), label: ''),
+      addLabel: context.l10n.habitAddTag,
+    );
+  }
+}
+
+class _LabelListEditor<T> extends StatefulWidget {
+  const _LabelListEditor({
+    required this.items,
+    required this.onChanged,
+    required this.idOf,
+    required this.labelOf,
+    required this.relabel,
+    required this.create,
+    required this.addLabel,
+  });
+
+  final List<T> items;
+  final ValueChanged<List<T>> onChanged;
+  final String Function(T item) idOf;
+  final String Function(T item) labelOf;
+  final T Function(T item, String label) relabel;
+  final T Function() create;
+  final String addLabel;
+
+  @override
+  State<_LabelListEditor<T>> createState() => _LabelListEditorState<T>();
+}
+
+class _LabelListEditorState<T> extends State<_LabelListEditor<T>> {
   final _controllers = <String, TextEditingController>{};
 
-  TextEditingController _controllerFor(HabitAction action) => _controllers
-      .putIfAbsent(action.id, () => TextEditingController(text: action.label));
+  TextEditingController _controllerFor(T item) => _controllers.putIfAbsent(
+    widget.idOf(item),
+    () => TextEditingController(text: widget.labelOf(item)),
+  );
 
   @override
   void dispose() {
@@ -40,26 +102,23 @@ class _HabitActionsInlineEditorState extends State<HabitActionsInlineEditor> {
     super.dispose();
   }
 
-  void _add() {
+  void _add() => widget.onChanged([...widget.items, widget.create()]);
+
+  void _remove(T item) {
+    final id = widget.idOf(item);
+    _controllers.remove(id)?.dispose();
     widget.onChanged([
-      ...widget.actions,
-      HabitAction(id: generateHabitFormId(), label: ''),
+      for (final existing in widget.items)
+        if (widget.idOf(existing) != id) existing,
     ]);
   }
 
-  void _remove(HabitAction action) {
-    _controllers.remove(action.id)?.dispose();
+  void _relabel(T item, String label) {
+    final id = widget.idOf(item);
     widget.onChanged([
-      for (final existing in widget.actions)
-        if (existing.id != action.id) existing,
-    ]);
-  }
-
-  void _relabel(HabitAction action, String label) {
-    widget.onChanged([
-      for (final existing in widget.actions)
-        if (existing.id == action.id)
-          existing.copyWith(label: label)
+      for (final existing in widget.items)
+        if (widget.idOf(existing) == id)
+          widget.relabel(existing, label)
         else
           existing,
     ]);
@@ -71,13 +130,13 @@ class _HabitActionsInlineEditorState extends State<HabitActionsInlineEditor> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        for (final action in widget.actions)
+        for (final item in widget.items)
           Padding(
             padding: const EdgeInsets.only(bottom: Spacing.sm),
             child: _ActionRow(
-              controller: _controllerFor(action),
-              onChanged: (label) => _relabel(action, label),
-              onRemove: () => _remove(action),
+              controller: _controllerFor(item),
+              onChanged: (label) => _relabel(item, label),
+              onRemove: () => _remove(item),
             ),
           ),
         TextButton(
@@ -87,7 +146,7 @@ class _HabitActionsInlineEditorState extends State<HabitActionsInlineEditor> {
             alignment: Alignment.centerLeft,
             foregroundColor: glass.habitAccent,
           ),
-          child: Text(context.l10n.habitAddAction),
+          child: Text(widget.addLabel),
         ),
       ],
     );

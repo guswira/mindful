@@ -29,6 +29,7 @@ import '../../features/settings/data/journal_reminders_controller.dart';
 import '../../features/settings/presentation/settings_screen.dart';
 import '../../features/tasks/data/task_reminders_controller.dart';
 import '../../shared/services/notification_service.dart';
+import '../platform/platform_features.dart';
 import 'sheet_navigation.dart';
 
 export 'sheet_navigation.dart'
@@ -214,15 +215,18 @@ GoRouter appRouter(Ref ref) {
   // `mindful://log-habit`, `mindful://open-task`, `mindful://home/tasks`
   // and `mindful://home/habits` (both land on the Tasks & Routines tab),
   // set by the native widget providers. See
-  // SPEC.md Home and Lock Screen Widgets.
-  unawaited(
-    HomeWidget.initiallyLaunchedFromHomeWidget().then(
+  // SPEC.md Home and Lock Screen Widgets. Phones only — home_widget has
+  // no desktop/web implementation.
+  if (isPhonePlatform) {
+    unawaited(
+      HomeWidget.initiallyLaunchedFromHomeWidget().then(
+        (uri) => navigateFromWidgetUri(ref, router, uri),
+      ),
+    );
+    HomeWidget.widgetClicked.listen(
       (uri) => navigateFromWidgetUri(ref, router, uri),
-    ),
-  );
-  HomeWidget.widgetClicked.listen(
-    (uri) => navigateFromWidgetUri(ref, router, uri),
-  );
+    );
+  }
 
   return router;
 }

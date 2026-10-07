@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
+import '../../core/constants/layout.dart';
 import '../../core/theme/glass_theme.dart';
 import 'app_background_scope.dart';
 
@@ -17,19 +18,51 @@ import 'app_background_scope.dart';
 /// [child] sits in a [BackdropGroup], so every `GlassCard` on the screen
 /// shares one backdrop read — see `GlassCard` for why.
 class BlobBackground extends StatelessWidget {
-  const BlobBackground({required this.child, super.key});
+  const BlobBackground({
+    required this.child,
+    this.maxContentWidth = AppLayout.maxContentWidth,
+    super.key,
+  });
 
   final Widget child;
+
+  /// How wide [child] may get on a big screen — wider for list + detail
+  /// layouts ([AppLayout.maxTwoPaneWidth]).
+  final double maxContentWidth;
 
   @override
   Widget build(BuildContext context) {
     final imagePath = AppBackgroundScope.imagePathOf(context);
+    final separator = AppLayout.verticalSeparator(context);
+    // Capped so content doesn't stretch across a Mac/iPad window, while
+    // the photo and blobs above still fill it.
+    final content = Align(
+      alignment: Alignment.topCenter,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: maxContentWidth),
+        child: BackdropGroup(child: child),
+      ),
+    );
     return Stack(
       children: [
         if (imagePath != null)
           Positioned.fill(child: _CustomPhoto(path: imagePath)),
         const Positioned.fill(child: IgnorePointer(child: _Blobs())),
-        BackdropGroup(child: child),
+        // On a screen split by a hinge / half-open fold, a capped (single
+        // column) screen moves onto the left half rather than straddling
+        // the split; an uncapped one (list + detail) lines up with it
+        // itself. Every BlobBackground fills the screen, so the
+        // separator's screen x is also x here.
+        if (separator != null && maxContentWidth.isFinite)
+          Positioned(
+            left: 0,
+            top: 0,
+            bottom: 0,
+            width: separator.left,
+            child: content,
+          )
+        else
+          content,
       ],
     );
   }

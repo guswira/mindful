@@ -476,9 +476,6 @@ class AppLocalizationsId extends AppLocalizations {
   String get planTabTitle => 'Tugas & Rutinitas';
 
   @override
-  String get planAdd => 'Tambah tugas atau kebiasaan';
-
-  @override
   String get taskConvertToRoutine => 'Jadikan rutinitas';
 
   @override
@@ -534,6 +531,42 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get habitActionRemoved => 'Aksi yang dihapus';
+
+  @override
+  String get habitSectionTags => 'Tag';
+
+  @override
+  String get habitTagsHint =>
+      'Opsional — misal Berat, Ringan. Tambahkan ke hari mana pun dari kalender kebiasaan.';
+
+  @override
+  String get habitAddTag => '+ Tambah tag';
+
+  @override
+  String get habitDayTags => 'Tag';
+
+  @override
+  String get habitTagSummaryTitle => 'Tag bulan ini';
+
+  @override
+  String habitTagTimes(String label, int count) {
+    return '$label ×$count';
+  }
+
+  @override
+  String habitTagCount(int count) {
+    return '×$count';
+  }
+
+  @override
+  String habitTagDecrease(String label) {
+    return 'Kurangi $label';
+  }
+
+  @override
+  String habitTagIncrease(String label) {
+    return 'Tambah $label';
+  }
 
   @override
   String get taskGroupUpcoming => 'Mendatang';
@@ -612,6 +645,10 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get taskNotFound => 'Tugas tidak ditemukan';
+
+  @override
+  String get detailSelectHint =>
+      'Pilih tugas atau rutinitas untuk melihat detailnya di sini';
 
   @override
   String get taskMarkAsDone => 'Tandai selesai';
@@ -809,6 +846,36 @@ class AppLocalizationsId extends AppLocalizations {
   String get moneyCategoryHeading => 'Kategori';
 
   @override
+  String get moneySpendingTypeHeading => 'Jenis pengeluaran';
+
+  @override
+  String get moneySpendingTypeEveryday => 'Sehari-hari';
+
+  @override
+  String get moneySpendingTypeWeekly => 'Tagihan mingguan';
+
+  @override
+  String get moneySpendingTypeMonthly => 'Tagihan bulanan';
+
+  @override
+  String get moneySpendingTypeYearly => 'Tagihan tahunan';
+
+  @override
+  String get moneySpendingTypeEverydayHint => 'Dihitung ke semua anggaran.';
+
+  @override
+  String get moneySpendingTypeWeeklyHint =>
+      'Tidak mengurangi anggaran harian. Dihitung ke mingguan, bulanan, dan tahunan.';
+
+  @override
+  String get moneySpendingTypeMonthlyHint =>
+      'Tidak mengurangi anggaran harian dan mingguan. Dihitung ke bulanan dan tahunan.';
+
+  @override
+  String get moneySpendingTypeYearlyHint =>
+      'Hanya dihitung ke anggaran tahunan.';
+
+  @override
   String get moneyNoteHint => 'Tambah catatan...';
 
   @override
@@ -839,6 +906,12 @@ class AppLocalizationsId extends AppLocalizations {
   String get moneyBudgetDaily => 'Harian';
 
   @override
+  String get moneyBudgetWeekly => 'Mingguan';
+
+  @override
+  String get moneyBudgetYearly => 'Tahunan';
+
+  @override
   String get moneyBudgetSettingsTitle => 'Pengaturan anggaran';
 
   @override
@@ -848,10 +921,22 @@ class AppLocalizationsId extends AppLocalizations {
   String get moneyDailyBudget => 'Anggaran harian';
 
   @override
+  String get moneyWeeklyBudget => 'Anggaran mingguan';
+
+  @override
+  String get moneyYearlyBudget => 'Anggaran tahunan';
+
+  @override
   String get moneySaveMonthly => 'Simpan bulanan';
 
   @override
   String get moneySaveDaily => 'Simpan harian';
+
+  @override
+  String get moneySaveWeekly => 'Simpan mingguan';
+
+  @override
+  String get moneySaveYearly => 'Simpan tahunan';
 
   @override
   String get moneyDeleteEntryTitle => 'Hapus catatan';
@@ -865,26 +950,20 @@ class AppLocalizationsId extends AppLocalizations {
   String get moneyTabTitle => 'Arus kas';
 
   @override
-  String get moneyAddSpending => '+ Pengeluaran';
-
-  @override
-  String get moneyAddIncome => '+ Pemasukan';
-
-  @override
   String get moneyBudgetIntroTitle => 'Atur anggaran';
 
   @override
   String get moneyBudgetIntroBody =>
-      'Pilih jumlah bulanan atau harian. Mindful menunjukkan sisanya saat kamu belanja, jadi kamu tahu posisimu sebelum bulan berakhir.';
+      'Pilih jumlah harian, mingguan, bulanan, atau tahunan. Mindful menunjukkan sisanya saat kamu belanja, jadi kamu tahu posisimu sebelum periodenya berakhir.';
 
   @override
   String get moneySetBudget => 'Atur anggaran';
 
   @override
-  String get moneySetMonthly => 'Atur bulanan';
+  String get moneyBudgetHeading => 'Anggaran';
 
   @override
-  String get moneySetDaily => 'Atur harian';
+  String get moneyBudgetSettingsTooltip => 'Pengaturan anggaran';
 
   @override
   String moneyBudgetOf(String currency, String amount) {
@@ -940,6 +1019,12 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get moneyDailyRemaining => 'Sisa harian';
+
+  @override
+  String get moneyWeeklyRemaining => 'Sisa mingguan';
+
+  @override
+  String get moneyYearlyRemaining => 'Sisa tahunan';
 
   @override
   String get moneyCategoryFood => 'Makanan';
@@ -1164,16 +1249,31 @@ class AppLocalizationsId extends AppLocalizations {
   String get writeButtonLabel => 'Tulis';
 
   @override
-  String get writeNewJournalEntry => 'Catatan jurnal baru';
+  String get writeNewJournalEntry => 'Tulis jurnal';
 
   @override
-  String get writeNewTask => 'Tugas baru';
+  String get writeNewTask => 'Buat tugas baru';
 
   @override
-  String get writeNewHabit => 'Kebiasaan baru';
+  String get writeNewHabit => 'Bangun kebiasaan baru';
 
   @override
-  String get writeNewMoneyEntry => 'Catatan keuangan baru';
+  String get writeNewMoneyEntry => 'Catat pengeluaran';
+
+  @override
+  String get writeTodayPlan => 'Tulis rencana hari ini';
+
+  @override
+  String get writeReviewToday => 'Tinjau hari ini';
+
+  @override
+  String get writeGratitude => 'Jurnal syukur';
+
+  @override
+  String get writeAddSpending => 'Tambah pengeluaran';
+
+  @override
+  String get writeAddIncome => 'Tambah pemasukan';
 
   @override
   String get sharedUnsyncedLabel => 'Belum tersinkron';

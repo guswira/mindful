@@ -29,6 +29,8 @@ Map<String, dynamic> _$BudgetSettingsToJson(_BudgetSettings instance) =>
     };
 
 const _$BudgetTypeEnumMap = {
-  BudgetType.monthly: 'monthly',
   BudgetType.daily: 'daily',
+  BudgetType.weekly: 'weekly',
+  BudgetType.monthly: 'monthly',
+  BudgetType.yearly: 'yearly',
 };

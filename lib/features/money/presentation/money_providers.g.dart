@@ -6,48 +6,54 @@ part of 'money_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$monthlyBudgetHash() => r'b9df96d5fa621715b5f2c5ceb56d0c29c13cae83';
+String _$budgetsHash() => r'a3d390835a4d561369c145fca0d8a4ae0fa8f3e2';
 
-/// The signed-in user's monthly budget, or null if it hasn't been set.
+/// Every budget the signed-in user has saved, by period — a period with
+/// no row is missing. A saved budget can still be 0; see
+/// [activeBudgetsProvider] for the ones that are actually set.
 ///
-/// Copied from [monthlyBudget].
-@ProviderFor(monthlyBudget)
-final monthlyBudgetProvider =
-    AutoDisposeFutureProvider<BudgetSettings?>.internal(
-      monthlyBudget,
-      name: r'monthlyBudgetProvider',
+/// Copied from [budgets].
+@ProviderFor(budgets)
+final budgetsProvider =
+    AutoDisposeFutureProvider<Map<BudgetType, BudgetSettings>>.internal(
+      budgets,
+      name: r'budgetsProvider',
       debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
           ? null
-          : _$monthlyBudgetHash,
+          : _$budgetsHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-typedef MonthlyBudgetRef = AutoDisposeFutureProviderRef<BudgetSettings?>;
-String _$dailyBudgetHash() => r'308ab82cb8101982c3a2367840b04a44a49c63dd';
+typedef BudgetsRef =
+    AutoDisposeFutureProviderRef<Map<BudgetType, BudgetSettings>>;
+String _$activeBudgetsHash() => r'496eaa5e1e45f1606e6b0062a01b09551465425f';
 
-/// The signed-in user's daily budget, or null if it hasn't been set.
+/// The budgets with an amount > 0, shortest period first — the ones the
+/// Cashflow tab and home card show.
 ///
-/// Copied from [dailyBudget].
-@ProviderFor(dailyBudget)
-final dailyBudgetProvider = AutoDisposeFutureProvider<BudgetSettings?>.internal(
-  dailyBudget,
-  name: r'dailyBudgetProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$dailyBudgetHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+/// Copied from [activeBudgets].
+@ProviderFor(activeBudgets)
+final activeBudgetsProvider =
+    AutoDisposeFutureProvider<Map<BudgetType, BudgetSettings>>.internal(
+      activeBudgets,
+      name: r'activeBudgetsProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$activeBudgetsHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-typedef DailyBudgetRef = AutoDisposeFutureProviderRef<BudgetSettings?>;
+typedef ActiveBudgetsRef =
+    AutoDisposeFutureProviderRef<Map<BudgetType, BudgetSettings>>;
 String _$budgetCurrencyHash() => r'7db91a963495ca6eaeefccecef0a00397f956554';
 
-/// The currency both budgets are set in. See
+/// The currency every budget is set in. See
 /// [MoneyRepository.getCurrency].
 ///
 /// Copied from [budgetCurrency].

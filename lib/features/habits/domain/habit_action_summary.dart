@@ -1,6 +1,7 @@
 import 'habit.dart';
 import 'habit_action.dart';
 import 'habit_log.dart';
+import 'habit_tag.dart';
 
 /// What a [HabitActionCount] row counts.
 enum HabitActionCountKind {
@@ -72,3 +73,50 @@ HabitAction? actionForLog(Habit habit, HabitLog log) {
   }
   return null;
 }
+
+/// One row of a habit's monthly tag summary: how many times [tag] was done.
+typedef HabitTagCount = ({HabitTag tag, int count});
+
+/// How many times each of [habit]'s tags was done in [month] — a log's
+/// count per tag adds up, so "Easy ×3" on one day counts 3. Only logs
+/// matching [where] count, when given (e.g. one action's logs).
+///
+/// Every current tag gets a row, in the habit's order, even at 0. Counts
+/// for tags since removed from the habit are dropped.
+List<HabitTagCount> countTagsInMonth(
+  Habit habit,
+  Iterable<HabitLog> logs,
+  DateTime month, {
+  bool Function(HabitLog log)? where,
+}) {
+  final counts = <String, int>{};
+  for (final log in logs) {
+    if (log.habitId == habit.id &&
+        log.date.year == month.year &&
+        log.date.month == month.month &&
+        (where == null || where(log))) {
+      for (final MapEntry(:key, :value) in log.tagCounts.entries) {
+        counts.update(key, (n) => n + value, ifAbsent: () => value);
+      }
+    }
+  }
+  return [
+    for (final tag in habit.tagList) (tag: tag, count: counts[tag.id] ?? 0),
+  ];
+}
+
+/// [countTagsInMonth] split by action — keyed by [HabitAction.id], one
+/// entry per current action of [habit].
+Map<String, List<HabitTagCount>> countTagsByActionInMonth(
+  Habit habit,
+  Iterable<HabitLog> logs,
+  DateTime month,
+) => {
+  for (final action in habit.actions)
+    action.id: countTagsInMonth(
+      habit,
+      logs,
+      month,
+      where: (log) => log.completedActionId == action.id,
+    ),
+};

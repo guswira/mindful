@@ -7,12 +7,13 @@ import '../../../core/theme/glass_theme.dart';
 import '../../../shared/widgets/glass_bottom_sheet.dart';
 import '../../../shared/widgets/glass_card.dart';
 import '../../../shared/widgets/group_label.dart';
+import '../../../shared/widgets/detail_selection.dart';
 import '../../../shared/widgets/intro_card.dart';
 import '../../habits/presentation/add_habit_sheet.dart';
 import '../domain/task.dart';
 import 'add_task_sheet.dart';
+import 'open_task_detail.dart';
 import 'task_complete_checkbox.dart';
-import 'task_detail_sheet.dart';
 import 'task_due_date_chip.dart';
 import 'task_tab.dart';
 
@@ -308,10 +309,17 @@ class _TaskRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final glass = Theme.of(context).extension<GlassTheme>()!;
+    final selected = DetailSelectionScope.isSelected(
+      context,
+      TaskDetailSelection(task.id),
+    );
     return Material(
-      color: Colors.transparent,
+      // Marks the task shown in the wide-screen detail pane.
+      color: selected
+          ? glass.taskAccent.withValues(alpha: 0.12)
+          : Colors.transparent,
       child: InkWell(
-        onTap: () => showTaskDetailSheet(context, task.id),
+        onTap: () => openTaskDetail(context, task.id),
         onLongPress: () => _showActions(context, ref),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),

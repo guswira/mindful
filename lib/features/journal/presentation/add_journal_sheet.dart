@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../core/constants/spacing.dart';
 import '../../../core/l10n/l10n.dart';
+import '../../../core/platform/platform_features.dart';
 import '../../../core/theme/glass_theme.dart';
 import '../../../shared/widgets/shake_widget.dart';
 import '../../../shared/widgets/sheet_header.dart';
@@ -48,26 +49,29 @@ class _AddJournalSheetState extends ConsumerState<AddJournalSheet> {
   }
 
   Future<void> _pickPhoto() async {
-    final source = await showModalBottomSheet<ImageSource>(
-      context: context,
-      builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.photo_camera_outlined),
-              title: Text(context.l10n.journalPhotoCamera),
-              onTap: () => Navigator.pop(context, ImageSource.camera),
+    // No camera source off phones, so desktop goes straight to the picker.
+    final source = isPhonePlatform
+        ? await showModalBottomSheet<ImageSource>(
+            context: context,
+            builder: (context) => SafeArea(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ListTile(
+                    leading: const Icon(Icons.photo_camera_outlined),
+                    title: Text(context.l10n.journalPhotoCamera),
+                    onTap: () => Navigator.pop(context, ImageSource.camera),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.photo_library_outlined),
+                    title: Text(context.l10n.journalPhotoGallery),
+                    onTap: () => Navigator.pop(context, ImageSource.gallery),
+                  ),
+                ],
+              ),
             ),
-            ListTile(
-              leading: const Icon(Icons.photo_library_outlined),
-              title: Text(context.l10n.journalPhotoGallery),
-              onTap: () => Navigator.pop(context, ImageSource.gallery),
-            ),
-          ],
-        ),
-      ),
-    );
+          )
+        : ImageSource.gallery;
     if (!context.mounted || source == null) {
       return;
     }

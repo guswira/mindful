@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/constants/layout.dart';
 import 'glass_card.dart';
 
 /// Shows [builder]'s content inside the shared bottom-sheet chrome used by
@@ -11,11 +12,24 @@ import 'glass_card.dart';
 /// *below* [FloatingNavBar] in [HomeScreen]'s [Stack]. A sheet pushed onto
 /// that nested Navigator would render behind the nav bar; pushing it onto
 /// the root Navigator instead puts it above everything.
+///
+/// On a wide screen (Mac, iPad — [AppLayout.isWide]) the same content
+/// opens as a centered [GlassDialog] instead: a full-width bottom sheet
+/// there is mostly empty glass. It's still a route, so the content's own
+/// `Navigator.pop(context, result)` calls work the same either way.
 Future<T?> showGlassBottomSheet<T>({
   required BuildContext context,
   required WidgetBuilder builder,
   bool isDismissible = true,
 }) {
+  if (AppLayout.isWide(context)) {
+    return showDialog<T>(
+      context: context,
+      useRootNavigator: true,
+      barrierDismissible: isDismissible,
+      builder: (context) => GlassDialog(child: builder(context)),
+    );
+  }
   return showModalBottomSheet<T>(
     context: context,
     useRootNavigator: true,
@@ -85,6 +99,40 @@ class GlassBottomSheet extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// A sheet's content as a centered strong [GlassCard], for wide screens.
+///
+/// [Dialog] already keeps clear of the keyboard and caps the height to the
+/// screen; [Flexible] passes that bound down so the content's own scroll
+/// view scrolls instead of overflowing, as in [GlassBottomSheet].
+class GlassDialog extends StatelessWidget {
+  const GlassDialog({required this.child, super.key});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      // A fixed width (Dialog clamps it to the screen), since Dialog would
+      // otherwise shrink-wrap narrow content into a skinny card — sheets
+      // are always full width on a phone.
+      child: SizedBox(
+        width: AppLayout.maxSheetWidth,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Flexible(
+              child: GlassCard(strong: true, borderRadius: 28, child: child),
+            ),
+          ],
         ),
       ),
     );

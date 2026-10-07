@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/spacing.dart';
 import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/glass_theme.dart';
+import '../../../shared/widgets/detail_selection.dart';
 import '../../../shared/widgets/glass_bottom_sheet.dart';
 import '../../../shared/widgets/glass_card.dart';
 import '../../../shared/widgets/group_label.dart';
@@ -15,6 +15,7 @@ import 'archived_habits_sheet.dart';
 import 'habit_manage_actions.dart';
 import 'habit_tab.dart';
 import 'habit_icon.dart';
+import 'open_routine_detail.dart';
 import 'routine_pill.dart';
 
 /// The Tasks & Routines tab's routines section: a label plus [items]'
@@ -183,11 +184,16 @@ class _HabitRow extends ConsumerWidget {
     final habit = item.habit;
     final isDone = item.todayLog != null;
     final color = routineColorOf(context, habit);
+    final selected = DetailSelectionScope.isSelected(
+      context,
+      RoutineDetailSelection(habit.id),
+    );
 
     return Material(
-      color: Colors.transparent,
+      // Marks the routine shown in the wide-screen detail pane.
+      color: selected ? color.withValues(alpha: 0.12) : Colors.transparent,
       child: InkWell(
-        onTap: () => context.push('/habits/${habit.id}'),
+        onTap: () => openRoutineDetail(context, habit.id),
         onLongPress: () => _showOptions(context, ref),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),

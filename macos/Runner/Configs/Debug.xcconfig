@@ -1,2 +1,4 @@
 #include "../../Flutter/Flutter-Debug.xcconfig"
 #include "Warnings.xcconfig"
+// Google Sign-In client — shared with iOS (same bundle id).
+#include? "../../../ios/Flutter/Secrets.xcconfig"

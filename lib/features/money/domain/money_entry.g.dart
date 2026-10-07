@@ -16,6 +16,7 @@ _MoneyEntry _$MoneyEntryFromJson(Map<String, dynamic> json) => _MoneyEntry(
   createdAt: DateTime.parse(json['created_at'] as String),
   updatedAt: DateTime.parse(json['updated_at'] as String),
   note: json['note'] as String?,
+  budgetPeriod: $enumDecodeNullable(_$BudgetTypeEnumMap, json['budget_period']),
   syncStatus:
       $enumDecodeNullable(_$SyncStatusEnumMap, json['sync_status']) ??
       SyncStatus.synced,
@@ -32,12 +33,21 @@ Map<String, dynamic> _$MoneyEntryToJson(_MoneyEntry instance) =>
       'created_at': instance.createdAt.toIso8601String(),
       'updated_at': instance.updatedAt.toIso8601String(),
       'note': instance.note,
+      if (_$BudgetTypeEnumMap[instance.budgetPeriod] case final value?)
+        'budget_period': value,
       'sync_status': _$SyncStatusEnumMap[instance.syncStatus]!,
     };
 
 const _$EntryTypeEnumMap = {
   EntryType.spending: 'spending',
   EntryType.income: 'income',
+};
+
+const _$BudgetTypeEnumMap = {
+  BudgetType.daily: 'daily',
+  BudgetType.weekly: 'weekly',
+  BudgetType.monthly: 'monthly',
+  BudgetType.yearly: 'yearly',
 };
 
 const _$SyncStatusEnumMap = {

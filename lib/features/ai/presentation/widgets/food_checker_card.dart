@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/constants/spacing.dart';
 import '../../../../core/l10n/l10n.dart';
+import '../../../../core/platform/platform_features.dart';
 import '../../../../core/theme/glass_theme.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../../shared/widgets/tinted_pill.dart';
@@ -61,26 +62,32 @@ class FoodCheckerCard extends StatelessWidget {
                 style: TextStyle(color: glass.textSecondary, fontSize: 13),
               ),
               const SizedBox(height: Spacing.lg - 2),
+              // No camera source off phones — the gallery becomes the
+              // primary action there.
               SizedBox(
                 width: double.infinity,
                 child: TintedPill(
                   label: l10n.aiCheckFoodCalories,
-                  icon: Icons.photo_camera_outlined,
+                  icon: isPhonePlatform
+                      ? Icons.photo_camera_outlined
+                      : Icons.photo_library_outlined,
                   color: glass.aiAccent,
-                  onTap: onOpenCamera,
+                  onTap: isPhonePlatform ? onOpenCamera : onPickFromGallery,
                 ),
               ),
-              const SizedBox(height: Spacing.sm),
-              TextButton(
-                onPressed: onPickFromGallery,
-                child: Text(
-                  l10n.aiChooseFromGallery,
-                  style: TextStyle(
-                    color: glass.aiAccent.withValues(alpha: 0.7),
-                    fontSize: 13,
+              if (isPhonePlatform) ...[
+                const SizedBox(height: Spacing.sm),
+                TextButton(
+                  onPressed: onPickFromGallery,
+                  child: Text(
+                    l10n.aiChooseFromGallery,
+                    style: TextStyle(
+                      color: glass.aiAccent.withValues(alpha: 0.7),
+                      fontSize: 13,
+                    ),
                   ),
                 ),
-              ),
+              ],
             ],
           ),
         ),

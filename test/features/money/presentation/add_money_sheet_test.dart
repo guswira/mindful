@@ -8,6 +8,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:mindful/core/theme/app_theme.dart';
 import 'package:mindful/features/auth/domain/auth_state.dart';
 import 'package:mindful/features/money/data/money_repository.dart';
+import 'package:mindful/features/money/domain/budget_type.dart';
 import 'package:mindful/features/money/domain/entry_type.dart';
 import 'package:mindful/features/money/domain/money_entry.dart';
 import 'package:mindful/features/money/presentation/add_money_sheet.dart';
@@ -146,7 +147,7 @@ void main() {
     'shows the keypad while the amount field is focused and hides it for '
     'the note field',
     (tester) async {
-      await tester.binding.setSurfaceSize(const Size(400, 1000));
+      await tester.binding.setSurfaceSize(const Size(400, 1200));
       addTearDown(() => tester.binding.setSurfaceSize(null));
       await tester.pumpWidget(buildSheet());
       await tester.pumpAndSettle();
@@ -196,4 +197,44 @@ void main() {
       );
     },
   );
+
+  testWidgets('spending type explains which budgets it counts toward', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(400, 1400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(buildSheet());
+    await tester.pumpAndSettle();
+
+    expect(find.text('Spending type'), findsOneWidget);
+    expect(find.text('Counts toward every budget.'), findsOneWidget);
+
+    await tester.tap(find.text('Yearly bill'));
+    await tester.pump();
+    expect(find.text('Only counts toward your yearly budget.'), findsOneWidget);
+
+    // Income never counts against a budget, so it has no spending type.
+    await tester.tap(find.text('Income'));
+    await tester.pump();
+    expect(find.text('Spending type'), findsNothing);
+  });
+
+  testWidgets('saves the picked spending type on the entry', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(400, 1400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    when(() => entriesBox.put(any(), any())).thenAnswer((_) async {});
+
+    await tester.pumpWidget(buildSheet());
+    await tester.enterText(find.byType(TextField).first, '50000');
+    await tester.tap(find.text('Monthly bill'));
+    await tester.pump();
+    await tester.tap(find.widgetWithText(TintedPill, 'Save'));
+    await tester.pump();
+
+    final captured = verify(() => entriesBox.put(any(), captureAny())).captured;
+    final saved = MoneyEntry.fromJson(
+      Map<String, dynamic>.from(captured.last as Map),
+    );
+    expect(saved.budgetPeriod, BudgetType.monthly);
+  });
 }

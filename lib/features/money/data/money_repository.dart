@@ -63,7 +63,7 @@ class MoneyRepository {
     }
   }
 
-  /// Every budget that's been set — monthly, daily, or both.
+  /// Every budget that's been set, shortest period first.
   List<BudgetSettings> getAllBudgetSettings() => [
     for (final type in BudgetType.values)
       if (getBudgetSettings(type) case final settings?) settings,
@@ -71,7 +71,7 @@ class MoneyRepository {
 
   /// Caches [settings] under its own [BudgetSettings.budgetType], then
   /// upserts it in Supabase (matching on `user_id, budget_type`, so
-  /// monthly and daily are independent rows). Throws if the Supabase sync
+  /// each period is an independent row). Throws if the Supabase sync
   /// fails — see class doc.
   Future<void> saveBudgetSettings(BudgetSettings settings) async {
     await _settingsBox.put(
@@ -81,13 +81,13 @@ class MoneyRepository {
     await _datasource.saveBudgetSettings(settings);
   }
 
-  /// The currency both budgets are set in — shared rather than tracked
-  /// per budget, so changing it in one place is reflected in the other.
+  /// The currency every budget is set in — shared rather than tracked
+  /// per budget, so changing it in one place is reflected in the others.
   /// Defaults to IDR (the app's default currency) until explicitly set.
   Future<String> getCurrency() async =>
       await _storage.read(key: _currencyKey) ?? 'IDR';
 
-  /// Updates the shared currency used by both budgets.
+  /// Updates the shared currency used by every budget.
   Future<void> setCurrency(String currency) =>
       _storage.write(key: _currencyKey, value: currency);
 
@@ -153,6 +153,11 @@ class MoneyRepository {
         settings.toJson(),
       );
     }
+    // The shared currency lives in device storage, so a fresh install
+    // would otherwise show the IDR default instead of the saved budget's.
+    if (allSettings.isNotEmpty) {
+      await setCurrency(allSettings.first.currency);
+    }
   }
 
   /// Total spending within [range] (inclusive), or all-time if null.
@@ -173,27 +178,23 @@ class MoneyRepository {
     return total;
   }
 
-  /// [type]'s budget amount minus this period's spending, or 0 if that
-  /// budget hasn't been set. Income doesn't offset a budget's remaining
-  /// amount — it's only reflected in the recap.
+  /// [type]'s budget amount minus this period's spending that counts
+  /// toward it (see [spendingTowardBudget] — longer bills skip shorter
+  /// budgets), or 0 if that budget hasn't been set. Income doesn't offset
+  /// a budget's remaining amount — it's only reflected in the recap.
   double getRemaining(BudgetType type) {
     final settings = getBudgetSettings(type);
     if (settings == null) {
       return 0;
     }
-    final range = getPeriodRange(type);
-    return settings.amount - getTotalSpending(range: range);
+    final entries = getEntries(range: getPeriodRange(type));
+    return settings.amount - spendingTowardBudget(entries, type);
   }
 
-  /// [type]'s current period: the 1st of this month through today for
-  /// [BudgetType.monthly], or just today for [BudgetType.daily].
-  DateTimeRange getPeriodRange(BudgetType type) {
-    final today = _dateOnly(DateTime.now());
-    final start = type == BudgetType.monthly
-        ? DateTime(today.year, today.month, 1)
-        : today;
-    return DateTimeRange(start: start, end: today);
-  }
+  /// [type]'s current period, from its first day (today, this Monday, the
+  /// 1st of the month or January 1st) through today.
+  DateTimeRange getPeriodRange(BudgetType type) =>
+      type.rangeEndingToday(DateTime.now());
 
   Future<void> _writeOptimistic(
     MoneyEntry entry,
@@ -212,9 +213,6 @@ class MoneyRepository {
 
   static bool _inRange(DateTime date, DateTimeRange range) =>
       !date.isBefore(range.start) && !date.isAfter(range.end);
-
-  static DateTime _dateOnly(DateTime date) =>
-      DateTime(date.year, date.month, date.day);
 
   /// Hive returns nested maps/lists with loose (`dynamic`) generics, which
   /// `fromJson` rejects. Round-tripping through `jsonEncode`/`jsonDecode`

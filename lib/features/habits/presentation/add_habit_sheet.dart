@@ -16,6 +16,7 @@ import '../../tasks/presentation/task_tab.dart';
 import '../data/habit_repository.dart';
 import '../domain/habit.dart';
 import '../domain/habit_action.dart';
+import '../domain/habit_tag.dart';
 import 'add_habit_sheet_actions.dart';
 import 'add_habit_sheet_icon_color.dart';
 import 'add_habit_sheet_name_field.dart';
@@ -54,6 +55,7 @@ class _AddHabitSheetState extends ConsumerState<AddHabitSheet> {
   String _icon = habitSheetIconPresets.first;
   String _color = habitSheetColorPresets.first;
   List<HabitAction> _actions = const [];
+  List<HabitTag> _tags = const [];
   bool _reminderEnabled = false;
   List<int> _reminderDays = const [];
   TimeOfDay? _reminderTime;
@@ -68,6 +70,7 @@ class _AddHabitSheetState extends ConsumerState<AddHabitSheet> {
       _icon = habit.icon;
       _color = habit.color;
       _actions = habit.actions;
+      _tags = habit.tagList;
       _reminderEnabled = habit.reminderDays.isNotEmpty;
       _reminderDays = habit.reminderDays;
       _reminderTime = habit.reminderTime;
@@ -133,6 +136,7 @@ class _AddHabitSheetState extends ConsumerState<AddHabitSheet> {
     setState(() => _saving = true);
     final reminderDays = _reminderEnabled ? _reminderDays : const <int>[];
     final reminderTime = _reminderEnabled ? _reminderTime : null;
+    final tags = _savedTags();
 
     final existing = widget.habit;
     final habit = existing == null
@@ -146,6 +150,7 @@ class _AddHabitSheetState extends ConsumerState<AddHabitSheet> {
             reminderDays: reminderDays,
             reminderTime: reminderTime,
             actions: _actions,
+            tags: tags,
           )
         : existing.copyWith(
             name: name,
@@ -154,6 +159,7 @@ class _AddHabitSheetState extends ConsumerState<AddHabitSheet> {
             reminderDays: reminderDays,
             reminderTime: reminderTime,
             actions: _actions,
+            tags: tags,
           );
 
     final repository = await ref.read(habitRepositoryProvider.future);
@@ -171,6 +177,16 @@ class _AddHabitSheetState extends ConsumerState<AddHabitSheet> {
       return;
     }
     Navigator.pop(context);
+  }
+
+  /// The tags to save: blank ones dropped, and null (key left out of the
+  /// upsert — see [Habit.tags]) while the habit has never had any.
+  List<HabitTag>? _savedTags() {
+    final tags = [
+      for (final tag in _tags)
+        if (tag.label.trim().isNotEmpty) tag.copyWith(label: tag.label.trim()),
+    ];
+    return tags.isEmpty && widget.habit?.tags == null ? null : tags;
   }
 
   Future<void> _saveHabit(HabitRepository repository, Habit habit) async {
@@ -295,6 +311,18 @@ class _AddHabitSheetState extends ConsumerState<AddHabitSheet> {
           Text(
             l10n.habitCustomActionsEmptyHint,
             style: TextStyle(color: glass.textHint, fontSize: 11),
+          ),
+          const SizedBox(height: 20),
+          _SectionLabel(l10n.habitSectionTags),
+          const SizedBox(height: Spacing.xs),
+          Text(
+            l10n.habitTagsHint,
+            style: TextStyle(color: glass.textHint, fontSize: 12),
+          ),
+          const SizedBox(height: Spacing.sm),
+          HabitTagsInlineEditor(
+            tags: _tags,
+            onChanged: (tags) => setState(() => _tags = tags),
           ),
           const SizedBox(height: 32),
           SizedBox(

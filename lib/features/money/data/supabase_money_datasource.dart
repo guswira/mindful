@@ -28,8 +28,8 @@ class SupabaseMoneyDatasource {
     return row == null ? null : BudgetSettings.fromJson(row);
   }
 
-  /// Every budget row belonging to the signed-in user (RLS-scoped) —
-  /// monthly, daily, or both.
+  /// Every budget row belonging to the signed-in user (RLS-scoped) — up
+  /// to one per [BudgetType].
   Future<List<BudgetSettings>> getAllBudgetSettings() async {
     final rows = await _client
         .from(SupabaseConstants.budgetSettingsTable)
@@ -38,8 +38,8 @@ class SupabaseMoneyDatasource {
   }
 
   /// Creates or overwrites the signed-in user's budget settings row for
-  /// [settings]'s [BudgetSettings.budgetType] — monthly and daily are
-  /// independent rows (`unique(user_id, budget_type)`).
+  /// [settings]'s [BudgetSettings.budgetType] — each period is an
+  /// independent row (`unique(user_id, budget_type)`).
   Future<void> saveBudgetSettings(BudgetSettings settings) async {
     await _client
         .from(SupabaseConstants.budgetSettingsTable)
@@ -70,11 +70,35 @@ class SupabaseMoneyDatasource {
   }
 
   /// Updates an existing money entry row.
+  ///
+  /// `budget_period` is left out of [MoneyEntry.toJson] while null, which
+  /// on an update would keep the old period — so it's cleared explicitly,
+  /// unless the column doesn't exist yet (database not migrated), where
+  /// there's nothing to clear.
   Future<void> updateEntry(MoneyEntry entry) async {
+    final json = entry.toJson();
+    if (json.containsKey(_budgetPeriodColumn)) {
+      await _update(entry.id, json);
+      return;
+    }
+    try {
+      await _update(entry.id, {...json, _budgetPeriodColumn: null});
+    } on PostgrestException catch (error) {
+      if (error.code != _unknownColumnCode) rethrow;
+      await _update(entry.id, json);
+    }
+  }
+
+  static const String _budgetPeriodColumn = 'budget_period';
+
+  /// PostgREST's "column not found in the schema cache".
+  static const String _unknownColumnCode = 'PGRST204';
+
+  Future<void> _update(String id, Map<String, dynamic> json) async {
     await _client
         .from(SupabaseConstants.moneyEntriesTable)
-        .update(entry.toJson())
-        .eq('id', entry.id);
+        .update(json)
+        .eq('id', id);
   }
 
   /// Deletes the money entry with [id].

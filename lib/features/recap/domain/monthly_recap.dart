@@ -110,9 +110,10 @@ class CashflowRecap {
     required this.entryCount,
     required this.noSpendDays,
     this.budget,
+    double? budgetSpending,
     this.topCategory,
     this.topCategoryAmount = 0,
-  });
+  }) : budgetSpending = budgetSpending ?? spending;
 
   final String currency;
   final double spending;
@@ -125,13 +126,20 @@ class CashflowRecap {
   /// The monthly budget, if one is set.
   final double? budget;
 
+  /// The part of [spending] that counts toward the monthly [budget] —
+  /// yearly bills skip it (see BudgetType.countsToward).
+  final double budgetSpending;
+
   /// Stored (English) spending category name with the largest total.
   final String? topCategory;
   final double topCategoryAmount;
 
   double get net => income - spending;
 
-  bool get underBudget => budget != null && spending <= budget!;
+  bool get underBudget => switch (budget) {
+    final budget? => budgetSpending <= budget,
+    null => false,
+  };
 
   RecapTone get tone => switch (entryCount) {
     0 => RecapTone.empty,

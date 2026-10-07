@@ -9,21 +9,31 @@ import '../domain/money_entry.dart';
 
 part 'money_providers.g.dart';
 
-/// The signed-in user's monthly budget, or null if it hasn't been set.
+/// Every budget the signed-in user has saved, by period — a period with
+/// no row is missing. A saved budget can still be 0; see
+/// [activeBudgetsProvider] for the ones that are actually set.
 @riverpod
-Future<BudgetSettings?> monthlyBudget(Ref ref) async {
+Future<Map<BudgetType, BudgetSettings>> budgets(Ref ref) async {
   final repository = await ref.watch(moneyRepositoryProvider.future);
-  return repository.getBudgetSettings(BudgetType.monthly);
+  return {
+    for (final settings in repository.getAllBudgetSettings())
+      settings.budgetType: settings,
+  };
 }
 
-/// The signed-in user's daily budget, or null if it hasn't been set.
+/// The budgets with an amount > 0, shortest period first — the ones the
+/// Cashflow tab and home card show.
 @riverpod
-Future<BudgetSettings?> dailyBudget(Ref ref) async {
-  final repository = await ref.watch(moneyRepositoryProvider.future);
-  return repository.getBudgetSettings(BudgetType.daily);
+Future<Map<BudgetType, BudgetSettings>> activeBudgets(Ref ref) async {
+  final all = await ref.watch(budgetsProvider.future);
+  return {
+    for (final type in BudgetType.values)
+      if (all[type] case final settings? when settings.amount > 0)
+        type: settings,
+  };
 }
 
-/// The currency both budgets are set in. See
+/// The currency every budget is set in. See
 /// [MoneyRepository.getCurrency].
 @riverpod
 Future<String> budgetCurrency(Ref ref) async {

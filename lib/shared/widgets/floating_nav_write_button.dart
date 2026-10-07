@@ -4,26 +4,38 @@ import 'package:flutter/material.dart';
 
 import '../../core/l10n/l10n.dart';
 import '../../core/theme/glass_theme.dart';
-import '../../features/habits/presentation/add_habit_sheet.dart';
-import '../../features/journal/presentation/add_journal_sheet.dart';
-import '../../features/money/presentation/add_money_sheet.dart';
-import '../../features/tasks/presentation/add_task_sheet.dart';
 import 'glass_bottom_sheet.dart';
 import 'write_options_sheet.dart';
 
-/// The four sheets reachable from [WriteButton]'s radial arc, per SPEC.md
-/// Money Flow Feature Write menu: left = journal, up-left = task,
-/// up-right = habit, right = money (spending).
+/// The radial arc's slots around [WriteButton], left to right: left,
+/// up-left, up-right, right.
 enum _WriteDirection { left, upLeft, upRight, right }
 
-/// Teal gradient write button on the right of [FloatingNavBar].
+/// Which slots a write menu of [count] items fills, in menu order — the
+/// upper ones first, so a 2-item menu sits right above the button.
+List<_WriteDirection> _slotsFor(int count) => switch (count) {
+  1 => const [_WriteDirection.upLeft],
+  2 => const [_WriteDirection.upLeft, _WriteDirection.upRight],
+  3 => const [
+    _WriteDirection.left,
+    _WriteDirection.upLeft,
+    _WriteDirection.upRight,
+  ],
+  _ => _WriteDirection.values,
+};
+
+/// Gradient write button on the right of [FloatingNavBar], in the current
+/// tab's accent (teal on Home — see [writeButtonGradient]).
 ///
-/// Tapping shows a bottom sheet with all four options. Holding and
-/// dragging shows a radial arc of the same four; releasing over one opens
-/// it. See SPEC.md Floating Island Nav Bar and Money Flow Feature Write
-/// menu.
+/// Tapping shows a bottom sheet with the write menu of the tab at
+/// [tabIndex] (see [writeOptionsFor]). Holding and dragging shows the same
+/// items as a radial arc; releasing over one opens it. See SPEC.md
+/// Floating Island Nav Bar.
 class WriteButton extends StatefulWidget {
-  const WriteButton({super.key});
+  const WriteButton({this.tabIndex, super.key});
+
+  /// The current shell tab, or null for the full menu.
+  final int? tabIndex;
 
   @override
   State<WriteButton> createState() => _WriteButtonState();
@@ -33,27 +45,18 @@ class _WriteButtonState extends State<WriteButton> {
   _WriteDirection? _dragDirection;
   bool _dragging = false;
 
-  void _showWriteSheet() => showWriteOptionsSheet(context);
+  void _showWriteSheet() =>
+      showWriteOptionsSheet(context, tabIndex: widget.tabIndex);
 
-  void _openJournalSheet() => showGlassBottomSheet(
-    context: context,
-    builder: (_) => const AddJournalSheet(),
-  );
-
-  void _openTaskSheet() => showGlassBottomSheet(
-    context: context,
-    builder: (_) => const AddTaskSheet(),
-  );
-
-  void _openHabitSheet() => showGlassBottomSheet(
-    context: context,
-    builder: (_) => const AddHabitSheet(),
-  );
-
-  void _openMoneySheet() => showGlassBottomSheet(
-    context: context,
-    builder: (_) => const AddMoneySheet(),
-  );
+  /// The write menu laid onto the arc's slots.
+  Map<_WriteDirection, WriteOption> _arcOptions() {
+    final options = writeOptionsFor(context, widget.tabIndex);
+    final slots = _slotsFor(options.length);
+    return {
+      for (var i = 0; i < slots.length && i < options.length; i++)
+        slots[i]: options[i],
+    };
+  }
 
   void _handleLongPressStart(LongPressStartDetails details) {
     setState(() {
@@ -67,31 +70,21 @@ class _WriteButtonState extends State<WriteButton> {
   }
 
   void _handleLongPressEnd(LongPressEndDetails details) {
-    final direction = _dragDirection;
+    final option = _arcOptions()[_dragDirection];
     setState(() {
       _dragging = false;
       _dragDirection = null;
     });
-    if (direction == null) {
+    if (option == null) {
       return;
     }
-    switch (direction) {
-      case _WriteDirection.left:
-        _openJournalSheet();
-      case _WriteDirection.upLeft:
-        _openTaskSheet();
-      case _WriteDirection.upRight:
-        _openHabitSheet();
-      case _WriteDirection.right:
-        _openMoneySheet();
-    }
+    showGlassBottomSheet<void>(context: context, builder: (_) => option.sheet);
   }
 
   /// Splits the drag into 4 compass-ish sectors — left, up-left, up-right,
   /// right — by the angle from the button, 0° = right and 90° = up. A
-  /// mostly-downward drag (outside [-150°, 150°] around that reference)
-  /// matches nothing, same as the old 3-direction version leaving "down"
-  /// unmapped.
+  /// mostly-downward drag matches nothing, and neither does a slot the
+  /// current tab's menu leaves empty.
   static _WriteDirection? _directionFor(Offset offset) {
     const threshold = 24.0;
     if (offset.distance < threshold) {
@@ -116,39 +109,38 @@ class _WriteButtonState extends State<WriteButton> {
   @override
   Widget build(BuildContext context) {
     final glass = Theme.of(context).extension<GlassTheme>()!;
+    final gradient = writeButtonGradient(glass, widget.tabIndex);
     return Stack(
       clipBehavior: Clip.none,
       alignment: Alignment.bottomRight,
       children: [
         if (_dragging)
-          for (final direction in _WriteDirection.values)
+          for (final MapEntry(key: direction, value: option)
+              in _arcOptions().entries)
             _DirectionBadge(
               direction: direction,
-              icon: switch (direction) {
-                _WriteDirection.left => Icons.menu_book_outlined,
-                _WriteDirection.upLeft => Icons.checklist_outlined,
-                _WriteDirection.upRight => Icons.calendar_month_outlined,
-                _WriteDirection.right => Icons.account_balance_wallet_outlined,
-              },
+              icon: option.icon,
+              color: gradient.first,
               active: _dragDirection == direction,
             ),
         GestureDetector(
           onLongPressStart: _handleLongPressStart,
           onLongPressMoveUpdate: _handleLongPressMoveUpdate,
           onLongPressEnd: _handleLongPressEnd,
-          child: Container(
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 250),
             width: 52,
             height: 52,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [glass.writeAccent, const Color(0xFF0EB8DF)],
+                colors: gradient,
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(22),
               boxShadow: [
                 BoxShadow(
-                  color: glass.writeAccent.withValues(alpha: 0.30),
+                  color: gradient.first.withValues(alpha: 0.30),
                   blurRadius: 20,
                   offset: const Offset(0, 4),
                 ),
@@ -180,11 +172,15 @@ class _DirectionBadge extends StatelessWidget {
   const _DirectionBadge({
     required this.direction,
     required this.icon,
+    required this.color,
     required this.active,
   });
 
   final _WriteDirection direction;
   final IconData icon;
+
+  /// Fill while [active] — the write button's accent.
+  final Color color;
   final bool active;
 
   static const Map<_WriteDirection, ({double right, double bottom})>
@@ -209,7 +205,7 @@ class _DirectionBadge extends StatelessWidget {
         alignment: Alignment.center,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: active ? glass.writeAccent : glass.strongCardColor,
+          color: active ? color : glass.strongCardColor,
         ),
         child: Icon(
           icon,

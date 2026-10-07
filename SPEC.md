@@ -233,11 +233,14 @@ create table journal_entries (
 );
 -- existing projects: alter table journal_entries
 --   add column type text not null default 'review';
+-- existing projects: alter table habits add column tags jsonb;
+--   alter table habit_logs add column tags jsonb;
 create table habits (
   id uuid primary key default gen_random_uuid(),
   user_id uuid references auth.users not null,
   name text not null, icon text not null, color text not null,
   reminder_days int[], reminder_time time, actions jsonb,
+  tags jsonb,                    -- [{id, label}], e.g. Heavy / Easy
   created_at timestamptz default now(), archived boolean default false
 );
 create table habit_logs (
@@ -245,6 +248,7 @@ create table habit_logs (
   user_id uuid references auth.users not null,
   habit_id uuid references habits not null,
   date date not null, completed_action_id text, note text,
+  tags jsonb,                    -- {tagId: count}, e.g. {"<easy>": 3}
   sync_status text default 'synced',
   created_at timestamptz default now(),
   unique(habit_id, date)
@@ -390,7 +394,8 @@ BE MINDFUL SECTION (BeMindfulSection — be_mindful_section.dart), above
     6. menu_book_outlined journalAccent "Mindful with your thoughts" [Write] →
          AddJournalSheet — done: any journal entry
     7. track_changes_rounded moneyAccent "Mindful with your budget" [Set] →
-         BudgetSettingsSheet — done: a monthly or daily budget > 0
+         BudgetSettingsSheet — done: any budget > 0 (daily, weekly, monthly
+         or yearly)
   Ordering is pure (home/domain/be_mindful_steps.dart —
   beMindfulProgress): a step still loading holds back the ones after it
   (no rows jumping around); a step whose data failed to load (e.g. food
@@ -408,7 +413,9 @@ TODAY'S TODO SECTION (TodayTodoCard — today_todo_card.dart):
       pills / "Done"). The icon is always in the routine's own color; the
       pills are plain glass (RoutinePill,
       habits/presentation/routine_pill.dart). Tap a pill → log it, and the
-      row leaves the card.
+      row leaves the card. Tap the rest of the row → its calendar
+      (HabitDetailScreen, or the detail pane on a tablet / in landscape —
+      see Tasks & Routines; task rows open theirs the same way).
     Done items (completed tasks, logged routines) are never shown on Home —
       only on the Tasks & Routines tab, where they can be undone.
     empty: dashed-border "What needs to be done today?" white25; once
@@ -470,10 +477,15 @@ Row:
 
   RIGHT — write button (52×52):
     borderRadius: 22px
-    gradient: LinearGradient writeAccent → Color(0xFF0EB8DF)
-    boxShadow: writeAccent.withOpacity(0.30) blurRadius 20 offset (0,4)
+    gradient: follows the current tab (writeButtonGradient) —
+      Home (and no tab): writeAccent → Color(0xFF0EB8DF), unchanged
+      other tabs: tab accent → the same accent, hue −12°, lightness −10%
+        (Tasks blue, Mindfulness yellow → amber, Money green, AI indigo)
+      animates between tabs (AnimatedContainer 250ms); the long-press
+      arc's active badge uses the same accent
+    boxShadow: gradient start .withOpacity(0.30) blurRadius 20 offset (0,4)
     Icon(Icons.edit_outlined, color:Color(0xFF0A1628), size:22)
-    onTap: showModalBottomSheet write options
+    onTap: write menu for the current tab (below)
     onLongPress: show radial arc overlay
 
 _NavItem widget:
@@ -497,15 +509,28 @@ Tab icons (outline style):
 Shell Scaffold body: Stack [ child, Positioned bottom:0 FloatingNavBar ]
 All tab screens: add bottom padding ≥ 88px so content clears the nav.
 
-Write button tap → showModalBottomSheet (glass):
-  ListTile (each with its tab's nav icon + accent) "Write journal" →
-    AddJournalSheet(), "Add task" → AddTaskSheet(), "Add habit" →
-    AddHabitSheet()
+Write button — the menu follows the current tab
+(writeOptionsFor, shared/widgets/write_options_sheet.dart; WriteButton
+gets FloatingNavBar's currentIndex). Each item: icon + accent + label →
+its add sheet:
+  Home (and AI, and the home widget's pencil — no tab): every item
+    "Build new routine" → AddHabitSheet (calendar_month, habitAccent)
+    "Do new task" → AddTaskSheet (checklist, taskAccent)
+    "Write journal" → AddJournalSheet (menu_book, journalAccent)
+    "Record spending" → AddMoneySheet(spending) (wallet, moneyAccent)
+  Tasks & Routines: "Build new routine", "Do new task"
+  Mindfulness: "Write today's plan" / "Review today" / "Gratitude
+    journal" → AddJournalSheet(initialType: plan / review / gratitude),
+    journalTypeIcon, journalAccent
+  Money: "Add spending" (trending_down, moneySpending) / "Add income"
+    (trending_up, moneyAccent) → AddMoneySheet(defaultType)
 
-Write button long press → radial arc overlay:
-  drag left → AddJournalSheet
-  drag up → AddTaskSheet
-  drag right → AddHabitSheet
+Write button tap → glass bottom sheet, one ListTile per item.
+
+Write button long press → radial arc overlay of the same items, filling
+  the slots left, up-left, up-right, right in menu order (4 items: all;
+  3: left, up-left, up-right; 2: up-left, up-right). Drag toward one and
+  release to open it; an empty slot or a downward drag opens nothing.
 
 ---
 
@@ -581,6 +606,7 @@ Title: "Build new habit"
   reminder toggle + day chips (Mon–Sun multi-select, habitAccent active)
   + time picker when enabled
   custom actions list (add/remove/rename)
+  tags list (optional, add/remove/rename — same inline editor as actions)
   TintedPill(edit?"Save changes":"Add habit", habitAccent) full width
   empty name → shake animation
 
@@ -659,8 +685,9 @@ the home/lock screen widgets still show tasks and routines separately
 (see Home Screen and the widgets section) — both "view all" links and the
 widgets' routines link (`mindful://home/habits`) land on this tab.
 
-Header: "Tasks & Routines" title + glass "+" button → small sheet:
-  "Add task" → AddTaskSheet, "Add habit" → AddHabitSheet
+Header: "Tasks & Routines" title only — no "+" button; adding goes through
+  the nav bar's write button (routine / task on this tab) or the empty
+  states' IntroCards.
 
 Body (one ListView, bottom padding 88):
   ROUTINES section (first — they repeat every day):
@@ -672,7 +699,8 @@ Body (one ListView, bottom padding 88):
       the same RoutinePill as home's TodayRoutineRow (logged one tinted in
       the routine's own color — routineColorOf, habit_icon.dart)
     tapping the already-selected action (or "Done") undoes today's log
-    tap row → HabitDetailScreen; long press → sheet: Edit / Archive / Delete
+    tap row → HabitDetailScreen (or the detail pane — see Tablet /
+      landscape below); long press → sheet: Edit / Archive / Delete
     "Archived (N)" next to the label (only when N > 0) → ArchivedHabitsSheet
       (archived_habits_sheet.dart): each archived habit with
       TintedPill("Restore") + delete; tap row → its HabitDetailScreen.
@@ -693,6 +721,44 @@ Body (one ListView, bottom padding 88):
     long press → sheet: Edit / Convert to routine / Delete
   Each half loads on its own (HabitTabController / TaskTabController) —
   one failing or loading never hides the other.
+
+Tablet / landscape (AppLayout.isTwoPane — width ≥ 640 AND (shortest
+side ≥ 600, i.e. a tablet or Mac window, OR landscape, incl. phones)):
+  ListDetailLayout (plan/presentation/list_detail_layout.dart) puts the
+  list (~3/5) and a DetailPane (~2/5) side by side, centered at 1200
+  (BlobBackground maxContentWidth). Used by this tab AND Home.
+  Tapping a task or routine selects it into the pane instead of opening
+  its sheet/page: tasks → TaskDetailView, routines → HabitDetailView
+  (name + edit header over the same HabitDetailBody as HabitDetailScreen:
+  streaks, calendar, day log sheet, action summary). Selected row: tinted
+  12% here (taskAccent / routine color); on Home the name turns that color.
+  Hint "Pick a task or routine to see its details here" until something
+  is picked, and again once it's deleted or converted. "Mark as done" /
+  logging keeps the pane open. Edit / Convert / day-log open their sheets.
+  How: TaskDetailView never closes itself — it reports onFollowUp /
+  onCompleted / onDeleted; TaskDetailSheet wraps it and pops on each.
+  Rows call openTaskDetail / openRoutineDetail: inside the
+  DetailSelectionScope (shared/widgets/detail_selection.dart) that only
+  ListDetailLayout's pane mode provides → select; anywhere else (phones in
+  portrait, notification taps, the archived sheet) → showTaskDetailSheet /
+  push /habits/:id. Selection is ListDetailLayout state per tab, kept
+  across tab switches, resizes and rotation; not in the URL.
+
+Foldables / dual screens (AppLayout.verticalSeparator — from
+MediaQuery.displayFeatures):
+  physically split = a hinge (two-screen phones), or a fold that's half
+    open like a book, running top to bottom → always two-pane, split AT
+    the separator: list on the left screen, details on the right, nothing
+    under the hinge (tab content uncapped — listDetailMaxWidth).
+  fully unfolded flat fold (one continuous screen), a side-to-side
+    (tabletop) fold, or folded shut → treated as a normal screen of that
+    size (the 3/5 split / phone layout above).
+  Also on a split screen: single-column screens (BlobBackground with a
+    finite cap — Mindfulness, Money, AI, full-page screens) sit on the
+    left screen; the floating nav bar sits on the right screen
+    (HomeScreen). Dialogs/sheets avoid the hinge on their own (Flutter's
+    DisplayFeatureSubScreen). Folding/unfolding is just a resize — the
+    selection survives it.
 
 Convert task → routine:
   From the task row's long-press sheet, or TaskDetailSheet's "⋯" menu
@@ -718,19 +784,39 @@ HabitDetailScreen (/habits/:id — full page, GlassPageScaffold so it
     many times it was done + a bar relative to the most-done one (actions
     at 0 included; plain "Done" / "Removed action" rows only if present).
     Counting is pure (habits/domain/habit_action_summary.dart).
+  Habit with tags: each action row also lists how its days were tagged
+    ("Heavy ×3 · Easy ×1"), and a GlassCard "Tags this month" lists every
+    tag's total (counts summed, so "Easy ×3" on one day counts 3) with
+    the same bars (countTagsInMonth / countTagsByActionInMonth).
   Tap a day (any day up to today; future days aren't tappable) →
     HabitDayLogSheet (habit_day_log_sheet.dart): date title, "Logged as"
     + the current action ("Done" / "Not done" / "Removed action") and the
     log's note, then "Change to" chips in the habit color — "Not done",
     then each action (plain "Done" for a habit without actions; a
     plain-done or removed-action log keeps its chip so it shows
-    selected) — and TintedPill("Save") at the bottom. Save with a change →
+    selected) — then, while the day is done and the habit has tags,
+    "Tags": a − ×N + counter per tag (0–99; 0 = not on the log) — and
+    TintedPill("Save") at the bottom. Save with a change →
     HabitDetailController.setDayLog: saves the log (same id + note, new
-    action) or deletes it for "Not done", updates the calendar in place,
+    action, new tag counts) or deletes it for "Not done", updates the calendar in place,
     refreshes today's routine list + home widgets. A failed Supabase
     delete → SnackBar. Missed past days can be logged the same way.
 
 AddHabitSheet / edit: uses bottom sheet (see Add Sheets above).
+
+Routine tags (HabitTag — habits/domain/habit_tag.dart):
+  Optional labels on a routine that apply across all of its actions, e.g.
+  Gym with Push / Pull / Leg + tags Heavy / Easy. A day's log holds a
+  count per tag (habit_logs.tags {tagId: count}), so one day can be
+  "Heavy" and "Easy ×3" at once. Tags are referenced by id, so renaming
+  one keeps its history; a removed tag's counts are kept but not shown.
+  Logging stays one tap — Home, the Tasks & Routines tab and the widgets
+  log untagged; tags are set from the calendar's HabitDayLogSheet.
+  Switching a day's action (HabitTabController.logAction) keeps its tags
+  and note.
+  Both `tags` columns are null until first used and left out of the
+  upsert while null (includeIfNull: false), so an app update works
+  against a database not migrated yet until someone actually tags.
 
 Notifications:
   habits: per-habit, habitAccent action buttons, fires on selected days.
@@ -833,7 +919,7 @@ Medium 4×2 (MindfulMediumWidget): two columns —
     not; tap → `mindful://open-task?taskId=…` → TaskDetailSheet)
   The Todo column + divider are hidden when no task is due, so routines
   fill the width. Pencil circle button bottom-right (white10 fill, white15
-  border) → `mindful://open-write-sheet` (write options sheet).
+  border) → `mindful://open-write-sheet` (the full write menu, as on Home).
 Small 2×2 (MindfulSmallWidget): chooser on first add — "Show me:" +
   "Todo" (checklist icon) / "Routines" (self_improvement icon) pills; the
   pick is saved as `smallWidgetMode`
@@ -1044,7 +1130,8 @@ Redirects:
 - Floating island nav bar — 5 tabs, NO profile tab, NO labels
 - Settings accessed via gear icon top-right of HomeScreen only
 - Each tab has its own accent color (see Feature accent colors)
-- Write button bottom-right of nav row — always teal gradient
+- Write button bottom-right of nav row — teal gradient on Home, the
+  current tab's accent elsewhere
 - All add actions → bottom sheet (NOT full page navigation)
 - Detail views → bottom sheet (NOT full page, except habit calendar)
 - Primary actions always at bottom of sheet/screen
@@ -1067,6 +1154,15 @@ Redirects:
   monthly recap slideshow, a breathing session, the journal history and
   the exercise activity calendar
 - ShakeWidget on empty required field submit attempt
+- Big screens (macOS, iPad — core/constants/layout.dart AppLayout): the
+  phone layout, centered rather than stretched. BlobBackground caps its
+  content at 720 (background still fills the window); the nav island +
+  write button are centered at 520; from 720 wide, showGlassBottomSheet
+  opens the same content as a centered 560 GlassDialog (still a route, so
+  pop-with-result works unchanged). Phones are below every cap. macOS
+  window min size 380×640 (MainFlutterWindow.swift). Phone-only plugins
+  (home_widget, quick_actions, camera) are skipped off phones via
+  isPhonePlatform (core/platform/platform_features.dart).
 - Empty feature lists use IntroCard (shared/widgets/intro_card.dart) — a
   brief introduction to the feature + the action that starts it — never a
   bare "No X yet" line (routines, tasks, budget, money entries)
@@ -1311,11 +1407,13 @@ Add moneyAccent to GlassTheme.
 ```sql
 create table budget_settings (
   id uuid primary key default gen_random_uuid(),
-  user_id uuid references auth.users not null unique,
-  budget_type text not null default 'monthly', -- 'monthly' | 'daily'
+  user_id uuid references auth.users not null,
+  budget_type text not null default 'monthly',
+    -- 'daily' | 'weekly' | 'monthly' | 'yearly'
   amount numeric(12,2) not null default 0,
   currency text not null default 'USD',
-  updated_at timestamptz default now()
+  updated_at timestamptz default now(),
+  unique(user_id, budget_type)   -- one row per period
 );
 
 create table money_entries (
@@ -1325,11 +1423,16 @@ create table money_entries (
   amount numeric(12,2) not null,
   category text not null,
   note text,
+  budget_period text,  -- spending type: null (everyday) | 'weekly' |
+                       -- 'monthly' | 'yearly' — see Spending type
   date date not null default current_date,
   sync_status text default 'synced',
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
+-- existing projects: alter table money_entries add column budget_period text;
+--   (and drop any check constraint on budget_settings.budget_type that only
+--   allows 'monthly' | 'daily')
 
 alter table budget_settings enable row level security;
 alter table money_entries enable row level security;
@@ -1342,7 +1445,7 @@ create policy "own" on money_entries for all using (auth.uid()=user_id);
 BudgetSettings (Freezed):
 - id: String
 - userId: String
-- budgetType: BudgetType (monthly | daily)
+- budgetType: BudgetType (daily | weekly | monthly | yearly)
 - amount: double
 - currency: String
 - updatedAt: DateTime
@@ -1354,12 +1457,44 @@ MoneyEntry (Freezed):
 - amount: double
 - category: String
 - note: String?
+- budgetPeriod: BudgetType? — spending type (null = everyday); always
+    null for income. Left out of the upsert while null (includeIfNull:
+    false), so an app update works against a database without the column
+    until someone picks a bill type; an update to an everyday entry clears
+    the column explicitly, retrying without it on PGRST204 (column
+    missing).
 - date: DateTime (date only)
 - syncStatus: SyncStatus
 - createdAt: DateTime
 - updatedAt: DateTime
 
-BudgetType enum: monthly, daily
+BudgetType enum (domain/budget_type.dart): daily, weekly, monthly, yearly —
+  declared shortest → longest; the order is the rule below.
+  rangeEndingToday(now): the period's first day → today — today / this
+    Monday (weeks start Monday, like the calendars) / the 1st / Jan 1.
+EntryType enum: spending, income
+
+### Spending type (which budgets an expense counts toward)
+
+Every spending entry has a spending type — Everyday (default), Weekly bill,
+Monthly bill or Yearly bill — so a big bill doesn't eat a shorter
+allowance. A bill counts only toward budgets at least as long as it
+(BudgetType.countsToward: period.index <= budget.index):
+
+                 daily  weekly  monthly  yearly
+  Everyday        ✓      ✓       ✓        ✓
+  Weekly bill     –      ✓       ✓        ✓
+  Monthly bill    –      –       ✓        ✓
+  Yearly bill     –      –       –        ✓
+
+e.g. a yearly insurance bill leaves the daily/weekly/monthly remaining
+untouched but lowers the yearly one; rent as a monthly bill lowers the
+monthly and yearly budgets but not the daily one.
+spendingTowardBudget(entries, budget) (money_entry.dart) is the one place
+this is computed — MoneyRepository.getRemaining, the budget gauges and the
+monthly recap's "budget used" all go through it. Income never offsets a
+budget. Totals that aren't a budget (Spent/Recap/category chart, AI
+advice) still count every entry.
 EntryType enum: spending, income
 
 Spending categories:
@@ -1380,27 +1515,29 @@ Shell route tabs:
 
 MoneyTab layout (BlobBackground, CustomScrollView):
 
-BUDGET CARD (GlassCard strong, top):
-  Row:
-    Column left:
-      Text "Budget" 12px white45
-      Text formatted amount + currency 28px bold white
-      Text budget type "per month" or "per day" 12px white35
-    Column right:
-      CircularProgressIndicator style gauge:
-        progress: spent / budget (capped at 1.0)
-        color: moneyAccent if < 80%, amberAccent if 80–99%,
-               red if >= 100%
-        size: 64px
-        center text: remaining % or "Over"
-  below: Row 3 mini stats:
-    "Spent" — total spending this period (red tinted)
-    "Income" — total income this period (moneyAccent tinted)
-    "Remaining" — budget - spent + income (white or red if negative)
-  settings icon top-right → opens BudgetSettingsSheet
-  no budget set (neither monthly nor daily): IntroCard track_changes_rounded moneyAccent
+BUDGET CARD (budget_card.dart, top) — one strong GlassCard (padding
+  12 16), compact:
+  header: "Budget" 15px w600 + ONE settings gear (GlassIconButton 32) on
+    the right → BudgetSettingsSheet
+  a 2-column grid (BudgetTileGrid) of BudgetProgressTiles, one per budget
+    that's set (amount > 0), shortest period first; an odd last tile keeps
+    its half width. Tile (budget_progress_tile.dart, shared with the home
+    card):
+      period label ("Daily" / "Weekly" / "Monthly" / "Yearly") 12px
+        textSecondary
+      remaining "[currency] [amount]" 17px bold — moneyAccent, red at or
+        below 0; scales down instead of clipping
+      4px rounded bar of the share USED + "72%" 11px muted to its right —
+        moneyAccent < 80%, amber 80–99%, red at 100%
+      "of [currency] [budget]" 11px muted (showTotal — Cashflow only)
+  while some period isn't set: a "+ Weekly · Yearly" moneyAccent link
+    under the grid → BudgetSettingsSheet
+  no budget set at all: IntroCard track_changes_rounded moneyAccent
     "Set a budget" + a short why + TintedPill("Set budget") →
     BudgetSettingsSheet, in place of the gauges
+  Providers: budgetsProvider (every saved row, by period — pre-fills the
+    sheet), activeBudgetsProvider (amount > 0 — gauges, home card, Be
+    mindful).
 
 REMAINING BUDGET INDICATOR (between budget card and list):
   if remaining > 0:
@@ -1414,14 +1551,9 @@ PERIOD SELECTOR (glass pill toggle):
   selected pill: moneyAccent tinted
   filters the entry list below
 
-ADD BUTTONS ROW (hidden until the first entry exists — the empty state's
-  "Record your spending" intro already offers adding one):
-  Row:
-    TintedPill("+ Spending", Colors.redAccent) flex 1
-      onTap → AddMoneySheet(defaultType: spending)
-    SizedBox 8
-    TintedPill("+ Income", moneyAccent) flex 1
-      onTap → AddMoneySheet(defaultType: income)
+No quick add buttons on the tab — adding goes through the nav bar's
+write button ("Add spending" / "Add income" on this tab) or the empty
+state's IntroCard.
 
 ENTRY LIST (grouped by date, newest first):
   no entries at all: IntroCard account_balance_wallet_outlined moneyAccent "Record your spending" +
@@ -1437,7 +1569,7 @@ ENTRY LIST (grouped by date, newest first):
       Column flex:
         Text category 14px white85 bold
         Text note 12px white45 if exists
-        Text date 11px white30
+        Text date 11px white30 — "Oct 1 · Monthly bill" for a bill
       Column right:
         Text amount:
           spending: "- [currency][amount]" red
@@ -1547,6 +1679,17 @@ category picker:
   categories change based on spending/income toggle
   first category auto-selected on type change
 
+spending type (SpendingTypePicker — spending_type_picker.dart; Spending
+  only, hidden for Income, which always saves null):
+  "Spending type" label + Wrap of chips: Everyday (null, default) /
+    Weekly bill / Monthly bill / Yearly bill — selected: moneySpending
+    tint + border
+  below: a muted 12px line on what the pick counts toward
+    ("Counts toward every budget." / "Skips your daily and weekly
+    budgets. Counts toward monthly and yearly." / "Only counts toward your
+    yearly budget." ...) — see Spending type
+  edit mode keeps the entry's type
+
 note field:
   TextField hint "Add a note..." 14px white60 no border
 
@@ -1564,7 +1707,8 @@ edit mode: pre-fills all fields, title "Edit entry"
 
 lib/features/money/presentation/money_detail_sheet.dart
 
-shows: type badge, amount large, category, note, date
+shows: type badge, amount large, category, spending type + what it
+  counts toward (bills only), note, date
 "⋯" more → Edit (AddMoneySheet pre-filled) / Delete confirm
 no primary action button (read-only detail)
 
@@ -1574,48 +1718,35 @@ lib/features/money/presentation/budget_settings_sheet.dart
 
 title: "Budget settings"
 
-budget type toggle: [ Monthly | Daily ] glass segmented
-amount field: large currency + amount input (autofocus)
-currency selector: text button showing current currency
-  tap → bottom picker with common currencies:
+one section per period — Daily / Weekly / Monthly / Yearly budget, white10
+  dividers between — each set independently (BudgetSettingsSheet(settings:
+  Map<BudgetType, BudgetSettings>) pre-fills each saved one):
+  label, currency + large amount input, TintedPill("Save daily" / "Save
+    weekly" / "Save monthly" / "Save yearly", moneyAccent) full width
+  a section left empty/0 is skipped on save
+currency selector: text button showing the shared currency (one for every
+  budget) — tap → bottom picker with common currencies:
   USD, EUR, GBP, SGD, IDR, MYR, THB, JPY, AUD, CAD
-
-TintedPill("Save settings", moneyAccent) full width
-on save: upsert budget_settings in Supabase
+on save: upsert that period's budget_settings row in Supabase
+  (onConflict user_id,budget_type), then invalidate budgets +
+  budgetCurrency + remainingBudget
 
 ### Home Screen — Money Flow integration
 
 REMAINING BUDGET WIDGET (after the recap banner, before Be mindful):
-  GlassCard compact (padding 12 16):
-  Row:
-    Column:
-      Text "Remaining budget" 12px white45
-      Text "[currency][amount]" 20px bold:
-        moneyAccent if positive, red if negative or zero
-      Text "of [budget] [per month/day]" 11px white30
-    Spacer
-    Column right:
-      mini circular progress 48px same colors as MoneyTab gauge
-      Text percentage 10px below
+  GlassCard (padding 16), the same 2-column BudgetTileGrid of
+  BudgetProgressTiles as the Cashflow card (no total line, labels
+  "Daily / Weekly / Monthly / Yearly remaining"); remaining from
+  MoneyRepository.getRemaining, so bills skip the shorter budgets
 
   tap → context.go('/home/money')
-  only shown if budget has been configured (amount > 0)
+  only shown if at least one budget is configured (amount > 0)
 
 ### Write menu — Money Flow addition
 
-Update write button bottom sheet and radial arc:
-
-showModalBottomSheet write options (4 items now):
-  Write journal → AddJournalSheet
-  Add task → AddTaskSheet
-  Add habit → AddHabitSheet
-  Add money → AddMoneySheet(defaultType: spending)
-
-Radial arc (hold+drag) directions update:
-  LEFT → AddJournalSheet
-  UP-LEFT → AddTaskSheet
-  UP-RIGHT → AddHabitSheet
-  RIGHT → AddMoneySheet(defaultType: spending)
+Home's write menu ends with "Record spending" → AddMoneySheet(spending);
+on the Money tab the menu is "Add spending" / "Add income" (see Floating
+Island Nav Bar).
 
 App shortcuts (quick_actions) — add:
   Add Money → AddMoneySheet(defaultType: spending)
@@ -1636,13 +1767,16 @@ lib/features/money/
   presentation/
     money_tab.dart
     add_money_sheet.dart
+    spending_type_picker.dart   ← Everyday / weekly / monthly / yearly bill
     money_detail_sheet.dart
     budget_settings_sheet.dart
     money_advice_sheet.dart     ← AI advice loading + result sheets
     money_advice_flow.dart      ← retry + notification orchestration
     money_advice_summary.dart   ← entries → prompt data
     widgets/
-      budget_card.dart          ← gauge + stats
+      budget_card.dart          ← one card: header + gear, tile grid
+      budget_progress_tile.dart ← one budget's tile + 2-column grid
+                                   (shared with the home card)
       entry_list.dart           ← grouped by date
       recap_section.dart        ← bar chart + summary
       remaining_budget_widget.dart ← home screen card
@@ -2150,7 +2284,8 @@ count, and the copy says "so far".
   TaskRecap: completed (completed tasks with updated_at in the month —
     tasks have no completion timestamp), added (created_at in the month),
     still open (unfinished, due by month end / today), done rate.
-  CashflowRecap: spending, income, net, % of monthly budget (if set),
+  CashflowRecap: spending, income, net, % of monthly budget (if set —
+    budgetSpending, i.e. without yearly bills, see Spending type),
     no-spend days, top spending category — from the Hive money cache, in
     the budget currency.
   AiRecap: food scans in the month, total + average kcal, most-scanned

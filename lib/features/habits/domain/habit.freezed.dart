@@ -15,7 +15,10 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Habit {
 
- String get id;@JsonKey(name: 'user_id') String get userId; String get name; String get icon; String get color;@JsonKey(name: 'created_at') DateTime get createdAt;@JsonKey(name: 'reminder_days') List<int> get reminderDays;@JsonKey(name: 'reminder_time')@TimeOfDayConverter() TimeOfDay? get reminderTime; List<HabitAction> get actions; bool get archived;
+ String get id;@JsonKey(name: 'user_id') String get userId; String get name; String get icon; String get color;@JsonKey(name: 'created_at') DateTime get createdAt;@JsonKey(name: 'reminder_days') List<int> get reminderDays;@JsonKey(name: 'reminder_time')@TimeOfDayConverter() TimeOfDay? get reminderTime; List<HabitAction> get actions; bool get archived;/// Null until the habit's tags are first edited, so the `tags` key is
+/// left out of the upsert and a `habits` table without the column (not
+/// migrated yet) keeps working. Read via [tagList].
+@JsonKey(includeIfNull: false) List<HabitTag>? get tags;
 /// Create a copy of Habit
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +31,16 @@ $HabitCopyWith<Habit> get copyWith => _$HabitCopyWithImpl<Habit>(this as Habit, 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Habit&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.name, name) || other.name == name)&&(identical(other.icon, icon) || other.icon == icon)&&(identical(other.color, color) || other.color == color)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&const DeepCollectionEquality().equals(other.reminderDays, reminderDays)&&(identical(other.reminderTime, reminderTime) || other.reminderTime == reminderTime)&&const DeepCollectionEquality().equals(other.actions, actions)&&(identical(other.archived, archived) || other.archived == archived));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Habit&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.name, name) || other.name == name)&&(identical(other.icon, icon) || other.icon == icon)&&(identical(other.color, color) || other.color == color)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&const DeepCollectionEquality().equals(other.reminderDays, reminderDays)&&(identical(other.reminderTime, reminderTime) || other.reminderTime == reminderTime)&&const DeepCollectionEquality().equals(other.actions, actions)&&(identical(other.archived, archived) || other.archived == archived)&&const DeepCollectionEquality().equals(other.tags, tags));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,userId,name,icon,color,createdAt,const DeepCollectionEquality().hash(reminderDays),reminderTime,const DeepCollectionEquality().hash(actions),archived);
+int get hashCode => Object.hash(runtimeType,id,userId,name,icon,color,createdAt,const DeepCollectionEquality().hash(reminderDays),reminderTime,const DeepCollectionEquality().hash(actions),archived,const DeepCollectionEquality().hash(tags));
 
 @override
 String toString() {
-  return 'Habit(id: $id, userId: $userId, name: $name, icon: $icon, color: $color, createdAt: $createdAt, reminderDays: $reminderDays, reminderTime: $reminderTime, actions: $actions, archived: $archived)';
+  return 'Habit(id: $id, userId: $userId, name: $name, icon: $icon, color: $color, createdAt: $createdAt, reminderDays: $reminderDays, reminderTime: $reminderTime, actions: $actions, archived: $archived, tags: $tags)';
 }
 
 
@@ -48,7 +51,7 @@ abstract mixin class $HabitCopyWith<$Res>  {
   factory $HabitCopyWith(Habit value, $Res Function(Habit) _then) = _$HabitCopyWithImpl;
 @useResult
 $Res call({
- String id,@JsonKey(name: 'user_id') String userId, String name, String icon, String color,@JsonKey(name: 'created_at') DateTime createdAt,@JsonKey(name: 'reminder_days') List<int> reminderDays,@JsonKey(name: 'reminder_time')@TimeOfDayConverter() TimeOfDay? reminderTime, List<HabitAction> actions, bool archived
+ String id,@JsonKey(name: 'user_id') String userId, String name, String icon, String color,@JsonKey(name: 'created_at') DateTime createdAt,@JsonKey(name: 'reminder_days') List<int> reminderDays,@JsonKey(name: 'reminder_time')@TimeOfDayConverter() TimeOfDay? reminderTime, List<HabitAction> actions, bool archived,@JsonKey(includeIfNull: false) List<HabitTag>? tags
 });
 
 
@@ -65,7 +68,7 @@ class _$HabitCopyWithImpl<$Res>
 
 /// Create a copy of Habit
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? userId = null,Object? name = null,Object? icon = null,Object? color = null,Object? createdAt = null,Object? reminderDays = null,Object? reminderTime = freezed,Object? actions = null,Object? archived = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? userId = null,Object? name = null,Object? icon = null,Object? color = null,Object? createdAt = null,Object? reminderDays = null,Object? reminderTime = freezed,Object? actions = null,Object? archived = null,Object? tags = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
@@ -77,7 +80,8 @@ as DateTime,reminderDays: null == reminderDays ? _self.reminderDays : reminderDa
 as List<int>,reminderTime: freezed == reminderTime ? _self.reminderTime : reminderTime // ignore: cast_nullable_to_non_nullable
 as TimeOfDay?,actions: null == actions ? _self.actions : actions // ignore: cast_nullable_to_non_nullable
 as List<HabitAction>,archived: null == archived ? _self.archived : archived // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,tags: freezed == tags ? _self.tags : tags // ignore: cast_nullable_to_non_nullable
+as List<HabitTag>?,
   ));
 }
 
@@ -162,10 +166,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'user_id')  String userId,  String name,  String icon,  String color, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'reminder_days')  List<int> reminderDays, @JsonKey(name: 'reminder_time')@TimeOfDayConverter()  TimeOfDay? reminderTime,  List<HabitAction> actions,  bool archived)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'user_id')  String userId,  String name,  String icon,  String color, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'reminder_days')  List<int> reminderDays, @JsonKey(name: 'reminder_time')@TimeOfDayConverter()  TimeOfDay? reminderTime,  List<HabitAction> actions,  bool archived, @JsonKey(includeIfNull: false)  List<HabitTag>? tags)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Habit() when $default != null:
-return $default(_that.id,_that.userId,_that.name,_that.icon,_that.color,_that.createdAt,_that.reminderDays,_that.reminderTime,_that.actions,_that.archived);case _:
+return $default(_that.id,_that.userId,_that.name,_that.icon,_that.color,_that.createdAt,_that.reminderDays,_that.reminderTime,_that.actions,_that.archived,_that.tags);case _:
   return orElse();
 
 }
@@ -183,10 +187,10 @@ return $default(_that.id,_that.userId,_that.name,_that.icon,_that.color,_that.cr
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'user_id')  String userId,  String name,  String icon,  String color, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'reminder_days')  List<int> reminderDays, @JsonKey(name: 'reminder_time')@TimeOfDayConverter()  TimeOfDay? reminderTime,  List<HabitAction> actions,  bool archived)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'user_id')  String userId,  String name,  String icon,  String color, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'reminder_days')  List<int> reminderDays, @JsonKey(name: 'reminder_time')@TimeOfDayConverter()  TimeOfDay? reminderTime,  List<HabitAction> actions,  bool archived, @JsonKey(includeIfNull: false)  List<HabitTag>? tags)  $default,) {final _that = this;
 switch (_that) {
 case _Habit():
-return $default(_that.id,_that.userId,_that.name,_that.icon,_that.color,_that.createdAt,_that.reminderDays,_that.reminderTime,_that.actions,_that.archived);case _:
+return $default(_that.id,_that.userId,_that.name,_that.icon,_that.color,_that.createdAt,_that.reminderDays,_that.reminderTime,_that.actions,_that.archived,_that.tags);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -203,10 +207,10 @@ return $default(_that.id,_that.userId,_that.name,_that.icon,_that.color,_that.cr
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, @JsonKey(name: 'user_id')  String userId,  String name,  String icon,  String color, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'reminder_days')  List<int> reminderDays, @JsonKey(name: 'reminder_time')@TimeOfDayConverter()  TimeOfDay? reminderTime,  List<HabitAction> actions,  bool archived)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, @JsonKey(name: 'user_id')  String userId,  String name,  String icon,  String color, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'reminder_days')  List<int> reminderDays, @JsonKey(name: 'reminder_time')@TimeOfDayConverter()  TimeOfDay? reminderTime,  List<HabitAction> actions,  bool archived, @JsonKey(includeIfNull: false)  List<HabitTag>? tags)?  $default,) {final _that = this;
 switch (_that) {
 case _Habit() when $default != null:
-return $default(_that.id,_that.userId,_that.name,_that.icon,_that.color,_that.createdAt,_that.reminderDays,_that.reminderTime,_that.actions,_that.archived);case _:
+return $default(_that.id,_that.userId,_that.name,_that.icon,_that.color,_that.createdAt,_that.reminderDays,_that.reminderTime,_that.actions,_that.archived,_that.tags);case _:
   return null;
 
 }
@@ -217,8 +221,8 @@ return $default(_that.id,_that.userId,_that.name,_that.icon,_that.color,_that.cr
 /// @nodoc
 @JsonSerializable()
 
-class _Habit implements Habit {
-  const _Habit({required this.id, @JsonKey(name: 'user_id') required this.userId, required this.name, required this.icon, required this.color, @JsonKey(name: 'created_at') required this.createdAt, @JsonKey(name: 'reminder_days') final  List<int> reminderDays = const <int>[], @JsonKey(name: 'reminder_time')@TimeOfDayConverter() this.reminderTime, final  List<HabitAction> actions = const <HabitAction>[], this.archived = false}): _reminderDays = reminderDays,_actions = actions;
+class _Habit extends Habit {
+  const _Habit({required this.id, @JsonKey(name: 'user_id') required this.userId, required this.name, required this.icon, required this.color, @JsonKey(name: 'created_at') required this.createdAt, @JsonKey(name: 'reminder_days') final  List<int> reminderDays = const <int>[], @JsonKey(name: 'reminder_time')@TimeOfDayConverter() this.reminderTime, final  List<HabitAction> actions = const <HabitAction>[], this.archived = false, @JsonKey(includeIfNull: false) final  List<HabitTag>? tags}): _reminderDays = reminderDays,_actions = actions,_tags = tags,super._();
   factory _Habit.fromJson(Map<String, dynamic> json) => _$HabitFromJson(json);
 
 @override final  String id;
@@ -243,6 +247,21 @@ class _Habit implements Habit {
 }
 
 @override@JsonKey() final  bool archived;
+/// Null until the habit's tags are first edited, so the `tags` key is
+/// left out of the upsert and a `habits` table without the column (not
+/// migrated yet) keeps working. Read via [tagList].
+ final  List<HabitTag>? _tags;
+/// Null until the habit's tags are first edited, so the `tags` key is
+/// left out of the upsert and a `habits` table without the column (not
+/// migrated yet) keeps working. Read via [tagList].
+@override@JsonKey(includeIfNull: false) List<HabitTag>? get tags {
+  final value = _tags;
+  if (value == null) return null;
+  if (_tags is EqualUnmodifiableListView) return _tags;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(value);
+}
+
 
 /// Create a copy of Habit
 /// with the given fields replaced by the non-null parameter values.
@@ -257,16 +276,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Habit&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.name, name) || other.name == name)&&(identical(other.icon, icon) || other.icon == icon)&&(identical(other.color, color) || other.color == color)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&const DeepCollectionEquality().equals(other._reminderDays, _reminderDays)&&(identical(other.reminderTime, reminderTime) || other.reminderTime == reminderTime)&&const DeepCollectionEquality().equals(other._actions, _actions)&&(identical(other.archived, archived) || other.archived == archived));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Habit&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.name, name) || other.name == name)&&(identical(other.icon, icon) || other.icon == icon)&&(identical(other.color, color) || other.color == color)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&const DeepCollectionEquality().equals(other._reminderDays, _reminderDays)&&(identical(other.reminderTime, reminderTime) || other.reminderTime == reminderTime)&&const DeepCollectionEquality().equals(other._actions, _actions)&&(identical(other.archived, archived) || other.archived == archived)&&const DeepCollectionEquality().equals(other._tags, _tags));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,userId,name,icon,color,createdAt,const DeepCollectionEquality().hash(_reminderDays),reminderTime,const DeepCollectionEquality().hash(_actions),archived);
+int get hashCode => Object.hash(runtimeType,id,userId,name,icon,color,createdAt,const DeepCollectionEquality().hash(_reminderDays),reminderTime,const DeepCollectionEquality().hash(_actions),archived,const DeepCollectionEquality().hash(_tags));
 
 @override
 String toString() {
-  return 'Habit(id: $id, userId: $userId, name: $name, icon: $icon, color: $color, createdAt: $createdAt, reminderDays: $reminderDays, reminderTime: $reminderTime, actions: $actions, archived: $archived)';
+  return 'Habit(id: $id, userId: $userId, name: $name, icon: $icon, color: $color, createdAt: $createdAt, reminderDays: $reminderDays, reminderTime: $reminderTime, actions: $actions, archived: $archived, tags: $tags)';
 }
 
 
@@ -277,7 +296,7 @@ abstract mixin class _$HabitCopyWith<$Res> implements $HabitCopyWith<$Res> {
   factory _$HabitCopyWith(_Habit value, $Res Function(_Habit) _then) = __$HabitCopyWithImpl;
 @override @useResult
 $Res call({
- String id,@JsonKey(name: 'user_id') String userId, String name, String icon, String color,@JsonKey(name: 'created_at') DateTime createdAt,@JsonKey(name: 'reminder_days') List<int> reminderDays,@JsonKey(name: 'reminder_time')@TimeOfDayConverter() TimeOfDay? reminderTime, List<HabitAction> actions, bool archived
+ String id,@JsonKey(name: 'user_id') String userId, String name, String icon, String color,@JsonKey(name: 'created_at') DateTime createdAt,@JsonKey(name: 'reminder_days') List<int> reminderDays,@JsonKey(name: 'reminder_time')@TimeOfDayConverter() TimeOfDay? reminderTime, List<HabitAction> actions, bool archived,@JsonKey(includeIfNull: false) List<HabitTag>? tags
 });
 
 
@@ -294,7 +313,7 @@ class __$HabitCopyWithImpl<$Res>
 
 /// Create a copy of Habit
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? userId = null,Object? name = null,Object? icon = null,Object? color = null,Object? createdAt = null,Object? reminderDays = null,Object? reminderTime = freezed,Object? actions = null,Object? archived = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? userId = null,Object? name = null,Object? icon = null,Object? color = null,Object? createdAt = null,Object? reminderDays = null,Object? reminderTime = freezed,Object? actions = null,Object? archived = null,Object? tags = freezed,}) {
   return _then(_Habit(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
@@ -306,7 +325,8 @@ as DateTime,reminderDays: null == reminderDays ? _self._reminderDays : reminderD
 as List<int>,reminderTime: freezed == reminderTime ? _self.reminderTime : reminderTime // ignore: cast_nullable_to_non_nullable
 as TimeOfDay?,actions: null == actions ? _self._actions : actions // ignore: cast_nullable_to_non_nullable
 as List<HabitAction>,archived: null == archived ? _self.archived : archived // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,tags: freezed == tags ? _self._tags : tags // ignore: cast_nullable_to_non_nullable
+as List<HabitTag>?,
   ));
 }
 

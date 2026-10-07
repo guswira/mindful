@@ -27,7 +27,7 @@ final archivedHabitsProvider = AutoDisposeFutureProvider<List<Habit>>.internal(
 // ignore: unused_element
 typedef ArchivedHabitsRef = AutoDisposeFutureProviderRef<List<Habit>>;
 String _$habitTabControllerHash() =>
-    r'0abddc945f1150c49e361efe44cec795dc2b2d66';
+    r'aa36602674b0a148ea8d9dc5dd757d34acab833d';
 
 /// Loads today's active habits and their completion status, and logs new
 /// completions to the cache (then Supabase, best-effort).

@@ -144,6 +144,8 @@ class NotificationService {
         // white-on-transparent silhouette. Default for every notification.
         android: AndroidInitializationSettings(_smallIcon),
         iOS: DarwinInitializationSettings(),
+        // Required on macOS — initialize() throws without it.
+        macOS: DarwinInitializationSettings(),
       ),
       onDidReceiveNotificationResponse: (response) =>
           _tapController.add(response.payload),

@@ -8,6 +8,7 @@ import '../../../core/theme/glass_theme.dart';
 import '../../../shared/services/widget_service.dart';
 import '../../../shared/widgets/glass_bottom_sheet.dart';
 import '../data/money_repository.dart';
+import '../domain/budget_type.dart';
 import '../domain/entry_type.dart';
 import '../domain/money_entry.dart';
 import 'add_money_sheet.dart';
@@ -70,6 +71,15 @@ class MoneyDetailSheet extends ConsumerWidget {
               ),
             ],
           ),
+          if (entry.budgetPeriod case final period?
+              when period != BudgetType.daily) ...[
+            const SizedBox(height: Spacing.sm),
+            Text(
+              '${budgetPeriodLabel(context.l10n, period)} · '
+              '${budgetPeriodHint(context.l10n, period)}',
+              style: TextStyle(color: glass.textMuted, fontSize: 13),
+            ),
+          ],
           if (entry.note case final note? when note.isNotEmpty) ...[
             const SizedBox(height: Spacing.sm),
             Text(

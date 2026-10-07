@@ -12,11 +12,17 @@ part of 'auth_state.dart';
 // dart format off
 T _$identity<T>(T value) => value;
 /// @nodoc
-mixin _$AuthState {
+mixin _$AuthState implements DiagnosticableTreeMixin {
 
 
 
 
+@override
+void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  properties
+    ..add(DiagnosticsProperty('type', 'AuthState'))
+    ;
+}
 
 @override
 bool operator ==(Object other) {
@@ -28,7 +34,7 @@ bool operator ==(Object other) {
 int get hashCode => runtimeType.hashCode;
 
 @override
-String toString() {
+String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
   return 'AuthState()';
 }
 
@@ -180,7 +186,7 @@ return unauthenticated();case _:
 /// @nodoc
 
 
-class AuthUnknown implements AuthState {
+class AuthUnknown with DiagnosticableTreeMixin implements AuthState {
   const AuthUnknown();
   
 
@@ -188,6 +194,12 @@ class AuthUnknown implements AuthState {
 
 
 
+@override
+void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  properties
+    ..add(DiagnosticsProperty('type', 'AuthState.unknown'))
+    ;
+}
 
 @override
 bool operator ==(Object other) {
@@ -199,7 +211,7 @@ bool operator ==(Object other) {
 int get hashCode => runtimeType.hashCode;
 
 @override
-String toString() {
+String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
   return 'AuthState.unknown()';
 }
 
@@ -212,7 +224,7 @@ String toString() {
 /// @nodoc
 
 
-class AuthAuthenticated implements AuthState {
+class AuthAuthenticated with DiagnosticableTreeMixin implements AuthState {
   const AuthAuthenticated(this.user);
   
 
@@ -225,6 +237,12 @@ class AuthAuthenticated implements AuthState {
 $AuthAuthenticatedCopyWith<AuthAuthenticated> get copyWith => _$AuthAuthenticatedCopyWithImpl<AuthAuthenticated>(this, _$identity);
 
 
+@override
+void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  properties
+    ..add(DiagnosticsProperty('type', 'AuthState.authenticated'))
+    ..add(DiagnosticsProperty('user', user));
+}
 
 @override
 bool operator ==(Object other) {
@@ -236,7 +254,7 @@ bool operator ==(Object other) {
 int get hashCode => Object.hash(runtimeType,user);
 
 @override
-String toString() {
+String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
   return 'AuthState.authenticated(user: $user)';
 }
 
@@ -278,7 +296,7 @@ as User,
 /// @nodoc
 
 
-class AuthUnauthenticated implements AuthState {
+class AuthUnauthenticated with DiagnosticableTreeMixin implements AuthState {
   const AuthUnauthenticated();
   
 
@@ -286,6 +304,12 @@ class AuthUnauthenticated implements AuthState {
 
 
 
+@override
+void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  properties
+    ..add(DiagnosticsProperty('type', 'AuthState.unauthenticated'))
+    ;
+}
 
 @override
 bool operator ==(Object other) {
@@ -297,7 +321,7 @@ bool operator ==(Object other) {
 int get hashCode => runtimeType.hashCode;
 
 @override
-String toString() {
+String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
   return 'AuthState.unauthenticated()';
 }
 

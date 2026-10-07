@@ -130,8 +130,8 @@ Future<Habit?> _findHabit(Ref ref, String habitId) async {
 BuildContext? _rootContext(GoRouter router) =>
     router.routerDelegate.navigatorKey.currentContext;
 
-/// Opens the write sheet's 3 options (journal/task/habit) as a modal over
-/// whatever's currently on screen — used by the medium widget's pencil
+/// Opens the full write menu (routine/task/journal/spending) as a modal
+/// over whatever's currently on screen — used by the medium widget's pencil
 /// button (`mindful://open-write-sheet`).
 void openWriteOptionsSheet(GoRouter router) {
   final context = _rootContext(router);

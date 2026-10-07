@@ -12,6 +12,7 @@ import 'app.dart';
 import 'core/l10n/app_language.dart';
 import 'core/l10n/app_language_controller.dart';
 import 'core/l10n/l10n.dart';
+import 'core/platform/platform_features.dart';
 import 'core/router/app_intent_actions.dart';
 import 'core/router/router.dart';
 import 'features/habits/data/habit_reminders_controller.dart';
@@ -48,22 +49,25 @@ Future<void> main() async {
   // Also fires immediately with the launching shortcut's type when the app
   // is cold-started from one, same as a tap while already running. Each
   // shortcut opens its add sheet directly — none of these are routes any
-  // more, per the bottom-sheet design rules.
-  await quickActions.initialize((type) {
-    switch (type) {
-      case 'newJournal':
-        openAddJournalSheet(router);
-      case 'newTask':
-        openAddTaskSheet(router);
-      case 'newHabit':
-        openAddHabitSheet(router);
-      case 'newMoney':
-        openAddMoneySheet(router);
-      case 'scanFood':
-        router.go('/home/ai');
-    }
-  });
-  await _setShortcutItems(quickActions);
+  // more, per the bottom-sheet design rules. Phones only — quick_actions
+  // has no desktop/web implementation.
+  if (isPhonePlatform) {
+    await quickActions.initialize((type) {
+      switch (type) {
+        case 'newJournal':
+          openAddJournalSheet(router);
+        case 'newTask':
+          openAddTaskSheet(router);
+        case 'newHabit':
+          openAddHabitSheet(router);
+        case 'newMoney':
+          openAddMoneySheet(router);
+        case 'scanFood':
+          router.go('/home/ai');
+      }
+    });
+    await _setShortcutItems(quickActions);
+  }
   // iOS App Intents ("Add spending") — for Shortcuts, Siri and Back Tap.
   listenForAppIntentActions(router);
   if (Platform.isIOS) {
@@ -76,7 +80,9 @@ Future<void> main() async {
   // language until the next app start.
   container.listen(appLanguageControllerProvider, (_, language) async {
     _applyLanguage(language);
-    await _setShortcutItems(quickActions);
+    if (isPhonePlatform) {
+      await _setShortcutItems(quickActions);
+    }
     container
       ..refresh(journalRemindersProvider)
       ..refresh(taskRemindersProvider)

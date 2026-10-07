@@ -26,33 +26,39 @@ final _dailySettings = BudgetSettings(
   updatedAt: DateTime(2026, 1, 1),
 );
 
+final _yearlySettings = BudgetSettings(
+  id: 'b3',
+  userId: 'u1',
+  budgetType: BudgetType.yearly,
+  amount: 12000,
+  currency: 'EUR',
+  updatedAt: DateTime(2026, 1, 1),
+);
+
 void main() {
-  Widget buildSheet({
-    BudgetSettings? monthlySettings,
-    BudgetSettings? dailySettings,
-  }) => ProviderScope(
-    child: MaterialApp(
-      theme: AppTheme.dark,
-      home: Scaffold(
-        body: BudgetSettingsSheet(
-          monthlySettings: monthlySettings,
-          dailySettings: dailySettings,
+  Widget buildSheet({Map<BudgetType, BudgetSettings> settings = const {}}) =>
+      ProviderScope(
+        child: MaterialApp(
+          theme: AppTheme.dark,
+          home: Scaffold(body: BudgetSettingsSheet(settings: settings)),
         ),
-      ),
-    ),
-  );
+      );
 
   testWidgets(
-    'shows both sections, defaulting to IDR, with independent save pills',
+    'shows a section per period, defaulting to IDR, with independent saves',
     (tester) async {
       await tester.pumpWidget(buildSheet());
 
       expect(find.text('Budget settings'), findsOneWidget);
-      expect(find.text('Monthly budget'), findsOneWidget);
       expect(find.text('Daily budget'), findsOneWidget);
-      expect(find.text('IDR'), findsNWidgets(2));
-      expect(find.widgetWithText(TintedPill, 'Save monthly'), findsOneWidget);
+      expect(find.text('Weekly budget'), findsOneWidget);
+      expect(find.text('Monthly budget'), findsOneWidget);
+      expect(find.text('Yearly budget'), findsOneWidget);
+      expect(find.text('IDR'), findsNWidgets(4));
       expect(find.widgetWithText(TintedPill, 'Save daily'), findsOneWidget);
+      expect(find.widgetWithText(TintedPill, 'Save weekly'), findsOneWidget);
+      expect(find.widgetWithText(TintedPill, 'Save monthly'), findsOneWidget);
+      expect(find.widgetWithText(TintedPill, 'Save yearly'), findsOneWidget);
     },
   );
 
@@ -75,7 +81,7 @@ void main() {
     expect(find.text('USD'), findsOneWidget);
   });
 
-  testWidgets('picking a currency updates both sections\' display', (
+  testWidgets('picking a currency updates every section\'s display', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(1080, 3600);
@@ -90,7 +96,7 @@ void main() {
     await tester.tap(find.text('USD').last);
     await tester.pumpAndSettle();
 
-    expect(find.text('USD'), findsNWidgets(2));
+    expect(find.text('USD'), findsNWidgets(4));
     expect(find.text('IDR'), findsNothing);
   });
 
@@ -99,13 +105,17 @@ void main() {
   ) async {
     await tester.pumpWidget(
       buildSheet(
-        monthlySettings: _monthlySettings,
-        dailySettings: _dailySettings,
+        settings: {
+          BudgetType.monthly: _monthlySettings,
+          BudgetType.daily: _dailySettings,
+          BudgetType.yearly: _yearlySettings,
+        },
       ),
     );
 
     expect(find.text('1.000'), findsOneWidget);
     expect(find.text('100'), findsOneWidget);
-    expect(find.text('EUR'), findsNWidgets(2));
+    expect(find.text('12.000'), findsOneWidget);
+    expect(find.text('EUR'), findsNWidgets(4));
   });
 }

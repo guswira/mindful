@@ -227,7 +227,6 @@
   },
   "habitAddAction": "+ Add action",
   "planTabTitle": "Tasks & Routines",
-  "planAdd": "Add task or habit",
   "taskConvertToRoutine": "Convert to routine",
   "habitConvertTitle": "Convert to routine",
   "habitConvertHint": "\"{name}\" will be removed from your tasks once this routine is saved.",
@@ -264,6 +263,46 @@
   "habitDayChangeTo": "Change to",
   "habitDayNotDone": "Not done",
   "habitActionRemoved": "Removed action",
+  "habitSectionTags": "Tags",
+  "habitTagsHint": "Optional — e.g. Heavy, Easy. Add them to any day from the routine's calendar.",
+  "habitAddTag": "+ Add tag",
+  "habitDayTags": "Tags",
+  "habitTagSummaryTitle": "Tags this month",
+  "habitTagTimes": "{label} ×{count}",
+  "@habitTagTimes": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "habitTagCount": "×{count}",
+  "@habitTagCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "habitTagDecrease": "Less {label}",
+  "@habitTagDecrease": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "habitTagIncrease": "More {label}",
+  "@habitTagIncrease": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
   "taskGroupUpcoming": "Upcoming",
   "taskGroupNoDate": "No date",
   "taskIntroTitle": "Clear your head, one task at a time",
@@ -318,6 +357,7 @@
     }
   },
   "taskNotFound": "Task not found",
+  "detailSelectHint": "Pick a task or routine to see its details here",
   "taskMarkAsDone": "Mark as done",
   "taskDeleteConfirmTitle": "Delete task",
   "taskDeleteConfirmBody": "\"{name}\" will be removed.",
@@ -421,6 +461,15 @@
   "moneyAddEntryTitle": "What's going on",
   "moneyEditEntryTitle": "Edit entry",
   "moneyCategoryHeading": "Category",
+  "moneySpendingTypeHeading": "Spending type",
+  "moneySpendingTypeEveryday": "Everyday",
+  "moneySpendingTypeWeekly": "Weekly bill",
+  "moneySpendingTypeMonthly": "Monthly bill",
+  "moneySpendingTypeYearly": "Yearly bill",
+  "moneySpendingTypeEverydayHint": "Counts toward every budget.",
+  "moneySpendingTypeWeeklyHint": "Skips your daily budget. Counts toward weekly, monthly and yearly.",
+  "moneySpendingTypeMonthlyHint": "Skips your daily and weekly budgets. Counts toward monthly and yearly.",
+  "moneySpendingTypeYearlyHint": "Only counts toward your yearly budget.",
   "moneyNoteHint": "Add a note...",
   "moneySaveChanges": "Save changes",
   "moneyTypeToggleSpending": "Spending",
@@ -431,11 +480,17 @@
   "moneyTypeIncome": "Income",
   "moneyBudgetMonthly": "Monthly",
   "moneyBudgetDaily": "Daily",
+  "moneyBudgetWeekly": "Weekly",
+  "moneyBudgetYearly": "Yearly",
   "moneyBudgetSettingsTitle": "Budget settings",
   "moneyMonthlyBudget": "Monthly budget",
   "moneyDailyBudget": "Daily budget",
+  "moneyWeeklyBudget": "Weekly budget",
+  "moneyYearlyBudget": "Yearly budget",
   "moneySaveMonthly": "Save monthly",
   "moneySaveDaily": "Save daily",
+  "moneySaveWeekly": "Save weekly",
+  "moneySaveYearly": "Save yearly",
   "moneyDeleteEntryTitle": "Delete entry",
   "moneyDeleteEntryBody": "\"{category}\" will be removed.",
   "@moneyDeleteEntryBody": {
@@ -446,13 +501,11 @@
     }
   },
   "moneyTabTitle": "Cashflow",
-  "moneyAddSpending": "+ Spending",
-  "moneyAddIncome": "+ Income",
   "moneyBudgetIntroTitle": "Set a budget",
-  "moneyBudgetIntroBody": "Choose a monthly or daily amount. Mindful shows what's left as you spend, so you know where you stand before the month runs out.",
+  "moneyBudgetIntroBody": "Choose a daily, weekly, monthly or yearly amount. Mindful shows what's left as you spend, so you know where you stand before the period runs out.",
   "moneySetBudget": "Set budget",
-  "moneySetMonthly": "Set Monthly",
-  "moneySetDaily": "Set Daily",
+  "moneyBudgetHeading": "Budget",
+  "moneyBudgetSettingsTooltip": "Budget settings",
   "moneyBudgetOf": "of {currency} {amount}",
   "@moneyBudgetOf": {
     "placeholders": {
@@ -496,6 +549,8 @@
   },
   "moneyMonthlyRemaining": "Monthly remaining",
   "moneyDailyRemaining": "Daily remaining",
+  "moneyWeeklyRemaining": "Weekly remaining",
+  "moneyYearlyRemaining": "Yearly remaining",
   "moneyCategoryFood": "Food",
   "moneyCategoryTransport": "Transport",
   "moneyCategoryShopping": "Shopping",
@@ -686,10 +741,15 @@
   "navMoney": "Money",
   "navAi": "AI Lab",
   "writeButtonLabel": "Write",
-  "writeNewJournalEntry": "New journal entry",
-  "writeNewTask": "New task",
-  "writeNewHabit": "New habit",
-  "writeNewMoneyEntry": "New money entry",
+  "writeNewJournalEntry": "Write journal",
+  "writeNewTask": "Do new task",
+  "writeNewHabit": "Build new routine",
+  "writeNewMoneyEntry": "Record spending",
+  "writeTodayPlan": "Write today's plan",
+  "writeReviewToday": "Review today",
+  "writeGratitude": "Gratitude journal",
+  "writeAddSpending": "Add spending",
+  "writeAddIncome": "Add income",
   "sharedUnsyncedLabel": "Not synced yet",
   "moneyAdviceButton": "AI advice",
   "moneyAdviceTitle": "AI spending advice",

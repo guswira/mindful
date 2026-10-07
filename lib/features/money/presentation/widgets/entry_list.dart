@@ -9,6 +9,7 @@ import '../../../../shared/widgets/glass_bottom_sheet.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../../shared/widgets/intro_card.dart';
 import '../../../../shared/widgets/unsynced_badge.dart';
+import '../../domain/budget_type.dart';
 import '../../domain/entry_type.dart';
 import '../../domain/money_entry.dart';
 import '../add_money_sheet.dart';
@@ -241,6 +242,16 @@ class _EntryCard extends StatelessWidget {
 
   final MoneyEntry entry;
 
+  /// "Oct 26", plus the bill type ("Oct 1 · Monthly bill") for spending
+  /// that skips the shorter budgets.
+  static String _dateLine(BuildContext context, MoneyEntry entry) {
+    final date = DateFormat.MMMd().format(entry.date);
+    return switch (entry.budgetPeriod) {
+      null || BudgetType.daily => date,
+      final period => '$date · ${budgetPeriodLabel(context.l10n, period)}',
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     final glass = Theme.of(context).extension<GlassTheme>()!;
@@ -285,7 +296,7 @@ class _EntryCard extends StatelessWidget {
                       style: TextStyle(color: glass.textHint, fontSize: 12),
                     ),
                   Text(
-                    DateFormat.MMMd().format(entry.date),
+                    _dateLine(context, entry),
                     style: TextStyle(color: glass.textMuted, fontSize: 11),
                   ),
                 ],

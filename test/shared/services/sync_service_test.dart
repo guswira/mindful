@@ -66,4 +66,27 @@ void main() {
       expect(calls, ['retry', 'widget']);
     },
   );
+
+  test(
+    'one failing table never keeps the tables after it from syncing',
+    () async {
+      final service = SyncService(
+        pull: [
+          () async => calls.add('journal'),
+          () async => throw Exception('habits failed'),
+          () async => calls.add('money'),
+        ],
+        retryPending: [
+          () async => throw Exception('retry failed'),
+          () async => calls.add('retry tasks'),
+        ],
+        updateWidgetData: () async => calls.add('widget'),
+        now: () => now,
+      );
+
+      await service.syncOnOpen();
+
+      expect(calls, ['retry tasks', 'journal', 'money', 'widget']);
+    },
+  );
 }

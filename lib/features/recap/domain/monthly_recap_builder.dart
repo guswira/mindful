@@ -1,6 +1,7 @@
 import '../../ai/domain/food_scan.dart';
 import '../../habits/domain/habit.dart';
 import '../../habits/domain/habit_log.dart';
+import '../../money/domain/budget_type.dart';
 import '../../money/domain/entry_type.dart';
 import '../../money/domain/money_entry.dart';
 import '../../tasks/domain/task.dart';
@@ -155,6 +156,7 @@ CashflowRecap _cashflow(
     entryCount: inMonth.length,
     noSpendDays: lastDay.difference(start).inDays + 1 - spendDays.length,
     budget: (monthlyBudget ?? 0) > 0 ? monthlyBudget : null,
+    budgetSpending: spendingTowardBudget(inMonth, BudgetType.monthly),
     topCategory: top?.key,
     topCategoryAmount: top?.value ?? 0,
   );

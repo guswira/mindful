@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
+import '../../core/constants/layout.dart';
 import '../../core/l10n/l10n.dart';
 import '../../core/theme/glass_theme.dart';
 import 'floating_nav_write_button.dart';
@@ -24,17 +25,24 @@ class FloatingNavBar extends StatelessWidget {
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(14, 0, 14, 12),
-        child: Row(
-          children: [
-            Expanded(
-              child: _NavIsland(
-                currentIndex: currentIndex,
-                onTabChanged: onTabChanged,
-              ),
+        // Centered and capped on Mac/iPad rather than stretched across the
+        // window; a phone is narrower than the cap.
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: AppLayout.maxNavWidth),
+            child: Row(
+              children: [
+                Expanded(
+                  child: _NavIsland(
+                    currentIndex: currentIndex,
+                    onTabChanged: onTabChanged,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                WriteButton(tabIndex: currentIndex),
+              ],
             ),
-            const SizedBox(width: 10),
-            const WriteButton(),
-          ],
+          ),
         ),
       ),
     );

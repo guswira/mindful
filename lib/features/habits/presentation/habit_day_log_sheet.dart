@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -33,14 +34,38 @@ List<HabitDayChoice> habitDayChoices(Habit habit, HabitLog? log) {
   ];
 }
 
+/// What [HabitDayLogSheet] pops with on Save: the day's new [choice], and
+/// its new tag counts — null when the tags weren't changed.
+typedef HabitDayLogUpdate = ({HabitDayChoice choice, Map<String, int>? tags});
+
+/// The most a single tag can be counted on one day.
+const habitTagMaxCount = 99;
+
+/// [counts] of [habit]'s current tags as "Heavy · Easy ×3", in the
+/// habit's order, or null if none was done. Counts of removed tags are
+/// left out.
+String? habitTagSummary(
+  AppLocalizations l10n,
+  Habit habit,
+  Map<String, int> counts,
+) {
+  final parts = [
+    for (final tag in habit.tagList)
+      if ((counts[tag.id] ?? 0) case final count when count > 0)
+        count == 1 ? tag.label : l10n.habitTagTimes(tag.label, count),
+  ];
+  return parts.isEmpty ? null : parts.join(' · ');
+}
+
 /// The choice matching [log] as it is now.
 HabitDayChoice habitDayChoiceOf(HabitLog? log) => log == null
     ? habitDayNotDone
     : (done: true, actionId: log.completedActionId);
 
 /// A day on the habit calendar: what was logged, and chips to change it
-/// (another action, plain done, or not done). Pops with the new
-/// [HabitDayChoice] on Save, or null when nothing changed / closed.
+/// (another action, plain done, or not done) plus, while it's done, a
+/// counter per tag ("Easy ×3"). Pops with a [HabitDayLogUpdate] on Save,
+/// or null when nothing changed / closed.
 class HabitDayLogSheet extends StatefulWidget {
   const HabitDayLogSheet({
     required this.habit,
@@ -63,6 +88,15 @@ class HabitDayLogSheet extends StatefulWidget {
 
 class _HabitDayLogSheetState extends State<HabitDayLogSheet> {
   late HabitDayChoice _selected = habitDayChoiceOf(widget.log);
+  late Map<String, int> _tags = {...?widget.log?.tags};
+
+  bool get _showTags => _selected.done && widget.habit.tagList.isNotEmpty;
+
+  void _setTagCount(String tagId, int count) {
+    setState(() {
+      _tags = {..._tags, tagId: count}..removeWhere((_, n) => n <= 0);
+    });
+  }
 
   String _label(HabitDayChoice choice) {
     final l10n = context.l10n;
@@ -82,8 +116,14 @@ class _HabitDayLogSheetState extends State<HabitDayLogSheet> {
   }
 
   void _save() {
-    final changed = _selected != habitDayChoiceOf(widget.log);
-    Navigator.pop(context, changed ? _selected : null);
+    final tagsChanged =
+        _selected.done &&
+        !mapEquals(_tags, widget.log?.tagCounts ?? const <String, int>{});
+    final changed = _selected != habitDayChoiceOf(widget.log) || tagsChanged;
+    Navigator.pop<HabitDayLogUpdate>(
+      context,
+      changed ? (choice: _selected, tags: tagsChanged ? _tags : null) : null,
+    );
   }
 
   @override
@@ -91,6 +131,11 @@ class _HabitDayLogSheetState extends State<HabitDayLogSheet> {
     final l10n = context.l10n;
     final glass = Theme.of(context).extension<GlassTheme>()!;
     final note = widget.log?.note;
+    final loggedTags = habitTagSummary(
+      l10n,
+      widget.habit,
+      widget.log?.tagCounts ?? const {},
+    );
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(20, 8, 8, 20),
       child: Column(
@@ -114,6 +159,10 @@ class _HabitDayLogSheetState extends State<HabitDayLogSheet> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
+                if (loggedTags != null) ...[
+                  const SizedBox(height: Spacing.xs),
+                  Text(loggedTags, style: TextStyle(color: widget.color)),
+                ],
                 if (note != null) ...[
                   const SizedBox(height: Spacing.xs),
                   Text(note, style: TextStyle(color: glass.textSecondary)),
@@ -137,6 +186,17 @@ class _HabitDayLogSheetState extends State<HabitDayLogSheet> {
                       ),
                   ],
                 ),
+                if (_showTags) ...[
+                  const SizedBox(height: Spacing.lg),
+                  _Caption(l10n.habitDayTags),
+                  for (final tag in widget.habit.tagList)
+                    _TagCountRow(
+                      label: tag.label,
+                      count: _tags[tag.id] ?? 0,
+                      color: widget.color,
+                      onChanged: (count) => _setTagCount(tag.id, count),
+                    ),
+                ],
                 const SizedBox(height: Spacing.lg),
                 SizedBox(
                   width: double.infinity,
@@ -217,6 +277,70 @@ class _ChoiceChip extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// One tag's label with a − / ×count / + stepper. At 0 the tag isn't on
+/// the day's log.
+class _TagCountRow extends StatelessWidget {
+  const _TagCountRow({
+    required this.label,
+    required this.count,
+    required this.color,
+    required this.onChanged,
+  });
+
+  final String label;
+  final int count;
+  final Color color;
+  final ValueChanged<int> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final glass = Theme.of(context).extension<GlassTheme>()!;
+    final active = count > 0;
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 14,
+              color: active ? Colors.white : glass.textSecondary,
+            ),
+          ),
+        ),
+        IconButton(
+          icon: const Icon(Icons.remove_circle_outline),
+          color: color,
+          tooltip: l10n.habitTagDecrease(label),
+          onPressed: active ? () => onChanged(count - 1) : null,
+        ),
+        SizedBox(
+          width: 36,
+          child: Text(
+            l10n.habitTagCount(count),
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: active ? color : glass.textMuted,
+            ),
+          ),
+        ),
+        IconButton(
+          icon: const Icon(Icons.add_circle_outline),
+          color: color,
+          tooltip: l10n.habitTagIncrease(label),
+          onPressed: count < habitTagMaxCount
+              ? () => onChanged(count + 1)
+              : null,
+        ),
+      ],
     );
   }
 }

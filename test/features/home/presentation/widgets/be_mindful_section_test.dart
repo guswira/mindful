@@ -86,8 +86,7 @@ Widget _buildSection({
     ),
     breathingSessionsProvider.overrideWith((ref) async => const []),
     journalEntriesProvider.overrideWith(_FakeJournal.new),
-    monthlyBudgetProvider.overrideWith((ref) async => null),
-    dailyBudgetProvider.overrideWith((ref) async => null),
+    budgetsProvider.overrideWith((ref) async => const {}),
   ],
   child: MaterialApp(
     theme: ThemeData(extensions: [GlassTheme.dark()]),

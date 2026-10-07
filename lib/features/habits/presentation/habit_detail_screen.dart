@@ -3,23 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../../core/constants/spacing.dart';
 import '../../../core/l10n/l10n.dart';
-import '../../../core/theme/glass_theme.dart';
 import '../../../shared/services/widget_service.dart';
 import '../../../shared/widgets/glass_bottom_sheet.dart';
 import '../../../shared/widgets/glass_page_scaffold.dart';
 import '../../auth/domain/auth_state.dart';
 import '../data/habit_repository.dart';
-import '../domain/habit.dart';
-import '../domain/habit_action_summary.dart';
 import '../domain/habit_log.dart';
 import 'add_habit_sheet.dart';
-import 'habit_action_summary_card.dart';
-import 'habit_calendar.dart';
 import 'habit_day_log_sheet.dart';
-import 'habit_form.dart';
 import 'habit_providers.dart';
+import 'habit_detail_body.dart';
 import 'habit_tab.dart';
 
 part 'habit_detail_screen.g.dart';
@@ -58,11 +52,16 @@ class HabitDetailController extends _$HabitDetailController {
   }
 
   /// Rewrites the log on [date] to [choice] — saved (keeping the day's log
-  /// id and note) or deleted — and updates the loaded logs in place. Also
+  /// id and note; [tags] replaces its tag counts when given) or deleted —
+  /// and updates the loaded logs in place. Also
   /// refreshes today's routine list and the home widgets, since [date] may
   /// be today. A failed Supabase delete is rethrown for the caller to
   /// surface, after the cache and [state] have already dropped the log.
-  Future<void> setDayLog(DateTime date, HabitDayChoice choice) async {
+  Future<void> setDayLog(
+    DateTime date,
+    HabitDayChoice choice, {
+    Map<String, int>? tags,
+  }) async {
     final repository = await ref.read(habitRepositoryProvider.future);
     final current = await future;
     final day = _dateOnly(date);
@@ -77,6 +76,7 @@ class HabitDetailController extends _$HabitDetailController {
           date: day,
           completedActionId: choice.actionId,
           note: existing?.note,
+          tags: tags ?? existing?.tags,
         );
         logs[day] = log;
         await repository.saveLog(log);
@@ -101,40 +101,6 @@ class HabitDetailController extends _$HabitDetailController {
 
   static DateTime _dateOnly(DateTime date) =>
       DateTime(date.year, date.month, date.day);
-}
-
-/// A habit's current and longest streak, computed over whichever months are
-/// loaded — not necessarily the habit's entire history. See
-/// [HabitDetailController].
-({int current, int longest}) _computeStreaks(
-  Map<DateTime, HabitLog> logsByDate,
-) {
-  if (logsByDate.isEmpty) {
-    return (current: 0, longest: 0);
-  }
-  final days = logsByDate.keys.toList()..sort();
-
-  var longest = 1;
-  var run = 1;
-  for (var i = 1; i < days.length; i++) {
-    run = days[i].difference(days[i - 1]).inDays == 1 ? run + 1 : 1;
-    if (run > longest) {
-      longest = run;
-    }
-  }
-
-  var cursor = DateTime.now();
-  cursor = DateTime(cursor.year, cursor.month, cursor.day);
-  if (!logsByDate.containsKey(cursor)) {
-    cursor = cursor.subtract(const Duration(days: 1));
-  }
-  var current = 0;
-  while (logsByDate.containsKey(cursor)) {
-    current++;
-    cursor = cursor.subtract(const Duration(days: 1));
-  }
-
-  return (current: current, longest: longest);
 }
 
 /// Monthly calendar of a habit's completions, with streaks and a
@@ -165,113 +131,11 @@ class HabitDetailScreen extends ConsumerWidget {
       ],
       body: switch ((habitAsync, detailAsync)) {
         (AsyncData(value: final habit?), AsyncData(:final value)) =>
-          _HabitDetailBody(habit: habit, state: value),
+          HabitDetailBody(habit: habit, state: value),
         (AsyncError(:final error), _) || (_, AsyncError(:final error)) =>
           Center(child: Text(context.l10n.habitLoadError('$error'))),
         _ => const Center(child: CircularProgressIndicator()),
       },
-    );
-  }
-}
-
-class _HabitDetailBody extends ConsumerWidget {
-  const _HabitDetailBody({required this.habit, required this.state});
-
-  final Habit habit;
-  final HabitDetailState state;
-
-  Future<void> _changeMonth(WidgetRef ref, int delta) async {
-    await ref
-        .read(habitDetailControllerProvider(habit.id).notifier)
-        .changeMonth(delta);
-  }
-
-  /// The action [log] recorded — "Done" for a plain log, "Removed action"
-  /// when that action no longer exists on the habit.
-  String _actionLabel(BuildContext context, HabitLog log) =>
-      switch ((log.completedActionId, actionForLog(habit, log))) {
-        (_, final action?) => action.label,
-        (null, _) => context.l10n.commonDone,
-        _ => context.l10n.habitActionRemoved,
-      };
-
-  /// Opens the day sheet and applies whatever the user changed it to.
-  Future<void> _openDay(
-    BuildContext context,
-    WidgetRef ref,
-    DateTime date,
-    HabitLog? log,
-    Color color,
-  ) async {
-    final messenger = ScaffoldMessenger.of(context);
-    final l10n = context.l10n;
-    final controller = ref.read(
-      habitDetailControllerProvider(habit.id).notifier,
-    );
-    final choice = await showGlassBottomSheet<HabitDayChoice>(
-      context: context,
-      builder: (_) =>
-          HabitDayLogSheet(habit: habit, date: date, log: log, color: color),
-    );
-    if (choice == null) {
-      return;
-    }
-    try {
-      await controller.setDayLog(date, choice);
-    } catch (error) {
-      debugPrint('Updating ${habit.id} on $date failed: $error');
-      messenger.showSnackBar(
-        SnackBar(content: Text(l10n.habitSyncFailed(habit.name, '$error'))),
-      );
-    }
-  }
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final streaks = _computeStreaks(state.logsByDate);
-    final habitAccent = Theme.of(context).extension<GlassTheme>()!.habitAccent;
-    final color = parseHexColorOr(habit.color, habitAccent);
-    final hasActions = habit.actions.isNotEmpty;
-    return GestureDetector(
-      onHorizontalDragEnd: (details) {
-        final velocity = details.primaryVelocity ?? 0;
-        if (velocity < 0) {
-          _changeMonth(ref, 1);
-        } else if (velocity > 0) {
-          _changeMonth(ref, -1);
-        }
-      },
-      child: ListView(
-        padding: const EdgeInsets.all(Spacing.md),
-        children: [
-          HabitStreakRow(current: streaks.current, longest: streaks.longest),
-          const SizedBox(height: Spacing.md),
-          HabitMonthHeader(
-            month: state.month,
-            onPrevious: () => _changeMonth(ref, -1),
-            onNext: () => _changeMonth(ref, 1),
-          ),
-          const SizedBox(height: Spacing.sm),
-          HabitMonthGrid(
-            month: state.month,
-            color: color,
-            logsByDate: state.logsByDate,
-            labelFor: hasActions ? (log) => _actionLabel(context, log) : null,
-            onDayTap: (date, log) => _openDay(context, ref, date, log, color),
-          ),
-          if (hasActions) ...[
-            const SizedBox(height: Spacing.md),
-            HabitActionSummaryCard(
-              counts: countActionsInMonth(
-                habit,
-                state.logsByDate.values,
-                state.month,
-              ),
-              color: color,
-            ),
-          ],
-        ],
-      ),
     );
   }
 }

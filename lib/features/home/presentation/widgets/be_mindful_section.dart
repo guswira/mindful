@@ -56,19 +56,10 @@ class BeMindfulSection extends ConsumerWidget {
     BeMindfulStep.budget: _budgetStatus(ref),
   };
 
-  BeMindfulStepStatus _budgetStatus(WidgetRef ref) {
-    final monthly = ref.watch(monthlyBudgetProvider);
-    final daily = ref.watch(dailyBudgetProvider);
-    if (!monthly.hasValue || !daily.hasValue) {
-      return monthly.hasError || daily.hasError
-          ? BeMindfulStepStatus.unknown
-          : BeMindfulStepStatus.loading;
-    }
-    final isSet =
-        (monthly.valueOrNull?.amount ?? 0) > 0 ||
-        (daily.valueOrNull?.amount ?? 0) > 0;
-    return isSet ? BeMindfulStepStatus.done : BeMindfulStepStatus.todo;
-  }
+  BeMindfulStepStatus _budgetStatus(WidgetRef ref) => _statusOf(
+    ref.watch(activeBudgetsProvider),
+    (budgets) => budgets.isNotEmpty,
+  );
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

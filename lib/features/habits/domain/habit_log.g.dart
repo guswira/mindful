@@ -13,6 +13,9 @@ _HabitLog _$HabitLogFromJson(Map<String, dynamic> json) => _HabitLog(
   date: DateTime.parse(json['date'] as String),
   completedActionId: json['completed_action_id'] as String?,
   note: json['note'] as String?,
+  tags: (json['tags'] as Map<String, dynamic>?)?.map(
+    (k, e) => MapEntry(k, (e as num).toInt()),
+  ),
   syncStatus:
       $enumDecodeNullable(_$SyncStatusEnumMap, json['sync_status']) ??
       SyncStatus.synced,
@@ -25,6 +28,7 @@ Map<String, dynamic> _$HabitLogToJson(_HabitLog instance) => <String, dynamic>{
   'date': instance.date.toIso8601String(),
   'completed_action_id': instance.completedActionId,
   'note': instance.note,
+  if (instance.tags case final value?) 'tags': value,
   'sync_status': _$SyncStatusEnumMap[instance.syncStatus]!,
 };
 

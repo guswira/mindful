@@ -6,6 +6,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../shared/models/sync_status.dart';
+import 'budget_type.dart';
 import 'entry_type.dart';
 
 part 'money_entry.freezed.dart';
@@ -28,6 +29,10 @@ abstract class MoneyEntry with _$MoneyEntry {
     @JsonKey(name: 'created_at') required DateTime createdAt,
     @JsonKey(name: 'updated_at') required DateTime updatedAt,
     String? note,
+    // Left out of the upsert while null (an everyday expense), so an app
+    // update keeps working against a database without the column yet.
+    @JsonKey(name: 'budget_period', includeIfNull: false)
+    BudgetType? budgetPeriod,
     @JsonKey(name: 'sync_status')
     @Default(SyncStatus.synced)
     SyncStatus syncStatus,
@@ -35,6 +40,23 @@ abstract class MoneyEntry with _$MoneyEntry {
 
   factory MoneyEntry.fromJson(Map<String, dynamic> json) =>
       _$MoneyEntryFromJson(json);
+}
+
+/// Total spending in [entries] that counts against a [budget] budget.
+///
+/// Income never offsets a budget, and a bill whose
+/// [MoneyEntry.budgetPeriod] is longer than [budget] is left out (see
+/// [BudgetType.countsToward]); no period means everyday spending, which
+/// counts against every budget.
+double spendingTowardBudget(Iterable<MoneyEntry> entries, BudgetType budget) {
+  var total = 0.0;
+  for (final entry in entries) {
+    if (entry.type == EntryType.spending &&
+        (entry.budgetPeriod ?? BudgetType.daily).countsToward(budget)) {
+      total += entry.amount;
+    }
+  }
+  return total;
 }
 
 /// Categories available when [MoneyEntry.type] is [EntryType.spending].

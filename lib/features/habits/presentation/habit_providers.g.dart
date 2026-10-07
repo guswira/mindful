@@ -6,7 +6,7 @@ part of 'habit_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$habitByIdHash() => r'e9d4709e49c48419dd4f29a163d50e0ad76408ae';
+String _$habitByIdHash() => r'cb8425ffba63d35bedae02d359e706e024b524a1';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -32,7 +32,8 @@ class _SystemHash {
 /// The cached habit with [id], or null if it doesn't exist.
 ///
 /// Shared by the detail and edit screens so they don't each re-derive it
-/// from the repository.
+/// from the repository. Re-read whenever today's routine list reloads, so
+/// every habit write (edit, archive, restore, delete) shows up here too.
 ///
 /// Copied from [habitById].
 @ProviderFor(habitById)
@@ -41,14 +42,16 @@ const habitByIdProvider = HabitByIdFamily();
 /// The cached habit with [id], or null if it doesn't exist.
 ///
 /// Shared by the detail and edit screens so they don't each re-derive it
-/// from the repository.
+/// from the repository. Re-read whenever today's routine list reloads, so
+/// every habit write (edit, archive, restore, delete) shows up here too.
 ///
 /// Copied from [habitById].
 class HabitByIdFamily extends Family<AsyncValue<Habit?>> {
   /// The cached habit with [id], or null if it doesn't exist.
   ///
   /// Shared by the detail and edit screens so they don't each re-derive it
-  /// from the repository.
+  /// from the repository. Re-read whenever today's routine list reloads, so
+  /// every habit write (edit, archive, restore, delete) shows up here too.
   ///
   /// Copied from [habitById].
   const HabitByIdFamily();
@@ -56,7 +59,8 @@ class HabitByIdFamily extends Family<AsyncValue<Habit?>> {
   /// The cached habit with [id], or null if it doesn't exist.
   ///
   /// Shared by the detail and edit screens so they don't each re-derive it
-  /// from the repository.
+  /// from the repository. Re-read whenever today's routine list reloads, so
+  /// every habit write (edit, archive, restore, delete) shows up here too.
   ///
   /// Copied from [habitById].
   HabitByIdProvider call(String id) {
@@ -86,14 +90,16 @@ class HabitByIdFamily extends Family<AsyncValue<Habit?>> {
 /// The cached habit with [id], or null if it doesn't exist.
 ///
 /// Shared by the detail and edit screens so they don't each re-derive it
-/// from the repository.
+/// from the repository. Re-read whenever today's routine list reloads, so
+/// every habit write (edit, archive, restore, delete) shows up here too.
 ///
 /// Copied from [habitById].
 class HabitByIdProvider extends AutoDisposeFutureProvider<Habit?> {
   /// The cached habit with [id], or null if it doesn't exist.
   ///
   /// Shared by the detail and edit screens so they don't each re-derive it
-  /// from the repository.
+  /// from the repository. Re-read whenever today's routine list reloads, so
+  /// every habit write (edit, archive, restore, delete) shows up here too.
   ///
   /// Copied from [habitById].
   HabitByIdProvider(String id)

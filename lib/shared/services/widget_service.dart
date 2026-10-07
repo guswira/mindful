@@ -12,6 +12,7 @@ import '../../features/habits/domain/habit.dart';
 import '../../features/habits/domain/habit_log.dart';
 import '../../features/journal/data/journal_repository.dart';
 import '../../core/l10n/l10n.dart';
+import '../../core/platform/platform_features.dart';
 import '../../features/tasks/data/task_repository.dart';
 
 part 'widget_service.g.dart';
@@ -67,6 +68,10 @@ class WidgetService {
   /// native widgets to redraw. Called on app open and after any journal,
   /// habit or task write — see SPEC.md.
   Future<void> updateWidgetData() async {
+    // No home screen widgets off phones (home_widget is iOS/Android only).
+    if (!isPhonePlatform) {
+      return;
+    }
     final today = _dateOnly(_now());
 
     final habits = _habitRepository.getTodayHabits();

@@ -6,10 +6,12 @@ part of 'task_tab.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$taskTabControllerHash() => r'7f79890e13455a047108adba7b1b387e9c81ff0e';
+String _$taskTabControllerHash() => r'98c1d9081b635616023ebc829eef09731322dcfc';
 
-/// Loads all tasks and marks completions, refreshed from Supabase in the
-/// background. See SPEC.md Task Manager.
+/// Loads all tasks, refreshed from Supabase in the background, and owns
+/// every task write — each one reloads this list (Home's Today's Todo, the
+/// Tasks & Routines tab, Be Mindful), the task's [taskByIdProvider] and
+/// the home/lock screen widgets. See SPEC.md Task Manager.
 ///
 /// Copied from [TaskTabController].
 @ProviderFor(TaskTabController)

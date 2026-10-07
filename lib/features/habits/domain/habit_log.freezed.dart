@@ -15,7 +15,10 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$HabitLog {
 
- String get id;@JsonKey(name: 'user_id') String get userId;@JsonKey(name: 'habit_id') String get habitId; DateTime get date;@JsonKey(name: 'completed_action_id') String? get completedActionId; String? get note;@JsonKey(name: 'sync_status') SyncStatus get syncStatus;
+ String get id;@JsonKey(name: 'user_id') String get userId;@JsonKey(name: 'habit_id') String get habitId; DateTime get date;@JsonKey(name: 'completed_action_id') String? get completedActionId; String? get note;/// How many times each tag (by [HabitTag.id]) was done that day, e.g.
+/// `{heavyId: 1, easyId: 3}`. Null until the log is first tagged —
+/// see [Habit.tags] for why. Read via [tagCounts].
+@JsonKey(includeIfNull: false) Map<String, int>? get tags;@JsonKey(name: 'sync_status') SyncStatus get syncStatus;
 /// Create a copy of HabitLog
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +31,16 @@ $HabitLogCopyWith<HabitLog> get copyWith => _$HabitLogCopyWithImpl<HabitLog>(thi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is HabitLog&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.habitId, habitId) || other.habitId == habitId)&&(identical(other.date, date) || other.date == date)&&(identical(other.completedActionId, completedActionId) || other.completedActionId == completedActionId)&&(identical(other.note, note) || other.note == note)&&(identical(other.syncStatus, syncStatus) || other.syncStatus == syncStatus));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is HabitLog&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.habitId, habitId) || other.habitId == habitId)&&(identical(other.date, date) || other.date == date)&&(identical(other.completedActionId, completedActionId) || other.completedActionId == completedActionId)&&(identical(other.note, note) || other.note == note)&&const DeepCollectionEquality().equals(other.tags, tags)&&(identical(other.syncStatus, syncStatus) || other.syncStatus == syncStatus));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,userId,habitId,date,completedActionId,note,syncStatus);
+int get hashCode => Object.hash(runtimeType,id,userId,habitId,date,completedActionId,note,const DeepCollectionEquality().hash(tags),syncStatus);
 
 @override
 String toString() {
-  return 'HabitLog(id: $id, userId: $userId, habitId: $habitId, date: $date, completedActionId: $completedActionId, note: $note, syncStatus: $syncStatus)';
+  return 'HabitLog(id: $id, userId: $userId, habitId: $habitId, date: $date, completedActionId: $completedActionId, note: $note, tags: $tags, syncStatus: $syncStatus)';
 }
 
 
@@ -48,7 +51,7 @@ abstract mixin class $HabitLogCopyWith<$Res>  {
   factory $HabitLogCopyWith(HabitLog value, $Res Function(HabitLog) _then) = _$HabitLogCopyWithImpl;
 @useResult
 $Res call({
- String id,@JsonKey(name: 'user_id') String userId,@JsonKey(name: 'habit_id') String habitId, DateTime date,@JsonKey(name: 'completed_action_id') String? completedActionId, String? note,@JsonKey(name: 'sync_status') SyncStatus syncStatus
+ String id,@JsonKey(name: 'user_id') String userId,@JsonKey(name: 'habit_id') String habitId, DateTime date,@JsonKey(name: 'completed_action_id') String? completedActionId, String? note,@JsonKey(includeIfNull: false) Map<String, int>? tags,@JsonKey(name: 'sync_status') SyncStatus syncStatus
 });
 
 
@@ -65,7 +68,7 @@ class _$HabitLogCopyWithImpl<$Res>
 
 /// Create a copy of HabitLog
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? userId = null,Object? habitId = null,Object? date = null,Object? completedActionId = freezed,Object? note = freezed,Object? syncStatus = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? userId = null,Object? habitId = null,Object? date = null,Object? completedActionId = freezed,Object? note = freezed,Object? tags = freezed,Object? syncStatus = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
@@ -73,7 +76,8 @@ as String,habitId: null == habitId ? _self.habitId : habitId // ignore: cast_nul
 as String,date: null == date ? _self.date : date // ignore: cast_nullable_to_non_nullable
 as DateTime,completedActionId: freezed == completedActionId ? _self.completedActionId : completedActionId // ignore: cast_nullable_to_non_nullable
 as String?,note: freezed == note ? _self.note : note // ignore: cast_nullable_to_non_nullable
-as String?,syncStatus: null == syncStatus ? _self.syncStatus : syncStatus // ignore: cast_nullable_to_non_nullable
+as String?,tags: freezed == tags ? _self.tags : tags // ignore: cast_nullable_to_non_nullable
+as Map<String, int>?,syncStatus: null == syncStatus ? _self.syncStatus : syncStatus // ignore: cast_nullable_to_non_nullable
 as SyncStatus,
   ));
 }
@@ -159,10 +163,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'user_id')  String userId, @JsonKey(name: 'habit_id')  String habitId,  DateTime date, @JsonKey(name: 'completed_action_id')  String? completedActionId,  String? note, @JsonKey(name: 'sync_status')  SyncStatus syncStatus)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'user_id')  String userId, @JsonKey(name: 'habit_id')  String habitId,  DateTime date, @JsonKey(name: 'completed_action_id')  String? completedActionId,  String? note, @JsonKey(includeIfNull: false)  Map<String, int>? tags, @JsonKey(name: 'sync_status')  SyncStatus syncStatus)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _HabitLog() when $default != null:
-return $default(_that.id,_that.userId,_that.habitId,_that.date,_that.completedActionId,_that.note,_that.syncStatus);case _:
+return $default(_that.id,_that.userId,_that.habitId,_that.date,_that.completedActionId,_that.note,_that.tags,_that.syncStatus);case _:
   return orElse();
 
 }
@@ -180,10 +184,10 @@ return $default(_that.id,_that.userId,_that.habitId,_that.date,_that.completedAc
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'user_id')  String userId, @JsonKey(name: 'habit_id')  String habitId,  DateTime date, @JsonKey(name: 'completed_action_id')  String? completedActionId,  String? note, @JsonKey(name: 'sync_status')  SyncStatus syncStatus)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'user_id')  String userId, @JsonKey(name: 'habit_id')  String habitId,  DateTime date, @JsonKey(name: 'completed_action_id')  String? completedActionId,  String? note, @JsonKey(includeIfNull: false)  Map<String, int>? tags, @JsonKey(name: 'sync_status')  SyncStatus syncStatus)  $default,) {final _that = this;
 switch (_that) {
 case _HabitLog():
-return $default(_that.id,_that.userId,_that.habitId,_that.date,_that.completedActionId,_that.note,_that.syncStatus);case _:
+return $default(_that.id,_that.userId,_that.habitId,_that.date,_that.completedActionId,_that.note,_that.tags,_that.syncStatus);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -200,10 +204,10 @@ return $default(_that.id,_that.userId,_that.habitId,_that.date,_that.completedAc
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, @JsonKey(name: 'user_id')  String userId, @JsonKey(name: 'habit_id')  String habitId,  DateTime date, @JsonKey(name: 'completed_action_id')  String? completedActionId,  String? note, @JsonKey(name: 'sync_status')  SyncStatus syncStatus)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, @JsonKey(name: 'user_id')  String userId, @JsonKey(name: 'habit_id')  String habitId,  DateTime date, @JsonKey(name: 'completed_action_id')  String? completedActionId,  String? note, @JsonKey(includeIfNull: false)  Map<String, int>? tags, @JsonKey(name: 'sync_status')  SyncStatus syncStatus)?  $default,) {final _that = this;
 switch (_that) {
 case _HabitLog() when $default != null:
-return $default(_that.id,_that.userId,_that.habitId,_that.date,_that.completedActionId,_that.note,_that.syncStatus);case _:
+return $default(_that.id,_that.userId,_that.habitId,_that.date,_that.completedActionId,_that.note,_that.tags,_that.syncStatus);case _:
   return null;
 
 }
@@ -214,8 +218,8 @@ return $default(_that.id,_that.userId,_that.habitId,_that.date,_that.completedAc
 /// @nodoc
 @JsonSerializable()
 
-class _HabitLog implements HabitLog {
-  const _HabitLog({required this.id, @JsonKey(name: 'user_id') required this.userId, @JsonKey(name: 'habit_id') required this.habitId, required this.date, @JsonKey(name: 'completed_action_id') this.completedActionId, this.note, @JsonKey(name: 'sync_status') this.syncStatus = SyncStatus.synced});
+class _HabitLog extends HabitLog {
+  const _HabitLog({required this.id, @JsonKey(name: 'user_id') required this.userId, @JsonKey(name: 'habit_id') required this.habitId, required this.date, @JsonKey(name: 'completed_action_id') this.completedActionId, this.note, @JsonKey(includeIfNull: false) final  Map<String, int>? tags, @JsonKey(name: 'sync_status') this.syncStatus = SyncStatus.synced}): _tags = tags,super._();
   factory _HabitLog.fromJson(Map<String, dynamic> json) => _$HabitLogFromJson(json);
 
 @override final  String id;
@@ -224,6 +228,21 @@ class _HabitLog implements HabitLog {
 @override final  DateTime date;
 @override@JsonKey(name: 'completed_action_id') final  String? completedActionId;
 @override final  String? note;
+/// How many times each tag (by [HabitTag.id]) was done that day, e.g.
+/// `{heavyId: 1, easyId: 3}`. Null until the log is first tagged —
+/// see [Habit.tags] for why. Read via [tagCounts].
+ final  Map<String, int>? _tags;
+/// How many times each tag (by [HabitTag.id]) was done that day, e.g.
+/// `{heavyId: 1, easyId: 3}`. Null until the log is first tagged —
+/// see [Habit.tags] for why. Read via [tagCounts].
+@override@JsonKey(includeIfNull: false) Map<String, int>? get tags {
+  final value = _tags;
+  if (value == null) return null;
+  if (_tags is EqualUnmodifiableMapView) return _tags;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(value);
+}
+
 @override@JsonKey(name: 'sync_status') final  SyncStatus syncStatus;
 
 /// Create a copy of HabitLog
@@ -239,16 +258,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _HabitLog&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.habitId, habitId) || other.habitId == habitId)&&(identical(other.date, date) || other.date == date)&&(identical(other.completedActionId, completedActionId) || other.completedActionId == completedActionId)&&(identical(other.note, note) || other.note == note)&&(identical(other.syncStatus, syncStatus) || other.syncStatus == syncStatus));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _HabitLog&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.habitId, habitId) || other.habitId == habitId)&&(identical(other.date, date) || other.date == date)&&(identical(other.completedActionId, completedActionId) || other.completedActionId == completedActionId)&&(identical(other.note, note) || other.note == note)&&const DeepCollectionEquality().equals(other._tags, _tags)&&(identical(other.syncStatus, syncStatus) || other.syncStatus == syncStatus));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,userId,habitId,date,completedActionId,note,syncStatus);
+int get hashCode => Object.hash(runtimeType,id,userId,habitId,date,completedActionId,note,const DeepCollectionEquality().hash(_tags),syncStatus);
 
 @override
 String toString() {
-  return 'HabitLog(id: $id, userId: $userId, habitId: $habitId, date: $date, completedActionId: $completedActionId, note: $note, syncStatus: $syncStatus)';
+  return 'HabitLog(id: $id, userId: $userId, habitId: $habitId, date: $date, completedActionId: $completedActionId, note: $note, tags: $tags, syncStatus: $syncStatus)';
 }
 
 
@@ -259,7 +278,7 @@ abstract mixin class _$HabitLogCopyWith<$Res> implements $HabitLogCopyWith<$Res>
   factory _$HabitLogCopyWith(_HabitLog value, $Res Function(_HabitLog) _then) = __$HabitLogCopyWithImpl;
 @override @useResult
 $Res call({
- String id,@JsonKey(name: 'user_id') String userId,@JsonKey(name: 'habit_id') String habitId, DateTime date,@JsonKey(name: 'completed_action_id') String? completedActionId, String? note,@JsonKey(name: 'sync_status') SyncStatus syncStatus
+ String id,@JsonKey(name: 'user_id') String userId,@JsonKey(name: 'habit_id') String habitId, DateTime date,@JsonKey(name: 'completed_action_id') String? completedActionId, String? note,@JsonKey(includeIfNull: false) Map<String, int>? tags,@JsonKey(name: 'sync_status') SyncStatus syncStatus
 });
 
 
@@ -276,7 +295,7 @@ class __$HabitLogCopyWithImpl<$Res>
 
 /// Create a copy of HabitLog
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? userId = null,Object? habitId = null,Object? date = null,Object? completedActionId = freezed,Object? note = freezed,Object? syncStatus = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? userId = null,Object? habitId = null,Object? date = null,Object? completedActionId = freezed,Object? note = freezed,Object? tags = freezed,Object? syncStatus = null,}) {
   return _then(_HabitLog(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
@@ -284,7 +303,8 @@ as String,habitId: null == habitId ? _self.habitId : habitId // ignore: cast_nul
 as String,date: null == date ? _self.date : date // ignore: cast_nullable_to_non_nullable
 as DateTime,completedActionId: freezed == completedActionId ? _self.completedActionId : completedActionId // ignore: cast_nullable_to_non_nullable
 as String?,note: freezed == note ? _self.note : note // ignore: cast_nullable_to_non_nullable
-as String?,syncStatus: null == syncStatus ? _self.syncStatus : syncStatus // ignore: cast_nullable_to_non_nullable
+as String?,tags: freezed == tags ? _self._tags : tags // ignore: cast_nullable_to_non_nullable
+as Map<String, int>?,syncStatus: null == syncStatus ? _self.syncStatus : syncStatus // ignore: cast_nullable_to_non_nullable
 as SyncStatus,
   ));
 }

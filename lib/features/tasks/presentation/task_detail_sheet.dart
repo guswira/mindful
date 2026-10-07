@@ -31,7 +31,13 @@ Future<void> showTaskDetailSheet(BuildContext context, String taskId) async {
   if (result == null || !context.mounted) {
     return;
   }
-  await showGlassBottomSheet<void>(
+  await showTaskFollowUp(context, result);
+}
+
+/// Opens the sheet [result] asks for: editing the task, or converting it
+/// into a routine.
+Future<void> showTaskFollowUp(BuildContext context, TaskDetailResult result) {
+  return showGlassBottomSheet<void>(
     context: context,
     builder: (_) => switch (result.outcome) {
       TaskDetailOutcome.edit => AddTaskSheet(task: result.task),
@@ -42,13 +48,55 @@ Future<void> showTaskDetailSheet(BuildContext context, String taskId) async {
   );
 }
 
-/// Bottom sheet showing a task's due date, reminder and subtasks, with
-/// edit/convert-to-routine/delete via the overflow menu and a "Mark as done" action. See
+/// [TaskDetailView] as a bottom sheet: closes once the task is done or
+/// deleted, and pops with the follow-up its overflow menu asked for. See
 /// SPEC.md Task Manager and the bottom-sheet design rules.
-class TaskDetailSheet extends ConsumerWidget {
+class TaskDetailSheet extends StatelessWidget {
   const TaskDetailSheet({required this.taskId, super.key});
 
   final String taskId;
+
+  @override
+  Widget build(BuildContext context) {
+    return TaskDetailView(
+      taskId: taskId,
+      onFollowUp: (result) => Navigator.pop<TaskDetailResult>(context, result),
+      onCompleted: () => Navigator.pop(context),
+      onDeleted: () => Navigator.pop(context),
+    );
+  }
+}
+
+/// A task's due date, reminder and subtasks, with edit/convert-to-routine/
+/// delete via the overflow menu and a "Mark as done" action.
+///
+/// Doesn't close itself — it reports through the callbacks instead, so it
+/// works both inside [TaskDetailSheet] and in the Tasks & Routines tab's
+/// detail pane on wide screens, which stays open.
+class TaskDetailView extends ConsumerWidget {
+  const TaskDetailView({
+    required this.taskId,
+    required this.onFollowUp,
+    required this.onCompleted,
+    required this.onDeleted,
+    this.notFound,
+    super.key,
+  });
+
+  final String taskId;
+
+  /// Edit or convert to a routine was picked from the overflow menu.
+  final ValueChanged<TaskDetailResult> onFollowUp;
+
+  /// The task was marked done.
+  final VoidCallback onCompleted;
+
+  /// The task was deleted.
+  final VoidCallback onDeleted;
+
+  /// Shown when [taskId] no longer exists (deleted, or converted to a
+  /// routine); a plain "Task not found" by default.
+  final Widget? notFound;
 
   Future<void> _toggleCheckbox(
     WidgetRef ref,
@@ -74,7 +122,7 @@ class TaskDetailSheet extends ConsumerWidget {
     await ref.read(taskTabControllerProvider.notifier).complete(task.id);
     HapticFeedback.lightImpact();
     if (context.mounted) {
-      Navigator.pop(context);
+      onCompleted();
     }
   }
 
@@ -91,10 +139,11 @@ class TaskDetailSheet extends ConsumerWidget {
         child: Center(child: Text(context.l10n.taskLoadError('$error'))),
       ),
       data: (task) => task == null
-          ? SizedBox(
-              height: 120,
-              child: Center(child: Text(context.l10n.taskNotFound)),
-            )
+          ? notFound ??
+                SizedBox(
+                  height: 120,
+                  child: Center(child: Text(context.l10n.taskNotFound)),
+                )
           : _buildDetail(context, ref, task),
     );
   }
@@ -120,7 +169,13 @@ class TaskDetailSheet extends ConsumerWidget {
               ),
               IconButton(
                 icon: const Icon(Icons.more_vert),
-                onPressed: () => showTaskMoreActions(context, ref, task),
+                onPressed: () => showTaskMoreActions(
+                  context,
+                  ref,
+                  task,
+                  onFollowUp: onFollowUp,
+                  onDeleted: onDeleted,
+                ),
               ),
             ],
           ),

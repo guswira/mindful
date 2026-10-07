@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../shared/models/sync_status.dart';
 import '../../../shared/services/notification_service.dart';
 import '../../../shared/services/widget_service.dart';
 import '../../auth/domain/auth_state.dart';
@@ -51,25 +52,29 @@ class HabitTabController extends _$HabitTabController {
 
   /// Logs [habit] as completed via [action] (or plain "done" if null) for
   /// [on] (default today — only the iOS lock screen widget's queued taps
-  /// pass an earlier day). Reuses that day's existing log id, if any,
-  /// instead of minting a new one on every toggle.
+  /// pass an earlier day). Switching an already-logged day to another
+  /// action keeps its id, note and tags — tags apply to every action.
   Future<void> logAction(
     Habit habit,
     HabitAction? action, {
     DateTime? on,
   }) async {
     final repository = await ref.read(habitRepositoryProvider.future);
-    final userId = ref.read(currentUserIdProvider);
     final day = on ?? DateTime.now();
     final existing = repository.getLog(habit.id, day);
     await repository.saveLog(
-      HabitLog(
-        id: existing?.id ?? const Uuid().v4(),
-        userId: userId,
-        habitId: habit.id,
-        date: day,
-        completedActionId: action?.id,
-      ),
+      existing?.copyWith(
+            date: day,
+            completedActionId: action?.id,
+            syncStatus: SyncStatus.synced,
+          ) ??
+          HabitLog(
+            id: const Uuid().v4(),
+            userId: ref.read(currentUserIdProvider),
+            habitId: habit.id,
+            date: day,
+            completedActionId: action?.id,
+          ),
     );
     ref.invalidateSelf();
     await refreshWidgetsBestEffort(

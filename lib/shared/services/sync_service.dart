@@ -55,16 +55,15 @@ class SyncService {
       return;
     }
 
-    try {
-      for (final retryOne in _retryPending) {
-        await retryOne();
+    // Each step on its own, so one failing table (or a slow photo bucket)
+    // can't keep every table after it from syncing.
+    for (final step in [..._retryPending, ..._pull]) {
+      try {
+        await step();
+      } catch (error) {
+        // Best-effort: the cache is still shown when Supabase is unreachable.
+        debugPrint('Sync on open step failed: $error');
       }
-      for (final pullOne in _pull) {
-        await pullOne();
-      }
-    } catch (error) {
-      // Best-effort: the cache is still shown when Supabase is unreachable.
-      debugPrint('Sync on open failed: $error');
     }
     await _updateWidgetData();
 

@@ -141,7 +141,7 @@ RecapSlideData _cashflow(
       (value: '$netSign${money(c.net.abs())}', label: l10n.recapStatNet),
       if (c.budget case final budget?)
         (
-          value: l10n.recapPercent(_percent(c.spending / budget)),
+          value: l10n.recapPercent(_percent(c.budgetSpending / budget)),
           label: l10n.recapStatBudgetUsed,
         ),
       (value: l10n.recapDays(c.noSpendDays), label: l10n.recapStatNoSpendDays),

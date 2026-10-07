@@ -8,6 +8,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../shared/models/time_of_day_converter.dart';
 import 'habit_action.dart';
+import 'habit_tag.dart';
 
 part 'habit.freezed.dart';
 part 'habit.g.dart';
@@ -32,7 +33,17 @@ abstract class Habit with _$Habit {
     TimeOfDay? reminderTime,
     @Default(<HabitAction>[]) List<HabitAction> actions,
     @Default(false) bool archived,
+
+    /// Null until the habit's tags are first edited, so the `tags` key is
+    /// left out of the upsert and a `habits` table without the column (not
+    /// migrated yet) keeps working. Read via [tagList].
+    @JsonKey(includeIfNull: false) List<HabitTag>? tags,
   }) = _Habit;
 
+  const Habit._();
+
   factory Habit.fromJson(Map<String, dynamic> json) => _$HabitFromJson(json);
+
+  /// [tags], or none.
+  List<HabitTag> get tagList => tags ?? const [];
 }

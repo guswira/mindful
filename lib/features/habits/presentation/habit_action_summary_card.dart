@@ -7,16 +7,31 @@ import '../../../shared/widgets/glass_card.dart';
 import '../domain/habit_action_summary.dart';
 
 /// How many times each action was done in the shown month, one row per
-/// action with a bar relative to the most-done one.
+/// action with a bar relative to the most-done one, and under it how that
+/// action's days were tagged ("Heavy ×3 · Easy ×1").
 class HabitActionSummaryCard extends StatelessWidget {
   const HabitActionSummaryCard({
     required this.counts,
     required this.color,
+    this.tagsByAction = const {},
     super.key,
   });
 
   final List<HabitActionCount> counts;
   final Color color;
+
+  /// Each action's tag counts, keyed by action id.
+  final Map<String, List<HabitTagCount>> tagsByAction;
+
+  /// [row]'s action's tags as "Heavy ×3 · Easy ×1", or null if none.
+  String? _tagLine(AppLocalizations l10n, HabitActionCount row) {
+    final tags = tagsByAction[row.action?.id] ?? const [];
+    final parts = [
+      for (final (:tag, :count) in tags)
+        if (count > 0) l10n.habitTagTimes(tag.label, count),
+    ];
+    return parts.isEmpty ? null : parts.join(' · ');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,6 +59,53 @@ class HabitActionSummaryCard extends StatelessWidget {
               count: row.count,
               progress: maxCount == 0 ? 0 : row.count / maxCount,
               color: color,
+              detail: _tagLine(context.l10n, row),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// How many times each tag was done in the shown month — a day tagged
+/// "Easy ×3" counts 3 — one row per tag with a bar relative to the
+/// most-done one.
+class HabitTagSummaryCard extends StatelessWidget {
+  const HabitTagSummaryCard({
+    required this.counts,
+    required this.color,
+    super.key,
+  });
+
+  final List<HabitTagCount> counts;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final glass = Theme.of(context).extension<GlassTheme>()!;
+    final maxCount = counts.fold(
+      0,
+      (max, row) => row.count > max ? row.count : max,
+    );
+    return GlassCard(
+      padding: const EdgeInsets.all(Spacing.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            context.l10n.habitTagSummaryTitle,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: glass.textMuted,
+            ),
+          ),
+          for (final (:tag, :count) in counts)
+            _ActionCountRow(
+              label: tag.label,
+              count: count,
+              progress: maxCount == 0 ? 0 : count / maxCount,
+              color: color,
             ),
         ],
       ),
@@ -65,12 +127,16 @@ class _ActionCountRow extends StatelessWidget {
     required this.count,
     required this.progress,
     required this.color,
+    this.detail,
   });
 
   final String label;
   final int count;
   final double progress;
   final Color color;
+
+  /// A muted line under the label, e.g. the action's tag counts.
+  final String? detail;
 
   @override
   Widget build(BuildContext context) {
@@ -99,6 +165,14 @@ class _ActionCountRow extends StatelessWidget {
               ),
             ],
           ),
+          if (detail case final detail?)
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: Text(
+                detail,
+                style: TextStyle(fontSize: 12, color: glass.textMuted),
+              ),
+            ),
           const SizedBox(height: Spacing.xs),
           ClipRRect(
             borderRadius: BorderRadius.circular(2),

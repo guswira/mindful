@@ -8,8 +8,6 @@ import 'package:mindful/core/theme/glass_theme.dart';
 import 'package:mindful/features/money/data/money_repository.dart';
 import 'package:mindful/features/money/domain/budget_settings.dart';
 import 'package:mindful/features/money/domain/budget_type.dart';
-import 'package:mindful/features/money/domain/entry_type.dart';
-import 'package:mindful/features/money/domain/money_entry.dart';
 import 'package:mindful/features/money/presentation/money_tab.dart';
 
 class _MockBox extends Mock implements Box<dynamic> {}
@@ -47,15 +45,12 @@ void main() {
     expect(find.text('Set budget'), findsOneWidget);
     await tester.scrollUntilVisible(find.text('Record your spending'), 200);
     expect(find.text('Record spending'), findsOneWidget);
-    // The intro offers adding the first entry, so no quick add buttons.
-    expect(find.text('+ Spending'), findsNothing);
-    expect(find.text('+ Income'), findsNothing);
     // Nothing to filter yet, so the period pills stay hidden.
     expect(find.text('This Week'), findsNothing);
   });
 
   testWidgets(
-    'only a monthly budget set shows its gauge and a ghost daily card',
+    'only a monthly budget set shows it plus a link to set the rest',
     (tester) async {
       final settings = BudgetSettings(
         id: 'b1',
@@ -73,8 +68,9 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Monthly'), findsOneWidget);
-      expect(find.text('Daily budget'), findsOneWidget);
-      expect(find.text('Set Daily'), findsOneWidget);
+      expect(find.text('Daily · Weekly · Yearly'), findsOneWidget);
+      // One gear for the whole card, not one per budget.
+      expect(find.byIcon(Icons.settings_outlined), findsOneWidget);
     },
   );
 
@@ -107,27 +103,25 @@ void main() {
     expect(find.text('Daily'), findsOneWidget);
     expect(find.textContaining('of USD 1,000'), findsOneWidget);
     expect(find.textContaining('of USD 50'), findsOneWidget);
+    expect(find.byIcon(Icons.settings_outlined), findsOneWidget);
   });
 
-  testWidgets('quick add buttons show once an entry exists', (tester) async {
-    final now = DateTime.now();
-    final entry = MoneyEntry(
-      id: 'e1',
+  testWidgets('a yearly budget gets its own gauge', (tester) async {
+    final yearly = BudgetSettings(
+      id: 'b3',
       userId: 'u1',
-      type: EntryType.spending,
-      amount: 12,
-      category: 'Food',
-      date: now,
-      createdAt: now,
-      updatedAt: now,
+      budgetType: BudgetType.yearly,
+      amount: 12000,
+      currency: 'USD',
+      updatedAt: DateTime(2026, 1, 1),
     );
-    when(() => entriesBox.values).thenReturn([entry.toJson()]);
+    when(() => settingsBox.get('settings_yearly')).thenReturn(yearly.toJson());
 
     await tester.pumpWidget(buildTab());
     await tester.pumpAndSettle();
 
-    expect(find.text('+ Spending'), findsOneWidget);
-    expect(find.text('+ Income'), findsOneWidget);
-    expect(find.text('Record your spending'), findsNothing);
+    expect(find.text('Yearly'), findsOneWidget);
+    expect(find.textContaining('of USD 12,000'), findsOneWidget);
+    expect(find.text('Daily · Weekly · Monthly'), findsOneWidget);
   });
 }

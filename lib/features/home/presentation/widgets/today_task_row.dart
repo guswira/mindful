@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/l10n/l10n.dart';
+import '../../../../core/theme/glass_theme.dart';
+import '../../../../shared/widgets/detail_selection.dart';
 import '../../../tasks/domain/task.dart';
 import '../../../tasks/presentation/task_complete_checkbox.dart';
-import '../../../tasks/presentation/task_detail_sheet.dart';
+import '../../../tasks/presentation/open_task_detail.dart';
 import '../../../tasks/presentation/task_due_date_chip.dart';
 import '../../../tasks/presentation/task_tab.dart';
 
@@ -17,7 +19,8 @@ const double todayRowLeadingWidth = 40;
 const double todayRowLeadingGap = 8;
 
 /// A due-today-or-overdue task: checkbox (completes it), name, due chip.
-/// Tap opens [showTaskDetailSheet].
+/// Tap opens its details ([openTaskDetail]: the pane beside Home on a
+/// tablet / in landscape, else a sheet).
 class TodayTaskRow extends ConsumerWidget {
   const TodayTaskRow({required this.task, super.key});
 
@@ -40,10 +43,16 @@ class TodayTaskRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final glass = Theme.of(context).extension<GlassTheme>()!;
+    // Marks the task shown in the detail pane.
+    final selected = DetailSelectionScope.isSelected(
+      context,
+      TaskDetailSelection(task.id),
+    );
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: GestureDetector(
-        onTap: () => showTaskDetailSheet(context, task.id),
+        onTap: () => openTaskDetail(context, task.id),
         child: Row(
           children: [
             SizedBox(
@@ -62,7 +71,10 @@ class TodayTaskRow extends ConsumerWidget {
                 task.name,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 14, color: Colors.white),
+                style: TextStyle(
+                  fontSize: 14,
+                  color: selected ? glass.taskAccent : Colors.white,
+                ),
               ),
             ),
             if (task.dueDate != null) TaskDueDateChip(dueDate: task.dueDate!),

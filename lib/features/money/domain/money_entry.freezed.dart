@@ -15,7 +15,9 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$MoneyEntry {
 
- String get id;@JsonKey(name: 'user_id') String get userId; EntryType get type; double get amount; String get category; DateTime get date;@JsonKey(name: 'created_at') DateTime get createdAt;@JsonKey(name: 'updated_at') DateTime get updatedAt; String? get note;@JsonKey(name: 'sync_status') SyncStatus get syncStatus;
+ String get id;@JsonKey(name: 'user_id') String get userId; EntryType get type; double get amount; String get category; DateTime get date;@JsonKey(name: 'created_at') DateTime get createdAt;@JsonKey(name: 'updated_at') DateTime get updatedAt; String? get note;// Left out of the upsert while null (an everyday expense), so an app
+// update keeps working against a database without the column yet.
+@JsonKey(name: 'budget_period', includeIfNull: false) BudgetType? get budgetPeriod;@JsonKey(name: 'sync_status') SyncStatus get syncStatus;
 /// Create a copy of MoneyEntry
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +30,16 @@ $MoneyEntryCopyWith<MoneyEntry> get copyWith => _$MoneyEntryCopyWithImpl<MoneyEn
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MoneyEntry&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.type, type) || other.type == type)&&(identical(other.amount, amount) || other.amount == amount)&&(identical(other.category, category) || other.category == category)&&(identical(other.date, date) || other.date == date)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.note, note) || other.note == note)&&(identical(other.syncStatus, syncStatus) || other.syncStatus == syncStatus));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MoneyEntry&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.type, type) || other.type == type)&&(identical(other.amount, amount) || other.amount == amount)&&(identical(other.category, category) || other.category == category)&&(identical(other.date, date) || other.date == date)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.note, note) || other.note == note)&&(identical(other.budgetPeriod, budgetPeriod) || other.budgetPeriod == budgetPeriod)&&(identical(other.syncStatus, syncStatus) || other.syncStatus == syncStatus));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,userId,type,amount,category,date,createdAt,updatedAt,note,syncStatus);
+int get hashCode => Object.hash(runtimeType,id,userId,type,amount,category,date,createdAt,updatedAt,note,budgetPeriod,syncStatus);
 
 @override
 String toString() {
-  return 'MoneyEntry(id: $id, userId: $userId, type: $type, amount: $amount, category: $category, date: $date, createdAt: $createdAt, updatedAt: $updatedAt, note: $note, syncStatus: $syncStatus)';
+  return 'MoneyEntry(id: $id, userId: $userId, type: $type, amount: $amount, category: $category, date: $date, createdAt: $createdAt, updatedAt: $updatedAt, note: $note, budgetPeriod: $budgetPeriod, syncStatus: $syncStatus)';
 }
 
 
@@ -48,7 +50,7 @@ abstract mixin class $MoneyEntryCopyWith<$Res>  {
   factory $MoneyEntryCopyWith(MoneyEntry value, $Res Function(MoneyEntry) _then) = _$MoneyEntryCopyWithImpl;
 @useResult
 $Res call({
- String id,@JsonKey(name: 'user_id') String userId, EntryType type, double amount, String category, DateTime date,@JsonKey(name: 'created_at') DateTime createdAt,@JsonKey(name: 'updated_at') DateTime updatedAt, String? note,@JsonKey(name: 'sync_status') SyncStatus syncStatus
+ String id,@JsonKey(name: 'user_id') String userId, EntryType type, double amount, String category, DateTime date,@JsonKey(name: 'created_at') DateTime createdAt,@JsonKey(name: 'updated_at') DateTime updatedAt, String? note,@JsonKey(name: 'budget_period', includeIfNull: false) BudgetType? budgetPeriod,@JsonKey(name: 'sync_status') SyncStatus syncStatus
 });
 
 
@@ -65,7 +67,7 @@ class _$MoneyEntryCopyWithImpl<$Res>
 
 /// Create a copy of MoneyEntry
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? userId = null,Object? type = null,Object? amount = null,Object? category = null,Object? date = null,Object? createdAt = null,Object? updatedAt = null,Object? note = freezed,Object? syncStatus = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? userId = null,Object? type = null,Object? amount = null,Object? category = null,Object? date = null,Object? createdAt = null,Object? updatedAt = null,Object? note = freezed,Object? budgetPeriod = freezed,Object? syncStatus = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
@@ -76,7 +78,8 @@ as String,date: null == date ? _self.date : date // ignore: cast_nullable_to_non
 as DateTime,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,note: freezed == note ? _self.note : note // ignore: cast_nullable_to_non_nullable
-as String?,syncStatus: null == syncStatus ? _self.syncStatus : syncStatus // ignore: cast_nullable_to_non_nullable
+as String?,budgetPeriod: freezed == budgetPeriod ? _self.budgetPeriod : budgetPeriod // ignore: cast_nullable_to_non_nullable
+as BudgetType?,syncStatus: null == syncStatus ? _self.syncStatus : syncStatus // ignore: cast_nullable_to_non_nullable
 as SyncStatus,
   ));
 }
@@ -162,10 +165,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'user_id')  String userId,  EntryType type,  double amount,  String category,  DateTime date, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'updated_at')  DateTime updatedAt,  String? note, @JsonKey(name: 'sync_status')  SyncStatus syncStatus)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'user_id')  String userId,  EntryType type,  double amount,  String category,  DateTime date, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'updated_at')  DateTime updatedAt,  String? note, @JsonKey(name: 'budget_period', includeIfNull: false)  BudgetType? budgetPeriod, @JsonKey(name: 'sync_status')  SyncStatus syncStatus)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _MoneyEntry() when $default != null:
-return $default(_that.id,_that.userId,_that.type,_that.amount,_that.category,_that.date,_that.createdAt,_that.updatedAt,_that.note,_that.syncStatus);case _:
+return $default(_that.id,_that.userId,_that.type,_that.amount,_that.category,_that.date,_that.createdAt,_that.updatedAt,_that.note,_that.budgetPeriod,_that.syncStatus);case _:
   return orElse();
 
 }
@@ -183,10 +186,10 @@ return $default(_that.id,_that.userId,_that.type,_that.amount,_that.category,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'user_id')  String userId,  EntryType type,  double amount,  String category,  DateTime date, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'updated_at')  DateTime updatedAt,  String? note, @JsonKey(name: 'sync_status')  SyncStatus syncStatus)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'user_id')  String userId,  EntryType type,  double amount,  String category,  DateTime date, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'updated_at')  DateTime updatedAt,  String? note, @JsonKey(name: 'budget_period', includeIfNull: false)  BudgetType? budgetPeriod, @JsonKey(name: 'sync_status')  SyncStatus syncStatus)  $default,) {final _that = this;
 switch (_that) {
 case _MoneyEntry():
-return $default(_that.id,_that.userId,_that.type,_that.amount,_that.category,_that.date,_that.createdAt,_that.updatedAt,_that.note,_that.syncStatus);case _:
+return $default(_that.id,_that.userId,_that.type,_that.amount,_that.category,_that.date,_that.createdAt,_that.updatedAt,_that.note,_that.budgetPeriod,_that.syncStatus);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -203,10 +206,10 @@ return $default(_that.id,_that.userId,_that.type,_that.amount,_that.category,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, @JsonKey(name: 'user_id')  String userId,  EntryType type,  double amount,  String category,  DateTime date, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'updated_at')  DateTime updatedAt,  String? note, @JsonKey(name: 'sync_status')  SyncStatus syncStatus)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, @JsonKey(name: 'user_id')  String userId,  EntryType type,  double amount,  String category,  DateTime date, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'updated_at')  DateTime updatedAt,  String? note, @JsonKey(name: 'budget_period', includeIfNull: false)  BudgetType? budgetPeriod, @JsonKey(name: 'sync_status')  SyncStatus syncStatus)?  $default,) {final _that = this;
 switch (_that) {
 case _MoneyEntry() when $default != null:
-return $default(_that.id,_that.userId,_that.type,_that.amount,_that.category,_that.date,_that.createdAt,_that.updatedAt,_that.note,_that.syncStatus);case _:
+return $default(_that.id,_that.userId,_that.type,_that.amount,_that.category,_that.date,_that.createdAt,_that.updatedAt,_that.note,_that.budgetPeriod,_that.syncStatus);case _:
   return null;
 
 }
@@ -218,7 +221,7 @@ return $default(_that.id,_that.userId,_that.type,_that.amount,_that.category,_th
 @JsonSerializable()
 
 class _MoneyEntry implements MoneyEntry {
-  const _MoneyEntry({required this.id, @JsonKey(name: 'user_id') required this.userId, required this.type, required this.amount, required this.category, required this.date, @JsonKey(name: 'created_at') required this.createdAt, @JsonKey(name: 'updated_at') required this.updatedAt, this.note, @JsonKey(name: 'sync_status') this.syncStatus = SyncStatus.synced});
+  const _MoneyEntry({required this.id, @JsonKey(name: 'user_id') required this.userId, required this.type, required this.amount, required this.category, required this.date, @JsonKey(name: 'created_at') required this.createdAt, @JsonKey(name: 'updated_at') required this.updatedAt, this.note, @JsonKey(name: 'budget_period', includeIfNull: false) this.budgetPeriod, @JsonKey(name: 'sync_status') this.syncStatus = SyncStatus.synced});
   factory _MoneyEntry.fromJson(Map<String, dynamic> json) => _$MoneyEntryFromJson(json);
 
 @override final  String id;
@@ -230,6 +233,9 @@ class _MoneyEntry implements MoneyEntry {
 @override@JsonKey(name: 'created_at') final  DateTime createdAt;
 @override@JsonKey(name: 'updated_at') final  DateTime updatedAt;
 @override final  String? note;
+// Left out of the upsert while null (an everyday expense), so an app
+// update keeps working against a database without the column yet.
+@override@JsonKey(name: 'budget_period', includeIfNull: false) final  BudgetType? budgetPeriod;
 @override@JsonKey(name: 'sync_status') final  SyncStatus syncStatus;
 
 /// Create a copy of MoneyEntry
@@ -245,16 +251,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MoneyEntry&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.type, type) || other.type == type)&&(identical(other.amount, amount) || other.amount == amount)&&(identical(other.category, category) || other.category == category)&&(identical(other.date, date) || other.date == date)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.note, note) || other.note == note)&&(identical(other.syncStatus, syncStatus) || other.syncStatus == syncStatus));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MoneyEntry&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.type, type) || other.type == type)&&(identical(other.amount, amount) || other.amount == amount)&&(identical(other.category, category) || other.category == category)&&(identical(other.date, date) || other.date == date)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.note, note) || other.note == note)&&(identical(other.budgetPeriod, budgetPeriod) || other.budgetPeriod == budgetPeriod)&&(identical(other.syncStatus, syncStatus) || other.syncStatus == syncStatus));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,userId,type,amount,category,date,createdAt,updatedAt,note,syncStatus);
+int get hashCode => Object.hash(runtimeType,id,userId,type,amount,category,date,createdAt,updatedAt,note,budgetPeriod,syncStatus);
 
 @override
 String toString() {
-  return 'MoneyEntry(id: $id, userId: $userId, type: $type, amount: $amount, category: $category, date: $date, createdAt: $createdAt, updatedAt: $updatedAt, note: $note, syncStatus: $syncStatus)';
+  return 'MoneyEntry(id: $id, userId: $userId, type: $type, amount: $amount, category: $category, date: $date, createdAt: $createdAt, updatedAt: $updatedAt, note: $note, budgetPeriod: $budgetPeriod, syncStatus: $syncStatus)';
 }
 
 
@@ -265,7 +271,7 @@ abstract mixin class _$MoneyEntryCopyWith<$Res> implements $MoneyEntryCopyWith<$
   factory _$MoneyEntryCopyWith(_MoneyEntry value, $Res Function(_MoneyEntry) _then) = __$MoneyEntryCopyWithImpl;
 @override @useResult
 $Res call({
- String id,@JsonKey(name: 'user_id') String userId, EntryType type, double amount, String category, DateTime date,@JsonKey(name: 'created_at') DateTime createdAt,@JsonKey(name: 'updated_at') DateTime updatedAt, String? note,@JsonKey(name: 'sync_status') SyncStatus syncStatus
+ String id,@JsonKey(name: 'user_id') String userId, EntryType type, double amount, String category, DateTime date,@JsonKey(name: 'created_at') DateTime createdAt,@JsonKey(name: 'updated_at') DateTime updatedAt, String? note,@JsonKey(name: 'budget_period', includeIfNull: false) BudgetType? budgetPeriod,@JsonKey(name: 'sync_status') SyncStatus syncStatus
 });
 
 
@@ -282,7 +288,7 @@ class __$MoneyEntryCopyWithImpl<$Res>
 
 /// Create a copy of MoneyEntry
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? userId = null,Object? type = null,Object? amount = null,Object? category = null,Object? date = null,Object? createdAt = null,Object? updatedAt = null,Object? note = freezed,Object? syncStatus = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? userId = null,Object? type = null,Object? amount = null,Object? category = null,Object? date = null,Object? createdAt = null,Object? updatedAt = null,Object? note = freezed,Object? budgetPeriod = freezed,Object? syncStatus = null,}) {
   return _then(_MoneyEntry(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
@@ -293,7 +299,8 @@ as String,date: null == date ? _self.date : date // ignore: cast_nullable_to_non
 as DateTime,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,note: freezed == note ? _self.note : note // ignore: cast_nullable_to_non_nullable
-as String?,syncStatus: null == syncStatus ? _self.syncStatus : syncStatus // ignore: cast_nullable_to_non_nullable
+as String?,budgetPeriod: freezed == budgetPeriod ? _self.budgetPeriod : budgetPeriod // ignore: cast_nullable_to_non_nullable
+as BudgetType?,syncStatus: null == syncStatus ? _self.syncStatus : syncStatus // ignore: cast_nullable_to_non_nullable
 as SyncStatus,
   ));
 }
