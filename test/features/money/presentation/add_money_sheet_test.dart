@@ -237,4 +237,29 @@ void main() {
     );
     expect(saved.budgetPeriod, BudgetType.monthly);
   });
+
+  testWidgets('the whole keypad stays on screen however tall the form is', (
+    tester,
+  ) async {
+    // A short phone: the spending form alone is taller than this.
+    await tester.binding.setSurfaceSize(const Size(390, 700));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(buildSheet());
+    await tester.pumpAndSettle();
+
+    Finder key(String label) => find.descendant(
+      of: find.byType(AmountKeypad),
+      matching: find.text(label),
+    );
+    for (final label in ['1', '9', '000', '0']) {
+      expect(tester.getRect(key(label)).bottom, lessThanOrEqualTo(700));
+    }
+    expect(
+      tester.getRect(find.byIcon(Icons.backspace_outlined)).bottom,
+      lessThanOrEqualTo(700),
+    );
+    await tester.tap(key('9'));
+    await tester.tap(key('000'));
+    expect(find.text('9.000'), findsOneWidget);
+  });
 }

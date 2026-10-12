@@ -1672,6 +1672,9 @@ amount field:
     Android lets an app add a "000" key to the system keyboard.
     Shown only while the amount field is focused; the note field gets the
     normal system keyboard.
+    Layout: the header, the Save pill and the keypad are pinned; only the
+    form between them scrolls, so the whole keypad (all 4 rows) is always
+    on screen however tall the form gets (e.g. with Spending type shown).
 
 category picker:
   Wrap of category chips (glass pills)

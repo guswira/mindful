@@ -169,77 +169,88 @@ class _AddMoneySheetState extends ConsumerState<AddMoneySheet> {
         : glass.moneyAccent;
     final currency = ref.watch(budgetCurrencyProvider).valueOrNull ?? 'IDR';
     final l10n = context.l10n;
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SheetHeader(
-            title: widget.entry == null
-                ? l10n.moneyAddEntryTitle
-                : l10n.moneyEditEntryTitle,
-            onClose: () => Navigator.pop(context),
-          ),
-          const SizedBox(height: Spacing.md),
-          TypeToggleRow(type: _type, onChanged: _setType),
-          const SizedBox(height: Spacing.lg),
-          AmountField(
-            shakeKey: _amountShake,
-            controller: _amountController,
-            focusNode: _amountFocus,
-            currency: currency,
-          ),
-          const SizedBox(height: Spacing.md),
-          Text(
-            l10n.moneyCategoryHeading,
-            style: TextStyle(color: glass.textHint, fontSize: 12),
-          ),
-          const SizedBox(height: Spacing.sm),
-          CategoryWrap(
-            categories: _categoriesFor(_type),
-            selected: _selectedCategory,
-            activeColor: activeColor,
-            onChanged: (category) =>
-                setState(() => _selectedCategory = category),
-          ),
-          if (_type == EntryType.spending) ...[
-            const SizedBox(height: Spacing.md),
-            SpendingTypePicker(
-              selected: _budgetPeriod,
-              onChanged: (period) => setState(() => _budgetPeriod = period),
-            ),
-          ],
-          const SizedBox(height: Spacing.sm),
-          TextField(
-            controller: _noteController,
-            style: const TextStyle(color: Colors.white70, fontSize: 14),
-            decoration: InputDecoration(
-              hintText: l10n.moneyNoteHint,
-              hintStyle: TextStyle(color: glass.textHint, fontSize: 14),
-              border: InputBorder.none,
-            ),
-          ),
-          const SizedBox(height: Spacing.sm),
-          DateRow(date: _selectedDate, onTap: _pickDate),
-          const SizedBox(height: Spacing.lg),
-          SizedBox(
-            width: double.infinity,
-            child: _isSaving
-                ? const Center(child: CircularProgressIndicator())
-                : TintedPill(
-                    label: widget.entry != null
-                        ? l10n.moneySaveChanges
-                        : l10n.commonSave,
-                    color: activeColor,
-                    onTap: _save,
+    // Header, Save and the keypad stay put; only the form scrolls, so the
+    // keypad is always fully on screen however tall the form gets.
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SheetHeader(
+          title: widget.entry == null
+              ? l10n.moneyAddEntryTitle
+              : l10n.moneyEditEntryTitle,
+          onClose: () => Navigator.pop(context),
+        ),
+        const SizedBox(height: Spacing.md),
+        Flexible(
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TypeToggleRow(type: _type, onChanged: _setType),
+                const SizedBox(height: Spacing.lg),
+                AmountField(
+                  shakeKey: _amountShake,
+                  controller: _amountController,
+                  focusNode: _amountFocus,
+                  currency: currency,
+                ),
+                const SizedBox(height: Spacing.md),
+                Text(
+                  l10n.moneyCategoryHeading,
+                  style: TextStyle(color: glass.textHint, fontSize: 12),
+                ),
+                const SizedBox(height: Spacing.sm),
+                CategoryWrap(
+                  categories: _categoriesFor(_type),
+                  selected: _selectedCategory,
+                  activeColor: activeColor,
+                  onChanged: (category) =>
+                      setState(() => _selectedCategory = category),
+                ),
+                if (_type == EntryType.spending) ...[
+                  const SizedBox(height: Spacing.md),
+                  SpendingTypePicker(
+                    selected: _budgetPeriod,
+                    onChanged: (period) =>
+                        setState(() => _budgetPeriod = period),
                   ),
+                ],
+                const SizedBox(height: Spacing.sm),
+                TextField(
+                  controller: _noteController,
+                  style: const TextStyle(color: Colors.white70, fontSize: 14),
+                  decoration: InputDecoration(
+                    hintText: l10n.moneyNoteHint,
+                    hintStyle: TextStyle(color: glass.textHint, fontSize: 14),
+                    border: InputBorder.none,
+                  ),
+                ),
+                const SizedBox(height: Spacing.sm),
+                DateRow(date: _selectedDate, onTap: _pickDate),
+              ],
+            ),
           ),
-          FocusedAmountKeypad(
-            focusNode: _amountFocus,
-            controller: _amountController,
-          ),
-        ],
-      ),
+        ),
+        const SizedBox(height: Spacing.md),
+        SizedBox(
+          width: double.infinity,
+          child: _isSaving
+              ? const Center(child: CircularProgressIndicator())
+              : TintedPill(
+                  label: widget.entry != null
+                      ? l10n.moneySaveChanges
+                      : l10n.commonSave,
+                  color: activeColor,
+                  onTap: _save,
+                ),
+        ),
+        FocusedAmountKeypad(
+          focusNode: _amountFocus,
+          controller: _amountController,
+        ),
+      ],
     );
   }
 }
