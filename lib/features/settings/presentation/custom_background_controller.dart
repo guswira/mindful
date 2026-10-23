@@ -26,9 +26,7 @@ class CustomBackgroundController extends _$CustomBackgroundController {
       imageQuality: 88,
     );
     if (photo == null) return false;
-    final path = await ref
-        .read(customBackgroundRepositoryProvider)
-        .save(photo.path);
+    final path = await ref.read(customBackgroundRepositoryProvider).save(photo);
     state = AsyncData(path);
     return true;
   }

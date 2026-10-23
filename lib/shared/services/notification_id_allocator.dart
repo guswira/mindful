@@ -1,4 +1,4 @@
-import 'package:hive/hive.dart';
+import 'package:hive_ce/hive.dart';
 
 /// Minimal persistent key-value storage [NotificationIdAllocator] needs —
 /// a thin seam over Hive's [Box] API so allocator logic can be tested

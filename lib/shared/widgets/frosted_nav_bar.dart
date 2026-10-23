@@ -1,0 +1,173 @@
+import 'dart:ui';
+
+import 'package:flutter/material.dart';
+
+import '../../core/constants/layout.dart';
+import '../../core/l10n/l10n.dart';
+import '../../core/theme/glass_style.dart';
+import '../../core/theme/glass_theme.dart';
+import 'frosted_write_button.dart';
+
+/// The frosted nav island (5 tabs: Home, Tasks & Routines, Mindfulness,
+/// Money, AI) + write button — [GlassStyle.frosted]'s nav, always at the
+/// bottom. See SPEC.md Floating Island Nav Bar → Frosted.
+class FrostedNavBar extends StatelessWidget {
+  const FrostedNavBar({
+    required this.currentIndex,
+    required this.onTabChanged,
+    super.key,
+  });
+
+  final int currentIndex;
+  final ValueChanged<int> onTabChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(14, 0, 14, 12),
+        // Centered and capped on Mac/iPad rather than stretched across the
+        // window; a phone is narrower than the cap.
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: AppLayout.maxNavWidth),
+            child: Row(
+              children: [
+                Expanded(
+                  child: _NavIsland(
+                    currentIndex: currentIndex,
+                    onTabChanged: onTabChanged,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                FrostedWriteButton(tabIndex: currentIndex),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _NavIsland extends StatelessWidget {
+  const _NavIsland({required this.currentIndex, required this.onTabChanged});
+
+  final int currentIndex;
+  final ValueChanged<int> onTabChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final glass = Theme.of(context).extension<GlassTheme>()!;
+    final l10n = context.l10n;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(28),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 11),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.09),
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.18),
+              width: 0.5,
+            ),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: _NavItem(
+                  icon: Icons.home_outlined,
+                  label: l10n.navHome,
+                  active: currentIndex == 0,
+                  activeColor: glass.homeAccent,
+                  onTap: () => onTabChanged(0),
+                ),
+              ),
+              Expanded(
+                child: _NavItem(
+                  icon: Icons.checklist_outlined,
+                  label: l10n.navTasks,
+                  active: currentIndex == 1,
+                  activeColor: glass.taskAccent,
+                  onTap: () => onTabChanged(1),
+                ),
+              ),
+              Expanded(
+                child: _NavItem(
+                  icon: Icons.menu_book_outlined,
+                  label: l10n.navJournal,
+                  active: currentIndex == 2,
+                  activeColor: glass.journalAccent,
+                  onTap: () => onTabChanged(2),
+                ),
+              ),
+              Expanded(
+                child: _NavItem(
+                  icon: Icons.account_balance_wallet_outlined,
+                  label: l10n.navMoney,
+                  active: currentIndex == 3,
+                  activeColor: glass.moneyAccent,
+                  onTap: () => onTabChanged(3),
+                ),
+              ),
+              Expanded(
+                child: _NavItem(
+                  icon: Icons.auto_awesome_outlined,
+                  label: l10n.navAi,
+                  active: currentIndex == 4,
+                  activeColor: glass.aiAccent,
+                  onTap: () => onTabChanged(4),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _NavItem extends StatelessWidget {
+  const _NavItem({
+    required this.icon,
+    required this.label,
+    required this.active,
+    required this.activeColor,
+    required this.onTap,
+  });
+
+  final IconData icon;
+
+  /// Screen-reader name for the tab — the island shows icons only.
+  final String label;
+  final bool active;
+  final Color activeColor;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = active ? activeColor : Colors.white.withValues(alpha: 0.28);
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 20, color: color, semanticLabel: label),
+          const SizedBox(height: 6),
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            width: active ? 16 : 4,
+            height: 4,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(2),
+              color: active ? activeColor : Colors.transparent,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

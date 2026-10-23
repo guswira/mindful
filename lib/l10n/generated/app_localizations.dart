@@ -140,6 +140,12 @@ abstract class AppLocalizations {
   /// **'Retry'**
   String get commonRetry;
 
+  /// No description provided for @commonPageLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load this page. Check your connection.'**
+  String get commonPageLoadFailed;
+
   /// No description provided for @commonDone.
   ///
   /// In en, this message translates to:
@@ -235,6 +241,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Google\'s servers are busy — retrying (attempt {attempt}/{maxAttempts})…'**
   String aiNotifRetryingBody(int attempt, int maxAttempts);
+
+  /// No description provided for @aiActivityRetrying.
+  ///
+  /// In en, this message translates to:
+  /// **'{task} · attempt {attempt}/{maxAttempts}'**
+  String aiActivityRetrying(String task, int attempt, int maxAttempts);
+
+  /// No description provided for @aiActivityFoodReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Food result ready — tap to view'**
+  String get aiActivityFoodReady;
+
+  /// No description provided for @aiActivityAdviceReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Spending advice ready — tap to view'**
+  String get aiActivityAdviceReady;
+
+  /// No description provided for @aiScanInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Still analyzing your last photo — it\'s shown at the top of the screen.'**
+  String get aiScanInProgress;
 
   /// No description provided for @aiScanSaved.
   ///
@@ -337,30 +367,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Analyzing your food...'**
   String get aiAnalyzingTitle;
-
-  /// No description provided for @aiAnalyzingTipIngredients.
-  ///
-  /// In en, this message translates to:
-  /// **'Identifying ingredients...'**
-  String get aiAnalyzingTipIngredients;
-
-  /// No description provided for @aiAnalyzingTipPortions.
-  ///
-  /// In en, this message translates to:
-  /// **'Estimating portions...'**
-  String get aiAnalyzingTipPortions;
-
-  /// No description provided for @aiAnalyzingTipNutrition.
-  ///
-  /// In en, this message translates to:
-  /// **'Calculating nutrition...'**
-  String get aiAnalyzingTipNutrition;
-
-  /// No description provided for @aiAnalyzingTipAlmostDone.
-  ///
-  /// In en, this message translates to:
-  /// **'Almost done...'**
-  String get aiAnalyzingTipAlmostDone;
 
   /// No description provided for @aiExperimentalTitle.
   ///
@@ -1664,6 +1670,12 @@ abstract class AppLocalizations {
   /// **'Delete'**
   String get moneyKeypadBackspace;
 
+  /// No description provided for @moneyKeypadNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get moneyKeypadNext;
+
   /// No description provided for @moneyDateChange.
   ///
   /// In en, this message translates to:
@@ -1795,6 +1807,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Set budget'**
   String get moneySetBudget;
+
+  /// No description provided for @moneyBudgetShowMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Show {count} more'**
+  String moneyBudgetShowMore(int count);
+
+  /// No description provided for @moneyBudgetShowLess.
+  ///
+  /// In en, this message translates to:
+  /// **'Show less'**
+  String get moneyBudgetShowLess;
 
   /// No description provided for @moneyBudgetHeading.
   ///
@@ -2448,7 +2472,7 @@ abstract class AppLocalizations {
   /// No description provided for @moneyAdviceInProgress.
   ///
   /// In en, this message translates to:
-  /// **'Still working on your advice — you\'ll get a notification if it fails.'**
+  /// **'Still working on your advice — it\'s shown at the top of the screen.'**
   String get moneyAdviceInProgress;
 
   /// No description provided for @recapBannerTitle.
@@ -2816,6 +2840,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{month} (so far)'**
   String settingsRecapSoFar(String month);
+
+  /// No description provided for @settingsGlassStyleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Glass style'**
+  String get settingsGlassStyleTitle;
+
+  /// No description provided for @settingsGlassStyleLiquid.
+  ///
+  /// In en, this message translates to:
+  /// **'Liquid glass'**
+  String get settingsGlassStyleLiquid;
+
+  /// No description provided for @settingsGlassStyleLiquidBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Refracting glass with fluid, springy animations'**
+  String get settingsGlassStyleLiquidBody;
+
+  /// No description provided for @settingsGlassStyleFrosted.
+  ///
+  /// In en, this message translates to:
+  /// **'Frosted glass'**
+  String get settingsGlassStyleFrosted;
+
+  /// No description provided for @settingsGlassStyleFrostedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The classic blurred look, lighter on older phones'**
+  String get settingsGlassStyleFrostedBody;
 
   /// No description provided for @settingsBackgroundTitle.
   ///

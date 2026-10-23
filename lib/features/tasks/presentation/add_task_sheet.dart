@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -205,15 +206,18 @@ class _AddTaskSheetState extends ConsumerState<AddTaskSheet> {
             onTap: _pickDueDate,
             onClear: _clearDueDate,
           ),
-          const Divider(color: Colors.white10, height: 1),
-          SheetOptionRow(
-            icon: Icons.notifications_none,
-            label: l10n.taskAddReminder,
-            value: _reminderTime?.format(context),
-            enabled: _dueDate != null,
-            onTap: _pickReminderTime,
-            onClear: () => setState(() => _reminderTime = null),
-          ),
+          // No reminders in a browser — see SPEC.md Web.
+          if (!kIsWeb) ...[
+            const Divider(color: Colors.white10, height: 1),
+            SheetOptionRow(
+              icon: Icons.notifications_none,
+              label: l10n.taskAddReminder,
+              value: _reminderTime?.format(context),
+              enabled: _dueDate != null,
+              onTap: _pickReminderTime,
+              onClear: () => setState(() => _reminderTime = null),
+            ),
+          ],
           const Divider(color: Colors.white10, height: 1),
           SubtasksToggleRow(
             value: _showSubtasks,

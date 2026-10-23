@@ -8,6 +8,7 @@ import 'package:mindful/core/theme/app_theme.dart';
 import 'package:mindful/features/habits/domain/habit.dart';
 import 'package:mindful/features/habits/domain/habit_log.dart';
 import 'package:mindful/features/habits/presentation/add_habit_sheet.dart';
+import 'package:mindful/features/habits/presentation/habit_detail_controller.dart';
 import 'package:mindful/features/habits/presentation/habit_detail_screen.dart';
 import 'package:mindful/features/habits/presentation/habit_detail_view.dart';
 import 'package:mindful/features/habits/presentation/habit_providers.dart';
@@ -72,9 +73,7 @@ Widget _buildTab({
     taskTabControllerProvider.overrideWith(() => _FakeTaskTabController(tasks)),
     taskByIdProvider(_task.id).overrideWith((ref) async => _task),
     habitByIdProvider(_habit.id).overrideWith((ref) async => _habit),
-    habitDetailControllerProvider(
-      _habit.id,
-    ).overrideWith(_FakeHabitDetailController.new),
+    habitDetailControllerProvider.overrideWith(_FakeHabitDetailController.new),
   ],
   child: MaterialApp(theme: AppTheme.dark, home: const PlanTab()),
 );

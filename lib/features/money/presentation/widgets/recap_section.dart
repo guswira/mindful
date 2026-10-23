@@ -13,11 +13,12 @@ import '../../domain/entry_type.dart';
 import '../../domain/money_entry.dart';
 import '../money_advice_flow.dart';
 import '../money_labels.dart';
+import '../money_period.dart';
 import '../money_providers.dart';
 
 /// Collapsible spending-by-category breakdown, income vs. spending
 /// summary, top category — for the current budget period — and an AI
-/// advice button covering every entry. See
+/// advice button covering the period picked in the entry list below. See
 /// SPEC.md Money Flow Feature Money Flow Tab, Recap Section.
 class RecapSection extends ConsumerWidget {
   const RecapSection({super.key});
@@ -44,9 +45,14 @@ class RecapSection extends ConsumerWidget {
     final totalSpending = repository.getTotalSpending(range: range);
     final totalIncome = repository.getTotalIncome(range: range);
     final net = totalIncome - totalSpending;
-    // Advice covers every entry, not just this month's, so it's offered
-    // whenever there's any history at all.
-    final hasAnyEntries = repository.getEntries().isNotEmpty;
+    // Advice covers the entry list's selected period (Today / This Week /
+    // This Month / All), so it's offered whenever that period has entries.
+    final adviceRange = ref
+        .watch(moneyPeriodProvider)
+        .rangeEndingAt(DateTime.now());
+    final hasAdviceEntries = repository
+        .getEntries(range: adviceRange)
+        .isNotEmpty;
 
     return GlassCard(
       strong: true,
@@ -105,10 +111,10 @@ class RecapSection extends ConsumerWidget {
                 style: TextStyle(color: glass.textMuted, fontSize: 12),
               ),
             ],
-            if (hasAnyEntries) ...[
+            if (hasAdviceEntries) ...[
               const SizedBox(height: Spacing.md),
               Align(
-                alignment: Alignment.centerLeft,
+                alignment: Alignment.centerRight,
                 child: TintedPill(
                   label: l10n.moneyAdviceButton,
                   icon: Icons.auto_awesome_outlined,

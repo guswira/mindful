@@ -29,11 +29,11 @@ class BudgetProgressTile extends StatelessWidget {
   double get _used =>
       ((settings.amount - remaining) / settings.amount).clamp(0.0, 1.0);
 
-  /// Same thresholds as before: calm under 80%, amber to 99%, red when
-  /// used up.
-  static Color _barColor(GlassTheme glass, double used) => switch (used) {
+  /// Calm up to half used, yellow past half, red once used up — shared by
+  /// the remaining amount and the bar so both warn together.
+  static Color _usageColor(GlassTheme glass, double used) => switch (used) {
     >= 1.0 => Colors.redAccent,
-    >= 0.8 => glass.accentAmber,
+    > 0.5 => glass.accentAmber,
     _ => glass.moneyAccent,
   };
 
@@ -42,8 +42,7 @@ class BudgetProgressTile extends StatelessWidget {
     final glass = Theme.of(context).extension<GlassTheme>()!;
     final format = NumberFormat('#,##0');
     final used = _used;
-    final barColor = _barColor(glass, used);
-    final amountColor = remaining <= 0 ? Colors.redAccent : glass.moneyAccent;
+    final color = _usageColor(glass, used);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -61,14 +60,14 @@ class BudgetProgressTile extends StatelessWidget {
           child: Text(
             '${settings.currency} ${format.format(remaining)}',
             style: TextStyle(
-              color: amountColor,
+              color: color,
               fontSize: 17,
               fontWeight: FontWeight.bold,
             ),
           ),
         ),
         const SizedBox(height: Spacing.sm),
-        _UsedBar(used: used, color: barColor),
+        _UsedBar(used: used, color: color),
         if (showTotal) ...[
           const SizedBox(height: Spacing.xs),
           Text(

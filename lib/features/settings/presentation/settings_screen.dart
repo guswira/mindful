@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -10,6 +11,7 @@ import '../../../shared/widgets/language_picker.dart';
 import '../../auth/domain/auth_state.dart';
 import '../data/journal_reminders_controller.dart';
 import 'background_section.dart';
+import 'glass_style_section.dart';
 import 'backup_settings_controller.dart';
 import 'debug_section.dart';
 import 'monthly_recap_section.dart';
@@ -29,8 +31,9 @@ class SettingsScreen extends ConsumerWidget {
           Divider(height: 1),
           _LanguageSection(),
           BackgroundSection(),
-          Divider(height: 1),
-          _NotificationsSection(),
+          GlassStyleSection(),
+          // No reminders in a browser — see SPEC.md Web.
+          if (!kIsWeb) ...[Divider(height: 1), _NotificationsSection()],
           Divider(height: 1),
           MonthlyRecapSection(),
           Divider(height: 1),

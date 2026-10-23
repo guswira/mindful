@@ -1,32 +1,45 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import '../../../core/l10n/l10n.dart';
-import '../../../shared/services/notification_service.dart';
 import '../domain/food_scan_exception.dart';
 
-/// How long and how often [runWithRetry] retries a busy Gemini response
-/// before giving up automatically — shared by the food scan and money
-/// advice requests.
+/// How long and how often [runWithRetry] retries a busy or timed-out
+/// Gemini response before giving up automatically — shared by the food
+/// scan and money advice requests.
 class FoodScanRetryPolicy {
   const FoodScanRetryPolicy._();
 
-  static const Duration delay = Duration(minutes: 1);
+  /// Waits before attempts 2, 3, 4 and 5. A 503 often clears within
+  /// seconds, so the first retry comes quickly; the waits then grow so a
+  /// genuinely overloaded model isn't hammered. (A flat minute made every
+  /// busy scan take at least a minute and a half.)
+  static const List<Duration> _delays = [
+    Duration(seconds: 5),
+    Duration(seconds: 15),
+    Duration(seconds: 30),
+    Duration(minutes: 1),
+  ];
+
   static const int maxAttempts = 5;
+
+  /// The wait before [attemptNumber] (2–[maxAttempts]).
+  static Duration delayBefore(int attemptNumber) =>
+      _delays[(attemptNumber - 2).clamp(0, _delays.length - 1)];
 }
 
-/// Runs [attempt] once, then keeps retrying it — waiting [delay] between
-/// tries, calling [onRetry] before each wait — as long as it keeps failing
-/// with [FoodScanErrorType.busy] and fewer than [maxAttempts] have run in
-/// total. Any other failure, or running out of attempts, rethrows that
+/// Runs [attempt] once, then keeps retrying it — waiting
+/// [delayBefore] the next attempt number between tries, calling [onRetry] before each wait — as long as it keeps failing
+/// with [FoodScanErrorType.busy] or [FoodScanErrorType.timeout] (a slow
+/// reply is usually Gemini under load too) and fewer than [maxAttempts]
+/// have run in total. Any other failure, or running out of attempts, rethrows that
 /// [FoodScanException] instead of retrying it.
 ///
-/// [delay] and [maxAttempts] default to [FoodScanRetryPolicy]'s —
+/// [delayBefore] and [maxAttempts] default to [FoodScanRetryPolicy]'s —
 /// overridable so tests can exercise the "gives up" path without a real
 /// multi-minute wait.
 Future<T> runWithRetry<T>({
   required Future<T> Function() attempt,
   required Future<void> Function(int attemptNumber) onRetry,
-  Duration delay = FoodScanRetryPolicy.delay,
+  Duration Function(int attemptNumber) delayBefore =
+      FoodScanRetryPolicy.delayBefore,
   int maxAttempts = FoodScanRetryPolicy.maxAttempts,
 }) async {
   var attemptNumber = 1;
@@ -34,38 +47,18 @@ Future<T> runWithRetry<T>({
     try {
       return await attempt();
     } on FoodScanException catch (error) {
-      final canRetry =
-          error.type == FoodScanErrorType.busy && attemptNumber < maxAttempts;
+      final retryable = switch (error.type) {
+        FoodScanErrorType.busy || FoodScanErrorType.timeout => true,
+        _ => false,
+      };
+      final canRetry = retryable && attemptNumber < maxAttempts;
       if (!canRetry) {
         rethrow;
       }
       attemptNumber++;
       await onRetry(attemptNumber);
-      await Future.delayed(delay);
+      await Future<void>.delayed(delayBefore(attemptNumber));
     }
-  }
-}
-
-/// Shows (or updates) the ongoing "analyzing" notification with [body].
-Future<void> showFoodScanProgressNotification(
-  WidgetRef ref,
-  String body,
-) async {
-  final service = await ref.read(notificationServiceProvider.future);
-  await service.showFoodScanProgress(body);
-}
-
-/// Clears the progress notification — or, if [failureMessage] is given,
-/// replaces it with a final failure the user can retry from instead.
-/// Called once a scan either succeeds or gives up retrying.
-Future<void> resolveFoodScanNotification(
-  WidgetRef ref, {
-  String? failureMessage,
-}) async {
-  final service = await ref.read(notificationServiceProvider.future);
-  await service.cancelFoodScanNotification();
-  if (failureMessage != null) {
-    await service.showFoodScanFailed(failureMessage);
   }
 }
 
@@ -74,7 +67,7 @@ Future<void> resolveFoodScanNotification(
 // ...) — the other types are always the same fixed condition, so a
 // canned message reads better than repeating the raw exception text.
 /// The message worth showing the user for [error] — shared by [AITab]'s
-/// SnackBar and [resolveFoodScanNotification]'s failure notification.
+/// SnackBar and the failure notification.
 String foodScanMessage(FoodScanException error) => switch (error.type) {
   FoodScanErrorType.notFood => currentL10n.aiErrorNotFood,
   FoodScanErrorType.networkError => currentL10n.aiErrorNoConnection,

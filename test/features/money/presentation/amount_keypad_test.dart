@@ -39,11 +39,13 @@ void main() {
     setUp(() => controller = TextEditingController());
     tearDown(() => controller.dispose());
 
-    Widget buildKeypad() => MaterialApp(
+    Widget buildKeypad({VoidCallback? onNext}) => MaterialApp(
       theme: AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: Scaffold(body: AmountKeypad(controller: controller)),
+      home: Scaffold(
+        body: AmountKeypad(controller: controller, onNext: onNext),
+      ),
     );
 
     testWidgets('typing 2 then 000 gives 2.000', (tester) async {
@@ -64,6 +66,25 @@ void main() {
 
       await tester.longPress(find.byIcon(Icons.backspace_outlined));
       expect(controller.text, '');
+    });
+
+    testWidgets('no Next key without onNext', (tester) async {
+      await tester.pumpWidget(buildKeypad());
+
+      expect(find.text('Next'), findsNothing);
+    });
+
+    testWidgets('Next calls onNext, digits still type', (tester) async {
+      var nexts = 0;
+      await tester.pumpWidget(buildKeypad(onNext: () => nexts++));
+
+      await tester.tap(find.text('7'));
+      await tester.tap(find.byIcon(Icons.backspace_outlined));
+      await tester.tap(find.text('4'));
+      await tester.tap(find.text('Next'));
+
+      expect(controller.text, '4');
+      expect(nexts, 1);
     });
   });
 }

@@ -1,0 +1,3 @@
+# Cloudflare Pages / Netlify: every route is the Flutter app (go_router
+# resolves it), so reloading /habits/<id> doesn't 404.
+/*  /index.html  200

@@ -15,54 +15,29 @@ import '../../domain/money_entry.dart';
 import '../add_money_sheet.dart';
 import '../money_detail_sheet.dart';
 import '../money_labels.dart';
+import '../money_period.dart';
 import '../money_providers.dart';
-
-/// The date range an [EntryList] filters to. Owns its own pill row and
-/// filtering state — see SPEC.md Money Flow Feature Money Flow Tab, Entry
-/// List.
-enum _Period { today, week, month, all }
 
 /// Money entries filtered by a glass pill period selector and grouped by
 /// date, newest first. See SPEC.md Money Flow Feature Money Flow Tab,
 /// Entry List.
-class EntryList extends ConsumerStatefulWidget {
+class EntryList extends ConsumerWidget {
   const EntryList({super.key});
 
-  @override
-  ConsumerState<EntryList> createState() => _EntryListState();
-}
-
-class _EntryListState extends ConsumerState<EntryList> {
-  _Period _period = _Period.month;
-
-  static String _labelFor(AppLocalizations l10n, _Period period) =>
+  static String _labelFor(AppLocalizations l10n, MoneyPeriod period) =>
       switch (period) {
-        _Period.today => l10n.commonToday,
-        _Period.week => l10n.moneyPeriodThisWeek,
-        _Period.month => l10n.moneyPeriodThisMonth,
-        _Period.all => l10n.moneyPeriodAll,
+        MoneyPeriod.today => l10n.commonToday,
+        MoneyPeriod.week => l10n.moneyPeriodThisWeek,
+        MoneyPeriod.month => l10n.moneyPeriodThisMonth,
+        MoneyPeriod.all => l10n.moneyPeriodAll,
       };
 
-  DateTimeRange? _rangeFor(_Period period) {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    return switch (period) {
-      _Period.today => DateTimeRange(start: today, end: today),
-      _Period.week => DateTimeRange(
-        start: today.subtract(Duration(days: today.weekday - 1)),
-        end: today,
-      ),
-      _Period.month => DateTimeRange(
-        start: DateTime(today.year, today.month, 1),
-        end: today,
-      ),
-      _Period.all => null,
-    };
-  }
-
   @override
-  Widget build(BuildContext context) {
-    final entriesAsync = ref.watch(moneyEntriesProvider(_rangeFor(_period)));
+  Widget build(BuildContext context, WidgetRef ref) {
+    final period = ref.watch(moneyPeriodProvider);
+    final entriesAsync = ref.watch(
+      moneyEntriesProvider(period.rangeEndingAt(DateTime.now())),
+    );
     final allEntries = ref.watch(moneyEntriesProvider(null)).valueOrNull;
     // Nothing recorded at all — the intro replaces the period pills and an
     // empty list, which would have nothing to filter.
@@ -80,9 +55,9 @@ class _EntryListState extends ConsumerState<EntryList> {
           const SizedBox(height: Spacing.md),
         ],
         _PeriodPillRow(
-          selected: _period,
+          selected: period,
           labelFor: (period) => _labelFor(context.l10n, period),
-          onChanged: (period) => setState(() => _period = period),
+          onChanged: ref.read(moneyPeriodProvider.notifier).select,
         ),
         const SizedBox(height: Spacing.sm),
         switch (entriesAsync) {
@@ -124,9 +99,9 @@ class _PeriodPillRow extends StatelessWidget {
     required this.onChanged,
   });
 
-  final _Period selected;
-  final String Function(_Period) labelFor;
-  final ValueChanged<_Period> onChanged;
+  final MoneyPeriod selected;
+  final String Function(MoneyPeriod) labelFor;
+  final ValueChanged<MoneyPeriod> onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -135,7 +110,7 @@ class _PeriodPillRow extends StatelessWidget {
       spacing: Spacing.sm,
       runSpacing: Spacing.sm,
       children: [
-        for (final period in _Period.values)
+        for (final period in MoneyPeriod.values)
           GestureDetector(
             onTap: () => onChanged(period),
             child: Container(

@@ -15,13 +15,27 @@ import 'budget_progress_tile.dart';
 
 /// One card for every configured budget (daily → yearly), two per row,
 /// with a single gear to open the settings and a link to set the periods
-/// that aren't yet — or an IntroCard explaining budgets if none is. See
-/// SPEC.md Money Flow Feature Money Flow Tab, Budget Card.
-class BudgetCard extends ConsumerWidget {
+/// that aren't yet — or an IntroCard explaining budgets if none is. Only
+/// the first [collapsedCount] budgets show until expanded, so the card
+/// doesn't push the entries off screen. See SPEC.md Money Flow Feature
+/// Money Flow Tab, Budget Card.
+class BudgetCard extends ConsumerStatefulWidget {
   const BudgetCard({super.key});
 
+  /// Budgets shown before "Show more" — one row of the grid.
+  static const collapsedCount = 2;
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<BudgetCard> createState() => _BudgetCardState();
+}
+
+class _BudgetCardState extends ConsumerState<BudgetCard> {
+  bool _expanded = false;
+
+  void _toggleExpanded() => setState(() => _expanded = !_expanded);
+
+  @override
+  Widget build(BuildContext context) {
     final saved = ref.watch(budgetsProvider).valueOrNull ?? const {};
     final active = ref.watch(activeBudgetsProvider).valueOrNull ?? const {};
     final glass = Theme.of(context).extension<GlassTheme>()!;
@@ -42,6 +56,11 @@ class BudgetCard extends ConsumerWidget {
 
     final remaining =
         ref.watch(remainingBudgetProvider).valueOrNull ?? const {};
+    final entries = active.entries.toList();
+    final hiddenCount = entries.length - BudgetCard.collapsedCount;
+    final visible = _expanded || hiddenCount <= 0
+        ? entries
+        : entries.take(BudgetCard.collapsedCount);
     final unset = [
       for (final type in BudgetType.values)
         if (!active.containsKey(type)) budgetTypeLabel(l10n, type),
@@ -55,21 +74,35 @@ class BudgetCard extends ConsumerWidget {
         children: [
           _BudgetCardHeader(onSettings: openSettings),
           const SizedBox(height: Spacing.sm),
-          Padding(
-            padding: const EdgeInsets.only(right: 4),
-            child: BudgetTileGrid(
-              children: [
-                for (final MapEntry(key: type, value: settings)
-                    in active.entries)
-                  BudgetProgressTile(
-                    label: budgetTypeLabel(l10n, type),
-                    settings: settings,
-                    remaining: remaining[type] ?? 0,
-                    showTotal: true,
-                  ),
-              ],
+          AnimatedSize(
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeInOut,
+            alignment: Alignment.topCenter,
+            child: Padding(
+              padding: const EdgeInsets.only(right: 4),
+              child: BudgetTileGrid(
+                children: [
+                  for (final MapEntry(key: type, value: settings) in visible)
+                    BudgetProgressTile(
+                      label: budgetTypeLabel(l10n, type),
+                      settings: settings,
+                      remaining: remaining[type] ?? 0,
+                      showTotal: true,
+                    ),
+                ],
+              ),
             ),
           ),
+          if (hiddenCount > 0) ...[
+            const SizedBox(height: Spacing.sm),
+            _ExpandToggle(
+              label: _expanded
+                  ? l10n.moneyBudgetShowLess
+                  : l10n.moneyBudgetShowMore(hiddenCount),
+              expanded: _expanded,
+              onTap: _toggleExpanded,
+            ),
+          ],
           if (unset.isNotEmpty) ...[
             const SizedBox(height: Spacing.md),
             _SetMoreLink(periods: unset.join(' · '), onTap: openSettings),
@@ -108,6 +141,50 @@ class _BudgetCardHeader extends StatelessWidget {
           onTap: onSettings,
         ),
       ],
+    );
+  }
+}
+
+/// "Show 2 more" / "Show less" under the tile grid.
+class _ExpandToggle extends StatelessWidget {
+  const _ExpandToggle({
+    required this.label,
+    required this.expanded,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool expanded;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final glass = Theme.of(context).extension<GlassTheme>()!;
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: Spacing.xs),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                color: glass.textSecondary,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(width: Spacing.xs),
+            Icon(
+              expanded ? Icons.expand_less : Icons.expand_more,
+              size: 18,
+              color: glass.textSecondary,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

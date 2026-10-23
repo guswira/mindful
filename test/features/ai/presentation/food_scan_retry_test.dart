@@ -50,13 +50,33 @@ void main() {
           return _analysis;
         },
         onRetry: (attempt) async => retriedAttempts.add(attempt),
-        delay: Duration.zero,
+        delayBefore: (_) => Duration.zero,
         maxAttempts: 5,
       );
 
       expect(result, _analysis);
       expect(calls, 3);
       expect(retriedAttempts, [2, 3]);
+    });
+
+    test('retries a timeout like a busy failure', () async {
+      var calls = 0;
+
+      final result = await runWithRetry(
+        attempt: () async {
+          calls++;
+          if (calls == 1) {
+            throw const FoodScanException('slow', FoodScanErrorType.timeout);
+          }
+          return _analysis;
+        },
+        onRetry: (_) async {},
+        delayBefore: (_) => Duration.zero,
+        maxAttempts: 5,
+      );
+
+      expect(result, _analysis);
+      expect(calls, 2);
     });
 
     test('does not retry a non-busy failure', () async {
@@ -66,7 +86,7 @@ void main() {
         runWithRetry(
           attempt: () async => throw _notBusy,
           onRetry: (_) async => retries++,
-          delay: Duration.zero,
+          delayBefore: (_) => Duration.zero,
           maxAttempts: 5,
         ),
         throwsA(_notBusy),
@@ -85,13 +105,22 @@ void main() {
             throw _busy;
           },
           onRetry: (_) async => retries++,
-          delay: Duration.zero,
+          delayBefore: (_) => Duration.zero,
           maxAttempts: 3,
         ),
         throwsA(_busy),
       );
       expect(calls, 3);
       expect(retries, 2);
+    });
+  });
+
+  group('FoodScanRetryPolicy', () {
+    test('retries soon at first, then backs off', () {
+      expect(FoodScanRetryPolicy.delayBefore(2), const Duration(seconds: 5));
+      expect(FoodScanRetryPolicy.delayBefore(3), const Duration(seconds: 15));
+      expect(FoodScanRetryPolicy.delayBefore(4), const Duration(seconds: 30));
+      expect(FoodScanRetryPolicy.delayBefore(5), const Duration(minutes: 1));
     });
   });
 

@@ -30,6 +30,10 @@ class AppLocalizationsId extends AppLocalizations {
   String get commonRetry => 'Coba lagi';
 
   @override
+  String get commonPageLoadFailed =>
+      'Halaman ini nggak bisa dimuat. Cek koneksimu.';
+
+  @override
   String get commonDone => 'Selesai';
 
   @override
@@ -83,6 +87,22 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
+  String aiActivityRetrying(String task, int attempt, int maxAttempts) {
+    return '$task · percobaan $attempt/$maxAttempts';
+  }
+
+  @override
+  String get aiActivityFoodReady => 'Hasil makanan siap — ketuk untuk lihat';
+
+  @override
+  String get aiActivityAdviceReady =>
+      'Saran pengeluaran siap — ketuk untuk lihat';
+
+  @override
+  String get aiScanInProgress =>
+      'Foto terakhirmu masih dianalisis — progresnya ada di atas layar.';
+
+  @override
   String get aiScanSaved => 'Hasil pindai disimpan!';
 
   @override
@@ -134,18 +154,6 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get aiAnalyzingTitle => 'Menganalisis makananmu...';
-
-  @override
-  String get aiAnalyzingTipIngredients => 'Mengenali bahan...';
-
-  @override
-  String get aiAnalyzingTipPortions => 'Memperkirakan porsi...';
-
-  @override
-  String get aiAnalyzingTipNutrition => 'Menghitung nutrisi...';
-
-  @override
-  String get aiAnalyzingTipAlmostDone => 'Hampir selesai...';
 
   @override
   String get aiExperimentalTitle => 'Fitur AI Eksperimental';
@@ -891,6 +899,9 @@ class AppLocalizationsId extends AppLocalizations {
   String get moneyKeypadBackspace => 'Hapus';
 
   @override
+  String get moneyKeypadNext => 'Lanjut';
+
+  @override
   String get moneyDateChange => 'Ganti';
 
   @override
@@ -958,6 +969,14 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get moneySetBudget => 'Atur anggaran';
+
+  @override
+  String moneyBudgetShowMore(int count) {
+    return 'Lihat $count lagi';
+  }
+
+  @override
+  String get moneyBudgetShowLess => 'Tampilkan lebih sedikit';
 
   @override
   String get moneyBudgetHeading => 'Anggaran';
@@ -1336,7 +1355,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get moneyAdviceInProgress =>
-      'Saranmu masih diproses — kamu akan dapat notifikasi kalau gagal.';
+      'Saranmu masih diproses — progresnya ada di atas layar.';
 
   @override
   String recapBannerTitle(String month) {
@@ -1564,6 +1583,23 @@ class AppLocalizationsId extends AppLocalizations {
   String settingsRecapSoFar(String month) {
     return '$month (sejauh ini)';
   }
+
+  @override
+  String get settingsGlassStyleTitle => 'Gaya kaca';
+
+  @override
+  String get settingsGlassStyleLiquid => 'Kaca cair';
+
+  @override
+  String get settingsGlassStyleLiquidBody =>
+      'Kaca yang membiaskan, dengan animasi yang lentur dan halus';
+
+  @override
+  String get settingsGlassStyleFrosted => 'Kaca buram';
+
+  @override
+  String get settingsGlassStyleFrostedBody =>
+      'Tampilan blur klasik, lebih ringan di HP lama';
 
   @override
   String get settingsBackgroundTitle => 'Latar belakang';

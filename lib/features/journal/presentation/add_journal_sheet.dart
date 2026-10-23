@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -93,11 +91,11 @@ class _AddJournalSheetState extends ConsumerState<AddJournalSheet> {
     final notifier = ref.read(journalEntriesProvider.notifier);
     final uploadedIds = <String>[];
     for (final photo in _newPhotos) {
-      final bytes = await File(photo.path).readAsBytes();
+      final bytes = await photo.readAsBytes();
       uploadedIds.add(
         await notifier.uploadPhoto(
           bytes: bytes,
-          mimeType: journalPhotoMimeType(photo.path),
+          mimeType: photo.mimeType ?? journalPhotoMimeType(photo.name),
         ),
       );
     }

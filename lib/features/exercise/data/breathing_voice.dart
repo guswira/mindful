@@ -4,6 +4,7 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/l10n/l10n.dart';
+import '../../../core/platform/platform_features.dart';
 
 part 'breathing_voice.g.dart';
 
@@ -49,7 +50,7 @@ class BreathingVoice {
     }
     await _tts.setLanguage(locale == 'id' ? 'id-ID' : 'en-US');
     await _tts.setSpeechRate(0.45);
-    if (defaultTargetPlatform == TargetPlatform.iOS) {
+    if (isNativeIOS) {
       await _tts.setSharedInstance(true);
       await _tts.setIosAudioCategory(IosTextToSpeechAudioCategory.playback, [
         IosTextToSpeechAudioCategoryOptions.mixWithOthers,

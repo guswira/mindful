@@ -5,15 +5,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:home_widget/home_widget.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../features/ai/presentation/ai_tab.dart';
 import '../../features/auth/domain/auth_state.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/splash_screen.dart';
 import '../../features/exercise/domain/breathing_exercise.dart';
-import '../../features/exercise/presentation/breathing_session_screen.dart';
-import '../../features/exercise/presentation/exercise_activity_screen.dart';
+import '../../features/exercise/presentation/breathing_session_screen.dart'
+    deferred as breathing_session;
+import '../../features/exercise/presentation/exercise_activity_screen.dart'
+    deferred as exercise_activity;
 import '../../features/habits/data/habit_reminders_controller.dart';
 import '../../features/habits/presentation/habit_detail_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
@@ -24,11 +25,21 @@ import '../../features/journal/presentation/journal_tab.dart';
 import '../../features/money/presentation/money_tab.dart';
 import '../../features/plan/presentation/plan_tab.dart';
 import '../../features/recap/domain/recap_window.dart';
-import '../../features/recap/presentation/monthly_recap_screen.dart';
+import '../../features/recap/presentation/monthly_recap_screen.dart'
+    deferred as monthly_recap;
 import '../../features/settings/data/journal_reminders_controller.dart';
-import '../../features/settings/presentation/settings_screen.dart';
+import '../../features/settings/presentation/settings_screen.dart'
+    deferred as settings;
 import '../../features/tasks/data/task_reminders_controller.dart';
+import '../../features/exercise/presentation/exercise_providers.dart';
+import '../../features/habits/presentation/habit_tab.dart';
+import '../../features/journal/data/journal_entries_controller.dart';
+import '../../features/money/presentation/money_providers.dart';
+import '../../features/tasks/presentation/task_tab.dart';
+import '../../shared/services/quote_service.dart';
 import '../../shared/services/notification_service.dart';
+import '../../shared/web/web_loader.dart';
+import '../../shared/widgets/deferred_screen.dart';
 import '../platform/platform_features.dart';
 import 'sheet_navigation.dart';
 
@@ -39,19 +50,24 @@ export 'sheet_navigation.dart'
         openAddMoneySheet,
         openAddTaskSheet;
 
-part 'router.g.dart';
-
 const String _splashLocation = '/splash';
 const String _loginLocation = '/login';
 const String _homeLocation = '/home/today';
+
+/// The app's one [GoRouter], kept alive for the app's lifetime.
+///
+/// Written by hand rather than with `@Riverpod`: this file imports every
+/// screen, and riverpod_generator's analyzer (pinned by Riverpod 2) can't
+/// read the newer Dart syntax in liquid_glass_widgets, which those screens
+/// pull in — see build.yaml.
+final appRouterProvider = Provider<GoRouter>(_appRouter);
 
 /// go_router config — routes from SPEC.md Navigation section.
 ///
 /// Redirect: unauthenticated users are always sent to [_loginLocation].
 /// Redirect: authenticated users hitting [_loginLocation] or
 /// [_splashLocation] are sent to [_homeLocation].
-@Riverpod(keepAlive: true)
-GoRouter appRouter(Ref ref) {
+GoRouter _appRouter(Ref ref) {
   final authListenable = _AuthChangeNotifier(ref);
   ref.onDispose(authListenable.dispose);
 
@@ -158,30 +174,46 @@ GoRouter appRouter(Ref ref) {
       ),
       GoRoute(
         path: '/exercise/activity',
-        builder: (context, state) => const ExerciseActivityScreen(),
+        builder: (context, state) => DeferredScreen(
+          load: exercise_activity.loadLibrary,
+          builder: (_) => exercise_activity.ExerciseActivityScreen(),
+        ),
       ),
       GoRoute(
         path: '/exercise/breathing/:exercise',
-        builder: (context, state) => BreathingSessionScreen(
-          exercise:
-              BreathingExercise.fromName(state.pathParameters['exercise']) ??
-              BreathingExercise.equal,
+        builder: (context, state) => DeferredScreen(
+          load: breathing_session.loadLibrary,
+          builder: (_) => breathing_session.BreathingSessionScreen(
+            exercise:
+                BreathingExercise.fromName(state.pathParameters['exercise']) ??
+                BreathingExercise.equal,
+          ),
         ),
       ),
       GoRoute(
         path: '/settings',
-        builder: (context, state) => const SettingsScreen(),
+        builder: (context, state) => DeferredScreen(
+          load: settings.loadLibrary,
+          builder: (_) => settings.SettingsScreen(),
+        ),
       ),
       GoRoute(
         path: '/recap/:month',
-        builder: (context, state) => MonthlyRecapScreen(
-          month:
-              parseRecapMonthKey(state.pathParameters['month']) ??
-              previousMonth(DateTime.now()),
+        builder: (context, state) => DeferredScreen(
+          load: monthly_recap.loadLibrary,
+          builder: (_) => monthly_recap.MonthlyRecapScreen(
+            month:
+                parseRecapMonthKey(state.pathParameters['month']) ??
+                previousMonth(DateTime.now()),
+          ),
         ),
       ),
     ],
   );
+
+  if (isWebPlatform) {
+    _hideWebLoaderOnceOffSplash(router, ref);
+  }
 
   ref.listen(notificationTapProvider, (previous, next) {
     final payload = next.valueOrNull;
@@ -229,6 +261,56 @@ GoRouter appRouter(Ref ref) {
   }
 
   return router;
+}
+
+/// Keeps web/index.html's loader up through the splash (the auth check)
+/// and fades it out only after the first real screen — login or home —
+/// has painted, so the page goes loader → screen with no spinner between.
+void _hideWebLoaderOnceOffSplash(GoRouter router, Ref ref) {
+  final delegate = router.routerDelegate;
+  void onRouteChanged() {
+    final path = delegate.currentConfiguration.uri.path;
+    if (path.isEmpty || path == _splashLocation) {
+      return;
+    }
+    delegate.removeListener(onRouteChanged);
+    // After the frame that draws the new route, not before it.
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => unawaited(_hideWebLoaderWhenSettled(ref, path)),
+    );
+  }
+
+  delegate.addListener(onRouteChanged);
+}
+
+/// The longest a signed-in launch holds the loader for Home's data — past
+/// it, the screen shows with whatever has loaded.
+const Duration _homeSettleTimeout = Duration(milliseconds: 1500);
+
+/// On a Home tab, waits for the cached (Hive) data its cards show — so the
+/// screen fades in complete instead of cards popping in behind or right
+/// after the fade — then hides the loader after the frame that draws it.
+/// Network-only data (food scans, the Supabase sync) isn't waited for.
+///
+/// Runs after Home's first frame, when its widgets already watch these
+/// (auto-dispose) providers — reading them earlier would load each twice.
+Future<void> _hideWebLoaderWhenSettled(Ref ref, String path) async {
+  if (path.startsWith('/home')) {
+    Future<void> settled(Future<Object?> future) =>
+        future.then<void>((_) {}, onError: (Object _) {});
+    await Future.wait([
+      settled(ref.read(taskTabControllerProvider.future)),
+      settled(ref.read(habitTabControllerProvider.future)),
+      settled(ref.read(activeBudgetsProvider.future)),
+      settled(ref.read(remainingBudgetProvider.future)),
+      settled(ref.read(dailyQuoteProvider.future)),
+      settled(ref.read(journalEntriesProvider.future)),
+      settled(ref.read(breathingSessionsProvider.future)),
+    ]).timeout(_homeSettleTimeout, onTimeout: () => const []);
+    // Let the cards rebuild with that data before revealing them.
+    await WidgetsBinding.instance.endOfFrame;
+  }
+  hideWebLoader();
 }
 
 String? _redirect(AuthState authState, GoRouterState routerState) {

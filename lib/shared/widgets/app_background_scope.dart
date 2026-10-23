@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 /// Hands the user's custom background photo down to every
@@ -11,7 +14,8 @@ class AppBackgroundScope extends InheritedWidget {
     super.key,
   });
 
-  /// Absolute path of the custom photo; null for the default background.
+  /// Absolute path of the custom photo (a `data:` URI on web); null for
+  /// the default background.
   final String? imagePath;
 
   /// The nearest scope's [imagePath], or null if there's none.
@@ -23,3 +27,8 @@ class AppBackgroundScope extends InheritedWidget {
   bool updateShouldNotify(AppBackgroundScope oldWidget) =>
       imagePath != oldWidget.imagePath;
 }
+
+/// The image for a custom background [path] from [AppBackgroundScope] — a
+/// file on device, a `data:` URI on web (see CustomBackgroundRepository).
+ImageProvider backgroundImageProvider(String path) =>
+    kIsWeb ? NetworkImage(path) : FileImage(File(path));

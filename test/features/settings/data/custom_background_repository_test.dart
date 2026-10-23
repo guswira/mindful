@@ -1,7 +1,10 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hive_ce/hive.dart';
+import 'package:image_picker/image_picker.dart';
 
 import 'package:mindful/features/settings/data/custom_background_repository.dart';
 
@@ -24,7 +27,7 @@ void main() {
   });
 
   test('save copies the photo in and readPath finds it again', () async {
-    final path = await repository.save(picked.path);
+    final path = await repository.save(XFile(picked.path));
 
     expect(path, startsWith('${docs.path}/backgrounds/'));
     expect(path, endsWith('.jpg'));
@@ -33,10 +36,10 @@ void main() {
   });
 
   test('saving again replaces and deletes the previous copy', () async {
-    final first = await repository.save(picked.path);
+    final first = await repository.save(XFile(picked.path));
     // Distinct timestamp-based file name for the second copy.
     await Future<void>.delayed(const Duration(milliseconds: 5));
-    final second = await repository.save(picked.path);
+    final second = await repository.save(XFile(picked.path));
 
     expect(second, isNot(first));
     expect(File(first).existsSync(), isFalse);
@@ -44,7 +47,7 @@ void main() {
   });
 
   test('clear resets to default and deletes the copy', () async {
-    final path = await repository.save(picked.path);
+    final path = await repository.save(XFile(picked.path));
     await repository.clear();
 
     expect(await repository.readPath(), isNull);
@@ -52,9 +55,48 @@ void main() {
   });
 
   test('a saved photo that has gone missing reads as no background', () async {
-    final path = await repository.save(picked.path);
+    final path = await repository.save(XFile(picked.path));
     File(path).deleteSync();
 
     expect(await repository.readPath(), isNull);
+  });
+
+  group('on web', () {
+    late Directory hiveDir;
+    late CustomBackgroundRepository webRepository;
+
+    setUp(() {
+      hiveDir = Directory.systemTemp.createTempSync('mindful_bg_hive');
+      Hive.init(hiveDir.path);
+      webRepository = CustomBackgroundRepository(
+        isWeb: true,
+        webBox: () =>
+            Hive.openBox<String>(CustomBackgroundRepository.webBoxName),
+      );
+    });
+
+    tearDown(() async {
+      await Hive.deleteFromDisk();
+      hiveDir.deleteSync(recursive: true);
+    });
+
+    test('keeps the photo as a data URI, with no file system', () async {
+      final photo = XFile.fromData(
+        Uint8List.fromList([1, 2, 3]),
+        mimeType: 'image/png',
+      );
+
+      final uri = await webRepository.save(photo);
+
+      expect(uri, 'data:image/png;base64,AQID');
+      expect(await webRepository.readPath(), uri);
+    });
+
+    test('clear goes back to the default background', () async {
+      await webRepository.save(XFile.fromData(Uint8List.fromList([1])));
+      await webRepository.clear();
+
+      expect(await webRepository.readPath(), isNull);
+    });
   });
 }

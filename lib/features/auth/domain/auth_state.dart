@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:hive/hive.dart';
+import 'package:hive_ce/hive.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -42,7 +42,13 @@ class AuthNotifier extends _$AuthNotifier {
   Future<void> _restoreSession() async {
     final repository = ref.read(authRepositoryProvider);
     try {
-      await repository.initialize();
+      // Web restores the session from Supabase alone. google_sign_in is
+      // only there for Settings → Drive, and initializing it downloads
+      // Google's sign-in script (~100 KB, ~1s) — so on web it's left to
+      // Drive and sign-out, which initialize it on first use.
+      if (!kIsWeb) {
+        await repository.initialize();
+      }
       final user = await repository.attemptSilentSignIn();
       if (user == null) {
         state = const AuthState.unauthenticated();
@@ -60,12 +66,22 @@ class AuthNotifier extends _$AuthNotifier {
   /// Starts an interactive Google sign-in, exchanged for a Supabase
   /// session. Throws on cancellation or failure; [state] is left unchanged
   /// so the caller can retry.
-  Future<void> signIn() async {
+  ///
+  /// Returns false when sign-in continues outside the app — on web the page
+  /// redirects to Google, and the session is restored on the way back.
+  Future<bool> signIn() async {
     final repository = ref.read(authRepositoryProvider);
-    await repository.initialize();
+    // Web signs in through Supabase's redirect, not google_sign_in.
+    if (!kIsWeb) {
+      await repository.initialize();
+    }
     final user = await repository.signIn();
+    if (user == null) {
+      return false;
+    }
     state = AuthState.authenticated(user);
     _syncOnOpen();
+    return true;
   }
 
   /// Kicks off a best-effort Supabase sync in the background — the cache

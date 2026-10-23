@@ -1,12 +1,12 @@
 {
-    "name": "mindful",
-    "short_name": "mindful",
+    "name": "Mindful",
+    "short_name": "Mindful",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
-    "orientation": "portrait-primary",
+    "background_color": "#0A1628",
+    "theme_color": "#0A1628",
+    "description": "Daily journaling, routines, tasks and money, in one calm place.",
+    "orientation": "any",
     "prefer_related_applications": false,
     "icons": [
         {

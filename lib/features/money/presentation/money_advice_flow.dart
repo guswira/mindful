@@ -5,27 +5,32 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/glass_theme.dart';
+import '../../../shared/services/ai_activity.dart';
 import '../../../shared/services/gemini_service.dart';
 import '../../../shared/services/notification_service.dart';
 import '../../../shared/widgets/glass_bottom_sheet.dart';
 import '../../ai/domain/food_scan_exception.dart';
 import '../../ai/presentation/food_scan_retry.dart';
 import '../data/money_repository.dart';
+import '../domain/money_advice.dart';
 import 'money_advice_sheet.dart';
 import 'money_advice_summary.dart';
+import 'money_period.dart';
 
 /// Whether a [requestMoneyAdvice] run is still going — possibly minutes
-/// into its retries, long after its loading sheet was dismissed. A second
-/// run would fight the first over the same notification id.
+/// into its retries. A second run would fight the first over the same
+/// notification id.
 bool _inFlight = false;
 
-/// Sends every money entry to Gemini and shows the advice — the same
-/// flow as [AITab]'s food scan: a non-dismissible loading sheet plus a
-/// progress notification (id 4003), auto-retrying a busy Gemini response
-/// per [runWithRetry]. The sheet is dismissed on the first retry (the
-/// notification carries progress from there); a final failure after that
-/// also leaves a failure notification with a "Retry" action. See SPEC.md
-/// Money Flow Feature AI Advice.
+/// Sends the money entries of the Money tab's selected period
+/// ([moneyPeriodProvider] — e.g. This Month → just this month's) to Gemini
+/// and offers the advice — the same
+/// non-blocking flow as the food scan's: the AI activity pill at the top of the
+/// screen shows it's running (and any retry), then "ready — tap to view";
+/// a progress notification (id 4003) tracks it in the background, and a
+/// final failure after a retry also leaves a failure notification with a
+/// "Retry" action. A busy or slow Gemini is retried per [runWithRetry].
+/// See SPEC.md Money Flow Feature AI Advice.
 ///
 /// Holds on to the root [NavigatorState], [ScaffoldMessengerState] and
 /// [ProviderContainer] rather than [context] itself, since the retries
@@ -56,7 +61,10 @@ Future<void> _run({
   required ScaffoldMessengerState messenger,
 }) async {
   final repository = await container.read(moneyRepositoryProvider.future);
-  final entries = repository.getEntries();
+  final range = container
+      .read(moneyPeriodProvider)
+      .rangeEndingAt(DateTime.now());
+  final entries = repository.getEntries(range: range);
   if (entries.isEmpty) {
     messenger.showSnackBar(
       SnackBar(content: Text(currentL10n.moneyAdviceNoEntries)),
@@ -66,39 +74,27 @@ Future<void> _run({
   final summary = buildMoneyAdviceSummary(
     entries,
     await repository.getCurrency(),
+    range: range,
   );
   if (!navigator.mounted) {
     return;
   }
 
-  unawaited(
-    showGlassBottomSheet<void>(
-      context: navigator.context,
-      isDismissible: false,
-      builder: (_) => const MoneyAdviceLoadingSheet(),
-    ),
-  );
-  var sheetOpen = true;
-  void closeSheet() {
-    if (sheetOpen && navigator.mounted) {
-      navigator.pop();
-    }
-    sheetOpen = false;
-  }
-
+  final activity = container.read(aiActivityProvider.notifier);
+  final id = activity.start(AiActivityKind.moneyAdvice);
   final notifications = await container.read(
     notificationServiceProvider.future,
   );
   await notifications.showMoneyAdviceProgress(currentL10n.moneyAdviceLoading);
 
+  var retried = false;
   try {
     final advice = await runWithRetry(
       attempt: () =>
           container.read(geminiServiceProvider).adviseOnMoney(summary),
       onRetry: (attemptNumber) async {
-        // Free up the UI once we know this will take a while — the
-        // notification carries progress from here instead.
-        closeSheet();
+        retried = true;
+        activity.retrying(id, attemptNumber, FoodScanRetryPolicy.maxAttempts);
         await notifications.showMoneyAdviceProgress(
           currentL10n.aiNotifRetryingBody(
             attemptNumber,
@@ -108,27 +104,30 @@ Future<void> _run({
       },
     );
     await notifications.cancelMoneyAdviceNotification();
-    closeSheet();
-    if (navigator.mounted) {
-      unawaited(
-        showGlassBottomSheet<void>(
-          context: navigator.context,
-          builder: (_) => MoneyAdviceSheet(advice: advice),
-        ),
-      );
-    }
+    activity.ready(id, () => _showAdvice(navigator, advice));
   } on FoodScanException catch (error) {
     final message = foodScanMessage(error);
-    // Once the sheet's been dismissed for a retry, the user may well not
-    // be watching any more — leave a notification they can act on too.
-    final wasDismissed = !sheetOpen;
+    activity.finish(id);
     await notifications.cancelMoneyAdviceNotification();
-    if (wasDismissed) {
+    // After a retry the user has likely moved on (or left the app) —
+    // leave a notification they can act on too.
+    if (retried) {
       await notifications.showMoneyAdviceFailed(message);
     }
-    closeSheet();
     _showError(messenger, navigator, message);
   }
+}
+
+void _showAdvice(NavigatorState navigator, MoneyAdvice advice) {
+  if (!navigator.mounted) {
+    return;
+  }
+  unawaited(
+    showGlassBottomSheet<void>(
+      context: navigator.context,
+      builder: (_) => MoneyAdviceSheet(advice: advice),
+    ),
+  );
 }
 
 void _showError(

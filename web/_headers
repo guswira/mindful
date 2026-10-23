@@ -1,0 +1,16 @@
+# Cloudflare Pages / Netlify. Hashed build output and assets can be cached
+# for long; the entry files must not be, so a deploy shows up on next load.
+/index.html
+  Cache-Control: no-cache
+/flutter_bootstrap.js
+  Cache-Control: no-cache
+/flutter_service_worker.js
+  Cache-Control: no-cache
+/version.json
+  Cache-Control: no-cache
+/manifest.json
+  Cache-Control: no-cache
+/assets/*
+  Cache-Control: public, max-age=86400
+/canvaskit/*
+  Cache-Control: public, max-age=31536000, immutable

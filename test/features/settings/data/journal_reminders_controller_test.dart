@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
 import 'package:mindful/core/l10n/app_language.dart';
+import 'package:mindful/core/theme/glass_style.dart';
 import 'package:mindful/features/settings/data/journal_reminders_controller.dart';
 import 'package:mindful/features/settings/data/settings_repository.dart';
 import 'package:mindful/shared/services/notification_service.dart';
@@ -32,6 +33,12 @@ class _FakeSettingsRepository implements SettingsRepository {
 
   @override
   Future<void> writeAppLanguage(AppLanguage language) async {}
+
+  @override
+  Future<GlassStyle?> readGlassStyle() async => GlassStyle.liquid;
+
+  @override
+  Future<void> writeGlassStyle(GlassStyle style) async {}
 }
 
 class _MockNotificationService extends Mock implements NotificationService {}

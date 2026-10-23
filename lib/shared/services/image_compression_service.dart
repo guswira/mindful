@@ -1,8 +1,6 @@
-import 'dart:io';
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../core/l10n/l10n.dart';
@@ -16,47 +14,46 @@ class ImageCompressionService {
   const ImageCompressionService();
 
   static const int _maxBytes = 4 * 1024 * 1024;
+  static const int _shortSide = 768;
 
-  /// Compresses [original] to at most 1024x1024, quality 75 — retried at
-  /// quality 50 if that first pass is still over 4MB (a large enough
+  /// Scales [original] down so its short side is 768px, quality 75 — a
+  /// food photo needs no more detail, and every extra KB is base64'd
+  /// through the proxy to Gemini. Retried at quality 50 if that first pass is still over 4MB (a large enough
   /// original can still clear 4MB at quality 75).
-  Future<File> compress(File original) async {
-    final dir = await getTemporaryDirectory();
-    final targetPath =
-        '${dir.path}/${DateTime.now().millisecondsSinceEpoch}_compressed.jpg';
-
-    var result = await FlutterImageCompress.compressAndGetFile(
-      original.path,
-      targetPath,
-      quality: 75,
-      minWidth: 1024,
-      minHeight: 1024,
+  ///
+  /// Works on bytes rather than files so it also runs on web, which has no
+  /// file system.
+  Future<Uint8List> compress(Uint8List original) async {
+    final stopwatch = Stopwatch()..start();
+    var result = await _compress(original, quality: 75);
+    if (result.length > _maxBytes) {
+      result = await _compress(original, quality: 50);
+    }
+    debugPrint(
+      'Food photo compressed in ${stopwatch.elapsedMilliseconds}ms '
+      '(${original.length ~/ 1024}KB → ${result.length ~/ 1024}KB)',
     );
-    if (result == null) {
+    return result;
+  }
+
+  Future<Uint8List> _compress(
+    Uint8List original, {
+    required int quality,
+  }) async {
+    try {
+      return await FlutterImageCompress.compressWithList(
+        original,
+        quality: quality,
+        minWidth: _shortSide,
+        minHeight: _shortSide,
+      );
+    } catch (error) {
+      debugPrint('Food photo compression failed: $error');
       throw FoodScanException(
         currentL10n.aiErrorCompressFailed,
         FoodScanErrorType.unknown,
       );
     }
-
-    if (await result.length() > _maxBytes) {
-      final retried = await FlutterImageCompress.compressAndGetFile(
-        original.path,
-        targetPath,
-        quality: 50,
-        minWidth: 1024,
-        minHeight: 1024,
-      );
-      if (retried == null) {
-        throw FoodScanException(
-          currentL10n.aiErrorCompressFailed,
-          FoodScanErrorType.unknown,
-        );
-      }
-      result = retried;
-    }
-
-    return File(result.path);
   }
 }
 

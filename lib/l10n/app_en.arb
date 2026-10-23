@@ -7,6 +7,7 @@
   "commonSave": "Save",
   "commonClose": "Close",
   "commonRetry": "Retry",
+  "commonPageLoadFailed": "Couldn't load this page. Check your connection.",
   "commonDone": "Done",
   "commonViewAll": "view all",
   "commonToday": "Today",
@@ -40,6 +41,23 @@
       }
     }
   },
+  "aiActivityRetrying": "{task} · attempt {attempt}/{maxAttempts}",
+  "@aiActivityRetrying": {
+    "placeholders": {
+      "task": {
+        "type": "String"
+      },
+      "attempt": {
+        "type": "int"
+      },
+      "maxAttempts": {
+        "type": "int"
+      }
+    }
+  },
+  "aiActivityFoodReady": "Food result ready — tap to view",
+  "aiActivityAdviceReady": "Spending advice ready — tap to view",
+  "aiScanInProgress": "Still analyzing your last photo — it's shown at the top of the screen.",
   "aiScanSaved": "Scan saved!",
   "aiMainIngredients": "Main ingredients",
   "aiResultDisclaimer": "AI estimates may vary based on portion size, preparation method, and ingredients.",
@@ -57,10 +75,6 @@
   "aiCaloriesUnit": "calories",
   "aiPerServing": "per serving",
   "aiAnalyzingTitle": "Analyzing your food...",
-  "aiAnalyzingTipIngredients": "Identifying ingredients...",
-  "aiAnalyzingTipPortions": "Estimating portions...",
-  "aiAnalyzingTipNutrition": "Calculating nutrition...",
-  "aiAnalyzingTipAlmostDone": "Almost done...",
   "aiExperimentalTitle": "Experimental AI Features",
   "aiExperimentalBody": "AI estimates may not be accurate. Use as a guide only — not medical advice.",
   "aiFoodCheckerTitle": "Food Calorie Checker",
@@ -475,6 +489,7 @@
   "moneyTypeToggleSpending": "Spending",
   "moneyTypeToggleIncome": "Income",
   "moneyKeypadBackspace": "Delete",
+  "moneyKeypadNext": "Next",
   "moneyDateChange": "Change",
   "moneyTypeSpending": "Spending",
   "moneyTypeIncome": "Income",
@@ -504,6 +519,15 @@
   "moneyBudgetIntroTitle": "Set a budget",
   "moneyBudgetIntroBody": "Choose a daily, weekly, monthly or yearly amount. Mindful shows what's left as you spend, so you know where you stand before the period runs out.",
   "moneySetBudget": "Set budget",
+  "moneyBudgetShowMore": "Show {count} more",
+  "@moneyBudgetShowMore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "moneyBudgetShowLess": "Show less",
   "moneyBudgetHeading": "Budget",
   "moneyBudgetSettingsTooltip": "Budget settings",
   "moneyBudgetOf": "of {currency} {amount}",
@@ -775,7 +799,7 @@
   "notifMoneyAdviceFailedTitle": "Spending advice failed",
   "notifMoneyAdviceResultChannelName": "AI advice result",
   "notifMoneyAdviceResultChannelDescription": "Spending advice that failed after retrying",
-  "moneyAdviceInProgress": "Still working on your advice — you'll get a notification if it fails.",
+  "moneyAdviceInProgress": "Still working on your advice — it's shown at the top of the screen.",
   "recapBannerTitle": "Your {month} recap is ready",
   "@recapBannerTitle": {
     "placeholders": {
@@ -900,6 +924,11 @@
       }
     }
   },
+  "settingsGlassStyleTitle": "Glass style",
+  "settingsGlassStyleLiquid": "Liquid glass",
+  "settingsGlassStyleLiquidBody": "Refracting glass with fluid, springy animations",
+  "settingsGlassStyleFrosted": "Frosted glass",
+  "settingsGlassStyleFrostedBody": "The classic blurred look, lighter on older phones",
   "settingsBackgroundTitle": "Background",
   "settingsBackgroundDefault": "Default",
   "settingsBackgroundCustom": "Custom photo",

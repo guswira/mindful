@@ -1,20 +1,24 @@
-import 'dart:io' show Platform;
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
+import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:home_widget/home_widget.dart';
-import 'package:intl/date_symbol_data_local.dart';
+import 'package:liquid_glass_widgets/liquid_glass_widgets.dart' as lg;
 import 'package:quick_actions/quick_actions.dart';
 
 import 'app.dart';
 import 'core/l10n/app_language.dart';
 import 'core/l10n/app_language_controller.dart';
+import 'core/l10n/date_symbols_subset.dart';
 import 'core/l10n/l10n.dart';
 import 'core/platform/platform_features.dart';
 import 'core/router/app_intent_actions.dart';
 import 'core/router/router.dart';
+import 'core/theme/glass_style.dart';
+import 'core/theme/glass_style_controller.dart';
 import 'features/habits/data/habit_reminders_controller.dart';
 import 'features/habits/presentation/widget_habit_log_sync.dart';
 import 'features/settings/data/journal_reminders_controller.dart';
@@ -25,15 +29,20 @@ import 'shared/services/widget_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load();
-  await const SupabaseService().initialize();
-  await Hive.initFlutter();
-  // Date symbols for every supported locale, so DateFormat works in
-  // Bahasa even outside a widget (notifications, the home widget).
-  await initializeDateFormatting();
+  // Web: /home/today rather than /#/home/today (no-op elsewhere). The host
+  // rewrites every path to index.html — see web/_redirects.
+  usePathUrlStrategy();
+  // Independent of each other, so they run side by side — the first
+  // frame waits for the slowest one, not their sum (it's most noticeable
+  // on web, where every step is a fetch or an IndexedDB/WebCrypto call).
+  await Future.wait([_initializeSupabase(), Hive.initFlutter()]);
+  // Date symbols for the app's languages, so DateFormat works in Bahasa
+  // even outside a widget (notifications, the home widget). Synchronous —
+  // the data is bundled.
+  initializeAppDateFormatting();
   // Before anything touches home_widget — building the router below asks
   // it for the launching widget URL, which throws on iOS without a group.
-  if (Platform.isIOS) {
+  if (isNativeIOS) {
     await HomeWidget.setAppGroupId(WidgetProviderNames.iOSAppGroupId);
   }
 
@@ -41,8 +50,19 @@ Future<void> main() async {
   // ProviderScope to create, so the quick_actions callback below can push
   // to the exact GoRouter instance the running app uses.
   final container = ProviderContainer();
-  await container.read(appLanguageControllerProvider.notifier).restore();
+  await Future.wait([
+    container.read(appLanguageControllerProvider.notifier).restore(),
+    container.read(glassStyleControllerProvider.notifier).restore(),
+  ]);
   _applyLanguage(container.read(appLanguageControllerProvider));
+  // Loads the liquid glass shaders (disk → RAM only, no GPU work) before
+  // the first frame, so the tab bar and cards don't flash unglazed. Only
+  // in liquid style: frosted (the web default) never draws them, and
+  // switching to liquid in Settings loads them then
+  // (GlassStyleController.select).
+  if (container.read(glassStyleControllerProvider) == GlassStyle.liquid) {
+    await lg.LiquidGlassWidgets.initialize();
+  }
   final router = container.read(appRouterProvider);
 
   const quickActions = QuickActions();
@@ -70,7 +90,7 @@ Future<void> main() async {
   }
   // iOS App Intents ("Add spending") — for Shortcuts, Siri and Back Tap.
   listenForAppIntentActions(router);
-  if (Platform.isIOS) {
+  if (isNativeIOS) {
     // Routine taps on the iOS lock screen widget, queued while closed.
     listenForWidgetHabitLogs(container);
   }
@@ -96,7 +116,26 @@ Future<void> main() async {
     );
   });
 
-  runApp(UncontrolledProviderScope(container: container, child: const App()));
+  runApp(
+    lg.LiquidGlassWidgets.wrap(
+      // MaterialApp: glass follows its (always dark) theme, not the OS.
+      brightnessResolver: Theme.maybeBrightnessOf,
+      // Benchmarks the device and steps glass quality down on slow or
+      // throttling hardware (budget Android) instead of dropping frames.
+      adaptiveQuality: true,
+      child: UncontrolledProviderScope(
+        container: container,
+        child: const App(),
+      ),
+    ),
+  );
+}
+
+/// Supabase needs `.env`'s URL and key, so it waits for that load — but
+/// nothing else in main() has to wait for either.
+Future<void> _initializeSupabase() async {
+  await dotenv.load();
+  await const SupabaseService().initialize();
 }
 
 /// Points [currentL10n] at [language] (or the device's language) ahead of

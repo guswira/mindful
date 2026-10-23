@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:hive/hive.dart';
+import 'package:hive_ce/hive.dart';
 import 'package:mocktail/mocktail.dart';
 
 import 'package:mindful/core/theme/app_theme.dart';
@@ -162,6 +162,36 @@ void main() {
       expect(find.byType(AmountKeypad), findsNothing);
     },
   );
+
+  testWidgets('the note sits right under the amount', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(400, 1200));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(buildSheet());
+    await tester.pumpAndSettle();
+
+    final noteY = tester.getCenter(find.text('Add a note...')).dy;
+    // Above the category chips (the first spending category is Food).
+    expect(noteY, lessThan(tester.getCenter(find.text('Food')).dy));
+  });
+
+  testWidgets('the keypad\'s Next key moves on to the note', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(400, 1200));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(buildSheet());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Next'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AmountKeypad), findsNothing);
+    final note = tester.widget<TextField>(
+      find.ancestor(
+        of: find.text('Add a note...'),
+        matching: find.byType(TextField),
+      ),
+    );
+    expect(note.focusNode?.hasFocus, isTrue);
+  });
 
   testWidgets('pre-fills fields and shows "Save changes" when editing', (
     tester,

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -23,17 +24,27 @@ class AuthRepository {
   // (e.g. in widget tests that never reach a signed-in state).
   SupabaseClient get _supabase => _supabaseOverride ?? Supabase.instance.client;
 
-  bool _initialized = false;
+  Future<void>? _initializing;
 
   /// Must complete before any other method on this repository is called.
-  Future<void> initialize() async {
-    if (_initialized) {
-      return;
-    }
+  /// Safe to call concurrently and repeatedly — every caller shares one
+  /// initialization (google_sign_in allows only one); a failed one is
+  /// retried on the next call.
+  Future<void> initialize() => _initializing ??= _initializeGoogleSignIn()
+      .catchError((Object error, StackTrace stackTrace) {
+        _initializing = null;
+        Error.throwWithStackTrace(error, stackTrace);
+      });
+
+  Future<void> _initializeGoogleSignIn() async {
+    // google_sign_in's web plugin takes the Web client ID as `clientId`
+    // and doesn't support `serverClientId`. On web it's only used for
+    // Drive's scope request in Settings — sign-in itself goes through
+    // Supabase (see [signIn]).
     await GoogleSignIn.instance.initialize(
-      serverClientId: googleServerClientId,
+      clientId: kIsWeb ? googleServerClientId : null,
+      serverClientId: kIsWeb ? null : googleServerClientId,
     );
-    _initialized = true;
   }
 
   /// Restores a previous session with no user interaction, returning null
@@ -44,7 +55,19 @@ class AuthRepository {
 
   /// Starts an interactive Google sign-in, then exchanges the Google ID
   /// token for a Supabase session.
-  Future<User> signIn() async {
+  ///
+  /// Returns null on web, where it only starts Supabase's Google redirect:
+  /// google_sign_in v7 has no `authenticate()` in a browser, so the page
+  /// leaves for Google and comes back with the session in its URL, which
+  /// `Supabase.initialize` picks up before [attemptSilentSignIn] runs.
+  Future<User?> signIn() async {
+    if (kIsWeb) {
+      await _supabase.auth.signInWithOAuth(
+        OAuthProvider.google,
+        redirectTo: Uri.base.origin,
+      );
+      return null;
+    }
     final account = await GoogleSignIn.instance.authenticate();
     final idToken = account.authentication.idToken;
     if (idToken == null) {
@@ -64,6 +87,7 @@ class AuthRepository {
   /// Signs out of both Google and Supabase. Drive's connection (if any) is
   /// left untouched — it's managed separately in Settings.
   Future<void> signOut() async {
+    await initialize();
     await GoogleSignIn.instance.signOut();
     await _supabase.auth.signOut();
   }

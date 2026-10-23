@@ -7,6 +7,7 @@ import '../../../shared/widgets/glass_bottom_sheet.dart';
 import '../domain/habit.dart';
 import 'add_habit_sheet.dart';
 import 'habit_detail_body.dart';
+import 'habit_detail_controller.dart';
 import 'habit_detail_screen.dart';
 import 'habit_icon.dart';
 import 'habit_providers.dart';

@@ -34,7 +34,9 @@ void main() {
     ),
   );
 
-  testWidgets('lays four budgets out two per row', (tester) async {
+  testWidgets('shows only the daily budget, with a link to the rest', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       build({
         BudgetType.daily: _budget(BudgetType.daily, 200000),
@@ -45,17 +47,46 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final daily = tester.getTopLeft(find.text('Daily remaining'));
-    final weekly = tester.getTopLeft(find.text('Weekly remaining'));
-    final monthly = tester.getTopLeft(find.text('Monthly remaining'));
-    final yearly = tester.getTopLeft(find.text('Yearly remaining'));
-    expect(weekly.dy, daily.dy);
-    expect(weekly.dx, greaterThan(daily.dx));
-    expect(monthly.dy, greaterThan(daily.dy));
-    expect(monthly.dx, daily.dx);
-    expect(yearly.dy, monthly.dy);
-    expect(find.text('IDR 22,500,000'), findsOneWidget);
-    expect(find.text('50%'), findsNWidgets(4));
+    expect(find.text('Daily remaining'), findsOneWidget);
+    expect(find.text('IDR 100,000'), findsOneWidget);
+    expect(find.text('Weekly remaining'), findsNothing);
+    expect(find.text('Monthly remaining'), findsNothing);
+    expect(find.text('Yearly remaining'), findsNothing);
+    expect(find.text('view all'), findsOneWidget);
+  });
+
+  testWidgets('without a daily budget, shows the shortest one set', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      build({
+        BudgetType.monthly: _budget(BudgetType.monthly, 4000000),
+        BudgetType.yearly: _budget(BudgetType.yearly, 45000000),
+      }),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Monthly remaining'), findsOneWidget);
+    expect(find.text('Yearly remaining'), findsNothing);
+  });
+
+  testWidgets('has Add spending and Add income buttons side by side', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      build({BudgetType.daily: _budget(BudgetType.daily, 200000)}),
+    );
+    await tester.pumpAndSettle();
+
+    final spending = tester.getCenter(find.text('Add spending'));
+    final income = tester.getCenter(find.text('Add income'));
+    expect(income.dy, spending.dy);
+    expect(income.dx, greaterThan(spending.dx));
+    // Below the budget.
+    expect(
+      spending.dy,
+      greaterThan(tester.getCenter(find.text('Daily remaining')).dy),
+    );
   });
 
   testWidgets('shows nothing when no budget is set', (tester) async {
@@ -63,5 +94,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.textContaining('remaining'), findsNothing);
+    expect(find.text('Add spending'), findsNothing);
   });
 }

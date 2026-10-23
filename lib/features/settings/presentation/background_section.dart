@@ -1,9 +1,8 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/l10n/l10n.dart';
+import '../../../shared/widgets/app_background_scope.dart';
 import 'custom_background_controller.dart';
 
 enum _BackgroundAction { pick, reset }
@@ -98,13 +97,16 @@ class _Thumbnail extends StatelessWidget {
     if (path == null) return const Icon(Icons.wallpaper_outlined);
     return ClipRRect(
       borderRadius: BorderRadius.circular(8),
-      child: Image.file(
-        File(path),
+      child: Image(
+        image: ResizeImage.resizeIfNeeded(
+          // Thumbnail-sized decode instead of the full photo.
+          (_size * MediaQuery.devicePixelRatioOf(context)).round(),
+          null,
+          backgroundImageProvider(path),
+        ),
         width: _size,
         height: _size,
         fit: BoxFit.cover,
-        // Thumbnail-sized decode instead of the full photo.
-        cacheWidth: (_size * MediaQuery.devicePixelRatioOf(context)).round(),
         errorBuilder: (context, error, stackTrace) =>
             const Icon(Icons.wallpaper_outlined),
       ),

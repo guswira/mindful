@@ -2,6 +2,7 @@ import 'dart:ui' show DisplayFeature, DisplayFeatureState, DisplayFeatureType;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:liquid_glass_widgets/liquid_glass_widgets.dart' as lg;
 
 import 'package:mindful/core/constants/layout.dart';
 import 'package:mindful/core/theme/glass_theme.dart';
@@ -100,7 +101,7 @@ void main() {
     expect(
       find.ancestor(
         of: find.text('Screen content'),
-        matching: find.byType(BackdropGroup),
+        matching: find.byType(lg.GlassBackdropGroup),
       ),
       findsOneWidget,
     );

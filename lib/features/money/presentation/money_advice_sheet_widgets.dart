@@ -5,33 +5,7 @@ import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/glass_theme.dart';
 import '../domain/money_advice.dart';
 
-/// Spinner shown while Gemini is working on the advice.
-class AdviceLoading extends StatelessWidget {
-  const AdviceLoading({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final glass = Theme.of(context).extension<GlassTheme>()!;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: Spacing.lg),
-        child: Column(
-          children: [
-            CircularProgressIndicator(color: glass.aiAccent, strokeWidth: 2),
-            const SizedBox(height: Spacing.md),
-            Text(
-              context.l10n.moneyAdviceLoading,
-              style: TextStyle(color: glass.textSecondary, fontSize: 14),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// The sparkle icon + "AI spending advice" title shared by the loading and
-/// result sheets.
+/// The sparkle icon + "AI spending advice" title of the result sheet.
 class AdviceTitle extends StatelessWidget {
   const AdviceTitle({super.key});
 

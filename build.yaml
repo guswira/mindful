@@ -1,6 +1,32 @@
+# Code generators only read the files that can hold @riverpod / @freezed /
+# @JsonSerializable code: data, domain, controllers, providers, services,
+# models (+ the three presentation files below that keep a controller).
+#
+# Why: riverpod_generator 2.x pins analyzer 7, which crashes ("Missing
+# implementation of visitDotShorthandPropertyAccess") on newer Dart syntax
+# in liquid_glass_widgets — and a builder resolves every file it runs on,
+# so any widget importing the glass widgets broke the whole build. Keep
+# generated code out of widget files (put providers in *_providers.dart /
+# *_controller.dart) until the Riverpod 3 migration lifts the pin.
 targets:
   $default:
     builders:
       json_serializable:
+        generate_for: &generated_sources
+          - lib/**/data/*.dart
+          - lib/**/domain/*.dart
+          - lib/**/*_controller.dart
+          - lib/**/*_providers.dart
+          - lib/shared/services/*.dart
+          - lib/shared/models/*.dart
+          - lib/features/habits/presentation/habit_tab.dart
+          - lib/features/tasks/presentation/task_tab.dart
+          - lib/features/home/presentation/widgets/unsynced_banner.dart
         options:
           explicit_to_json: true
+      freezed:
+        generate_for: *generated_sources
+      riverpod_generator:
+        generate_for: *generated_sources
+      source_gen:combining_builder:
+        generate_for: *generated_sources

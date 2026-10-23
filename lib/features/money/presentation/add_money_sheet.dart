@@ -21,7 +21,8 @@ import 'money_providers.dart';
 import 'spending_type_picker.dart';
 
 /// Bottom sheet to create or edit a money entry: type, amount, category,
-/// spending type (which budgets it counts toward), note and date. See SPEC.md Money Flow Feature Add Money Sheet and the
+/// note, category, spending type (which budgets it counts toward) and
+/// date. See SPEC.md Money Flow Feature Add Money Sheet and the
 /// bottom-sheet design rules.
 ///
 /// Passing [entry] pre-fills the form and switches saving to an update;
@@ -46,6 +47,7 @@ class _AddMoneySheetState extends ConsumerState<AddMoneySheet> {
   final _amountShake = GlobalKey<ShakeWidgetState>();
   final _amountFocus = FocusNode();
   final _noteController = TextEditingController();
+  final _noteFocus = FocusNode();
   late String _selectedCategory;
   BudgetType? _budgetPeriod;
   DateTime _selectedDate = DateTime.now();
@@ -70,6 +72,7 @@ class _AddMoneySheetState extends ConsumerState<AddMoneySheet> {
     _amountController.dispose();
     _amountFocus.dispose();
     _noteController.dispose();
+    _noteFocus.dispose();
     super.dispose();
   }
 
@@ -196,7 +199,20 @@ class _AddMoneySheetState extends ConsumerState<AddMoneySheet> {
                   focusNode: _amountFocus,
                   currency: currency,
                 ),
-                const SizedBox(height: Spacing.md),
+                // Right under the amount: the keypad's Next key jumps here.
+                TextField(
+                  controller: _noteController,
+                  focusNode: _noteFocus,
+                  textInputAction: TextInputAction.done,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.white70, fontSize: 14),
+                  decoration: InputDecoration(
+                    hintText: l10n.moneyNoteHint,
+                    hintStyle: TextStyle(color: glass.textHint, fontSize: 14),
+                    border: InputBorder.none,
+                  ),
+                ),
+                const SizedBox(height: Spacing.sm),
                 Text(
                   l10n.moneyCategoryHeading,
                   style: TextStyle(color: glass.textHint, fontSize: 12),
@@ -217,16 +233,6 @@ class _AddMoneySheetState extends ConsumerState<AddMoneySheet> {
                         setState(() => _budgetPeriod = period),
                   ),
                 ],
-                const SizedBox(height: Spacing.sm),
-                TextField(
-                  controller: _noteController,
-                  style: const TextStyle(color: Colors.white70, fontSize: 14),
-                  decoration: InputDecoration(
-                    hintText: l10n.moneyNoteHint,
-                    hintStyle: TextStyle(color: glass.textHint, fontSize: 14),
-                    border: InputBorder.none,
-                  ),
-                ),
                 const SizedBox(height: Spacing.sm),
                 DateRow(date: _selectedDate, onTap: _pickDate),
               ],
@@ -249,6 +255,7 @@ class _AddMoneySheetState extends ConsumerState<AddMoneySheet> {
         FocusedAmountKeypad(
           focusNode: _amountFocus,
           controller: _amountController,
+          onNext: _noteFocus.requestFocus,
         ),
       ],
     );

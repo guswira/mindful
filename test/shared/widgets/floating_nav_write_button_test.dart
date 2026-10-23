@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:liquid_glass_widgets/liquid_glass_widgets.dart' as lg;
 
 import 'package:mindful/core/theme/glass_theme.dart';
 import 'package:mindful/shared/widgets/floating_nav_write_button.dart';
@@ -16,15 +17,24 @@ void main() {
     ),
   );
 
+  // The menu morphs out over a few hundred ms of spring animation.
+  Future<void> settleMenu(WidgetTester tester) async {
+    for (var i = 0; i < 20; i++) {
+      await tester.pump(const Duration(milliseconds: 50));
+    }
+  }
+
   Future<void> openMenu(WidgetTester tester, {int? tabIndex}) async {
     await tester.pumpWidget(buildButton(tabIndex: tabIndex));
-    await tester.tap(find.byType(FloatingActionButton));
-    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.edit_outlined));
+    await settleMenu(tester);
   }
 
   List<String> menuLabels(WidgetTester tester) => [
-    for (final tile in tester.widgetList<ListTile>(find.byType(ListTile)))
-      (tile.title! as Text).data!,
+    for (final item in tester.widgetList<lg.GlassMenuItem>(
+      find.byType(lg.GlassMenuItem),
+    ))
+      item.title,
   ];
 
   testWidgets('Home shows every item', (tester) async {
@@ -68,20 +78,25 @@ void main() {
     expect(menuLabels(tester), ['Add spending', 'Add income']);
   });
 
-  testWidgets('holding shows the tab\'s items as a dial', (tester) async {
+  testWidgets('the menu is closed until the button is used', (tester) async {
+    await tester.pumpWidget(buildButton(tabIndex: WriteMenuTab.money));
+
+    expect(find.text('Add spending'), findsNothing);
+  });
+
+  testWidgets('holding opens the tab\'s menu under the finger', (tester) async {
     await tester.pumpWidget(buildButton(tabIndex: WriteMenuTab.money));
 
     final gesture = await tester.startGesture(
-      tester.getCenter(find.byType(FloatingActionButton)),
+      tester.getCenter(find.byIcon(Icons.edit_outlined)),
     );
     await tester.pump(const Duration(milliseconds: 600));
+    await settleMenu(tester);
 
-    expect(find.byIcon(Icons.trending_down_rounded), findsOneWidget);
-    expect(find.byIcon(Icons.trending_up_rounded), findsOneWidget);
-    expect(find.byIcon(Icons.checklist_outlined), findsNothing);
+    expect(menuLabels(tester), ['Add spending', 'Add income']);
 
     await gesture.up();
-    await tester.pump();
+    await settleMenu(tester);
   });
 
   test('the button follows the tab accent, Home stays teal', () {

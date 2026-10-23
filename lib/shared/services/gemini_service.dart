@@ -6,12 +6,15 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:http/http.dart' as http;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../core/l10n/l10n.dart';
 import '../../features/ai/domain/food_analysis.dart';
 import '../../features/ai/domain/food_scan_exception.dart';
 import '../../features/money/domain/money_advice.dart';
+import 'gemini_proxy_client.dart';
+import 'gemini_thinking_client.dart';
 
 part 'gemini_service.g.dart';
 
@@ -38,36 +41,69 @@ If the image is not food or you cannot identify it, respond with exactly: null''
 /// spending advice (SPEC.md Money Flow Feature AI Advice).
 class GeminiService {
   GeminiService()
-    : _model = GenerativeModel(
-        // gemini-1.5-flash (SPEC.md's original pick) was fully retired —
-        // every request to it now 404s. gemini-3.8-flash is the current
-        // stable, vision-capable flash model.
-        model: 'gemini-3.8-flash',
-        apiKey: dotenv.env['GEMINI_API_KEY'] ?? '',
+    // Neither a one-photo nutrition estimate nor spending advice gains much
+    // from reasoning, so both get the least thinking (fastest). The photo
+    // is read at medium resolution — half the image tokens of the default,
+    // still plenty to tell dishes apart (low starts to blur them).
+    : _foodModel = _createModel(
+        GeminiThinkingLevel.minimal,
+        mediaResolution: GeminiMediaResolution.medium,
+      ),
+      _adviceModel = _createModel(
+        GeminiThinkingLevel.minimal,
+        // The reply is a short summary + a few bullets; the cap stops a
+        // rambling answer from adding seconds.
+        maxOutputTokens: 1024,
       );
 
-  final GenerativeModel _model;
+  /// Talks to Gemini directly only when a native build still has
+  /// `GEMINI_API_KEY` in its `.env`; otherwise (always on web) through the
+  /// `gemini-proxy` Edge Function, which keeps the key server-side.
+  static GenerativeModel _createModel(
+    GeminiThinkingLevel thinking, {
+    GeminiMediaResolution? mediaResolution,
+    int? maxOutputTokens,
+  }) {
+    final apiKey = dotenv.maybeGet('GEMINI_API_KEY') ?? '';
+    final direct = !kIsWeb && apiKey.isNotEmpty;
+    return GenerativeModel(
+      // gemini-1.5-flash (SPEC.md's original pick) was fully retired —
+      // every request to it now 404s. gemini-3.8-flash is the current
+      // stable, vision-capable flash model.
+      model: 'gemini-3.8-flash',
+      // The proxy swaps this placeholder for the user's Supabase JWT.
+      apiKey: direct ? apiKey : 'proxy',
+      httpClient: GeminiThinkingClient(
+        thinking,
+        mediaResolution: mediaResolution,
+        inner: direct ? null : GeminiProxyClient(),
+      ),
+      // Both prompts want bare JSON; JSON mode stops Gemini wrapping it in
+      // prose or fences, so it writes (and we wait for) fewer tokens.
+      generationConfig: GenerationConfig(
+        responseMimeType: 'application/json',
+        maxOutputTokens: maxOutputTokens,
+      ),
+    );
+  }
 
-  static const Duration _timeout = Duration(seconds: 30);
+  final GenerativeModel _foodModel;
+  final GenerativeModel _adviceModel;
+
+  static const Duration _foodTimeout = Duration(seconds: 30);
+
+  /// Longer than the food scan's: the prompt can carry many money
+  /// entries and the reply is several paragraphs.
+  static const Duration _adviceTimeout = Duration(seconds: 60);
 
   /// Returns null when Gemini reports the photo isn't food. Throws
   /// [FoodScanException] for every other failure — timeout, no
   /// connection, an API-side error, or a response that isn't valid JSON.
-  Future<FoodAnalysis?> analyzeFood(File compressedImage) async {
-    final Uint8List bytes;
-    try {
-      bytes = await compressedImage.readAsBytes();
-    } catch (error) {
-      debugPrint('Unreadable food photo: $error');
-      throw FoodScanException(
-        currentL10n.geminiErrorUnknown,
-        FoodScanErrorType.unknown,
-      );
-    }
-    final text = await _generate([
+  Future<FoodAnalysis?> analyzeFood(Uint8List compressedImage) async {
+    final text = await _generate(_foodModel, _foodTimeout, [
       Content.multi([
         TextPart(_foodAnalysisPrompt),
-        DataPart('image/jpeg', bytes),
+        DataPart('image/jpeg', compressedImage),
       ]),
     ]);
     if (text == null || text == 'null') {
@@ -81,7 +117,7 @@ class GeminiService {
   /// back in the app language. Throws [FoodScanException] on any failure,
   /// same as [analyzeFood] — it shares the same error classification.
   Future<MoneyAdvice> adviseOnMoney(String moneySummary) async {
-    final text = await _generate([
+    final text = await _generate(_adviceModel, _adviceTimeout, [
       Content.text(currentL10n.moneyAdvicePrompt(moneySummary)),
     ]);
     if (text == null || text.isEmpty) {
@@ -95,9 +131,20 @@ class GeminiService {
 
   /// Sends [content] and returns Gemini's trimmed reply text, mapping
   /// every failure onto a [FoodScanException] with a user-facing message.
-  Future<String?> _generate(List<Content> content) async {
+  Future<String?> _generate(
+    GenerativeModel model,
+    Duration timeout,
+    List<Content> content,
+  ) async {
+    final stopwatch = Stopwatch()..start();
     try {
-      final response = await _model.generateContent(content).timeout(_timeout);
+      final response = await model.generateContent(content).timeout(timeout);
+      final usage = response.usageMetadata;
+      debugPrint(
+        'Gemini replied in ${stopwatch.elapsedMilliseconds}ms '
+        '(prompt ${usage?.promptTokenCount} tokens, '
+        'reply ${usage?.candidatesTokenCount} tokens)',
+      );
       return response.text?.trim();
     } on TimeoutException {
       throw FoodScanException(
@@ -105,6 +152,13 @@ class GeminiService {
         FoodScanErrorType.timeout,
       );
     } on SocketException {
+      throw FoodScanException(
+        currentL10n.aiErrorNoConnection,
+        FoodScanErrorType.networkError,
+      );
+    } on http.ClientException {
+      // What a dropped connection looks like on web, where there's no
+      // SocketException.
       throw FoodScanException(
         currentL10n.aiErrorNoConnection,
         FoodScanErrorType.networkError,

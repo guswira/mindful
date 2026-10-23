@@ -1,45 +1,69 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
+import 'package:liquid_glass_widgets/liquid_glass_widgets.dart' as lg;
 
 import '../../core/constants/layout.dart';
-import '../../core/l10n/l10n.dart';
-import '../../core/theme/glass_theme.dart';
 import 'floating_nav_write_button.dart';
+import 'nav_tabs.dart';
 
-/// Island nav bar (5 tabs: Home, Tasks & Routines, Mindfulness,
-/// Money, AI) + write button, replacing the standard bottom nav bar
-/// entirely. See SPEC.md Floating Island Nav Bar.
+/// Bottom liquid glass tab bar (5 tabs: Home, Tasks & Routines,
+/// Mindfulness, Money, AI) + write button — [NavPlacement.bottom].
+///
+/// A [lg.GlassTabBar.minimizable]: the selected tab sits under a liquid
+/// glass droplet that slides between tabs with jelly physics (drag along
+/// the bar to scrub it). With a [minimizeController] driving it (iPhone),
+/// scrolling down shrinks the bar to the selected tab's circle and the
+/// write button with it; scrolling back up or tapping the circle brings it
+/// back. See SPEC.md Floating Island Nav Bar.
 class FloatingNavBar extends StatelessWidget {
   const FloatingNavBar({
     required this.currentIndex,
     required this.onTabChanged,
+    this.minimizeController,
     super.key,
   });
 
   final int currentIndex;
   final ValueChanged<int> onTabChanged;
 
+  /// Null keeps the bar expanded (tests, Android).
+  final lg.GlassTabBarMinimizeController? minimizeController;
+
   @override
   Widget build(BuildContext context) {
+    final controller = minimizeController;
     return SafeArea(
+      top: false,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(14, 0, 14, 12),
-        // Centered and capped on Mac/iPad rather than stretched across the
-        // window; a phone is narrower than the cap.
+        // Centered and capped on Mac / Android tablets rather than
+        // stretched across the window; a phone is narrower than the cap.
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: AppLayout.maxNavWidth),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Expanded(
-                  child: _NavIsland(
-                    currentIndex: currentIndex,
-                    onTabChanged: onTabChanged,
+                  child: lg.GlassTabBar.minimizable(
+                    tabs: buildNavTabs(context),
+                    selectedIndex: currentIndex,
+                    onTabSelected: onTabChanged,
+                    minimizeController: controller,
+                    onMinimizedTabTap: controller?.expand,
+                    horizontalPadding: 0,
+                    verticalPadding: 0,
+                    barHeight: NavBarMetrics.barHeight,
+                    minimizedBarHeight: NavBarMetrics.minimizedBarHeight,
+                    iconSize: NavBarMetrics.iconSize,
+                    settings: navBarGlass,
+                    indicatorColor: navIndicatorColor(context, currentIndex),
                   ),
                 ),
                 const SizedBox(width: 10),
-                WriteButton(tabIndex: currentIndex),
+                _MinimizingWriteButton(
+                  tabIndex: currentIndex,
+                  minimizeController: controller,
+                ),
               ],
             ),
           ),
@@ -49,123 +73,30 @@ class FloatingNavBar extends StatelessWidget {
   }
 }
 
-class _NavIsland extends StatelessWidget {
-  const _NavIsland({required this.currentIndex, required this.onTabChanged});
-
-  final int currentIndex;
-  final ValueChanged<int> onTabChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final glass = Theme.of(context).extension<GlassTheme>()!;
-    final l10n = context.l10n;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(28),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 11),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.09),
-            borderRadius: BorderRadius.circular(28),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.18),
-              width: 0.5,
-            ),
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: _NavItem(
-                  icon: Icons.home_outlined,
-                  label: l10n.navHome,
-                  active: currentIndex == 0,
-                  activeColor: glass.homeAccent,
-                  onTap: () => onTabChanged(0),
-                ),
-              ),
-              Expanded(
-                child: _NavItem(
-                  icon: Icons.checklist_outlined,
-                  label: l10n.navTasks,
-                  active: currentIndex == 1,
-                  activeColor: glass.taskAccent,
-                  onTap: () => onTabChanged(1),
-                ),
-              ),
-              Expanded(
-                child: _NavItem(
-                  icon: Icons.menu_book_outlined,
-                  label: l10n.navJournal,
-                  active: currentIndex == 2,
-                  activeColor: glass.journalAccent,
-                  onTap: () => onTabChanged(2),
-                ),
-              ),
-              Expanded(
-                child: _NavItem(
-                  icon: Icons.account_balance_wallet_outlined,
-                  label: l10n.navMoney,
-                  active: currentIndex == 3,
-                  activeColor: glass.moneyAccent,
-                  onTap: () => onTabChanged(3),
-                ),
-              ),
-              Expanded(
-                child: _NavItem(
-                  icon: Icons.auto_awesome_outlined,
-                  label: l10n.navAi,
-                  active: currentIndex == 4,
-                  activeColor: glass.aiAccent,
-                  onTap: () => onTabChanged(4),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _NavItem extends StatelessWidget {
-  const _NavItem({
-    required this.icon,
-    required this.label,
-    required this.active,
-    required this.activeColor,
-    required this.onTap,
+/// The write button, shrinking along with the minimized tab bar — like
+/// the trailing circle next to a minimized iOS 26 tab bar.
+class _MinimizingWriteButton extends StatelessWidget {
+  const _MinimizingWriteButton({
+    required this.tabIndex,
+    required this.minimizeController,
   });
 
-  final IconData icon;
-
-  /// Screen-reader name for the tab — the island shows icons only.
-  final String label;
-  final bool active;
-  final Color activeColor;
-  final VoidCallback onTap;
+  final int tabIndex;
+  final lg.GlassTabBarMinimizeController? minimizeController;
 
   @override
   Widget build(BuildContext context) {
-    final color = active ? activeColor : Colors.white.withValues(alpha: 0.28);
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 20, color: color, semanticLabel: label),
-          const SizedBox(height: 6),
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            width: active ? 16 : 4,
-            height: 4,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(2),
-              color: active ? activeColor : Colors.transparent,
-            ),
-          ),
-        ],
+    final controller = minimizeController;
+    if (controller == null) {
+      return WriteButton(tabIndex: tabIndex);
+    }
+    return ListenableBuilder(
+      listenable: controller,
+      builder: (context, _) => WriteButton(
+        tabIndex: tabIndex,
+        size: controller.minimized
+            ? NavBarMetrics.minimizedBarHeight
+            : NavBarMetrics.barHeight,
       ),
     );
   }

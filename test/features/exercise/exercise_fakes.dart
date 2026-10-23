@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:hive/hive.dart';
+import 'package:hive_ce/hive.dart';
 
 import 'package:mindful/features/exercise/data/ambience_player.dart';
 import 'package:mindful/features/exercise/data/breathing_preferences_repository.dart';

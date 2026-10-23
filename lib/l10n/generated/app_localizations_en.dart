@@ -30,6 +30,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonRetry => 'Retry';
 
   @override
+  String get commonPageLoadFailed =>
+      'Couldn\'t load this page. Check your connection.';
+
+  @override
   String get commonDone => 'Done';
 
   @override
@@ -80,6 +84,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String aiNotifRetryingBody(int attempt, int maxAttempts) {
     return 'Google\'s servers are busy — retrying (attempt $attempt/$maxAttempts)…';
   }
+
+  @override
+  String aiActivityRetrying(String task, int attempt, int maxAttempts) {
+    return '$task · attempt $attempt/$maxAttempts';
+  }
+
+  @override
+  String get aiActivityFoodReady => 'Food result ready — tap to view';
+
+  @override
+  String get aiActivityAdviceReady => 'Spending advice ready — tap to view';
+
+  @override
+  String get aiScanInProgress =>
+      'Still analyzing your last photo — it\'s shown at the top of the screen.';
 
   @override
   String get aiScanSaved => 'Scan saved!';
@@ -133,18 +152,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aiAnalyzingTitle => 'Analyzing your food...';
-
-  @override
-  String get aiAnalyzingTipIngredients => 'Identifying ingredients...';
-
-  @override
-  String get aiAnalyzingTipPortions => 'Estimating portions...';
-
-  @override
-  String get aiAnalyzingTipNutrition => 'Calculating nutrition...';
-
-  @override
-  String get aiAnalyzingTipAlmostDone => 'Almost done...';
 
   @override
   String get aiExperimentalTitle => 'Experimental AI Features';
@@ -888,6 +895,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get moneyKeypadBackspace => 'Delete';
 
   @override
+  String get moneyKeypadNext => 'Next';
+
+  @override
   String get moneyDateChange => 'Change';
 
   @override
@@ -955,6 +965,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get moneySetBudget => 'Set budget';
+
+  @override
+  String moneyBudgetShowMore(int count) {
+    return 'Show $count more';
+  }
+
+  @override
+  String get moneyBudgetShowLess => 'Show less';
 
   @override
   String get moneyBudgetHeading => 'Budget';
@@ -1332,7 +1350,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get moneyAdviceInProgress =>
-      'Still working on your advice — you\'ll get a notification if it fails.';
+      'Still working on your advice — it\'s shown at the top of the screen.';
 
   @override
   String recapBannerTitle(String month) {
@@ -1560,6 +1578,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String settingsRecapSoFar(String month) {
     return '$month (so far)';
   }
+
+  @override
+  String get settingsGlassStyleTitle => 'Glass style';
+
+  @override
+  String get settingsGlassStyleLiquid => 'Liquid glass';
+
+  @override
+  String get settingsGlassStyleLiquidBody =>
+      'Refracting glass with fluid, springy animations';
+
+  @override
+  String get settingsGlassStyleFrosted => 'Frosted glass';
+
+  @override
+  String get settingsGlassStyleFrostedBody =>
+      'The classic blurred look, lighter on older phones';
 
   @override
   String get settingsBackgroundTitle => 'Background';

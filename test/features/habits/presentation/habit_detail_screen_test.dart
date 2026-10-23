@@ -8,6 +8,7 @@ import 'package:mindful/features/habits/domain/habit_action.dart';
 import 'package:mindful/features/habits/domain/habit_log.dart';
 import 'package:mindful/features/habits/domain/habit_tag.dart';
 import 'package:mindful/features/habits/presentation/habit_day_log_sheet.dart';
+import 'package:mindful/features/habits/presentation/habit_detail_controller.dart';
 import 'package:mindful/features/habits/presentation/habit_detail_screen.dart';
 import 'package:mindful/features/habits/presentation/habit_providers.dart';
 
@@ -65,7 +66,7 @@ void main() {
   Widget buildScreen() => ProviderScope(
     overrides: [
       habitByIdProvider('h1').overrideWith((ref) async => _habit),
-      habitDetailControllerProvider('h1').overrideWith(() => controller),
+      habitDetailControllerProvider.overrideWith(() => controller),
     ],
     child: MaterialApp(
       theme: ThemeData(extensions: [GlassTheme.dark()]),

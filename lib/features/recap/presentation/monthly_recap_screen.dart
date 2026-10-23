@@ -7,14 +7,9 @@ import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/glass_theme.dart';
 import '../../../shared/widgets/blob_background.dart';
 import '../domain/monthly_recap.dart';
-import '../domain/recap_window.dart';
 import 'monthly_recap_providers.dart';
 import 'recap_slides.dart';
 import 'widgets/recap_slideshow.dart';
-
-/// Opens [month]'s recap slideshow as a full page.
-Future<void> openMonthlyRecap(BuildContext context, DateTime month) =>
-    context.push('/recap/${recapMonthKey(month)}');
 
 /// Full-screen, story-style recap of [month]'s routines, tasks, cashflow
 /// and AI usage (route `/recap/:month`). See SPEC.md Monthly Recap.

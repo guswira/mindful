@@ -7,7 +7,7 @@ import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/glass_theme.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../monthly_recap_providers.dart';
-import '../monthly_recap_screen.dart';
+import '../recap_navigation.dart';
 
 /// Home screen invite to the month's recap, shown every day from the last
 /// days of a month through the first days of the next (see

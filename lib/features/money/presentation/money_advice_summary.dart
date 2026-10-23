@@ -1,21 +1,28 @@
+import 'package:flutter/material.dart' show DateTimeRange;
+
 import '../domain/entry_type.dart';
 import '../domain/money_entry.dart';
 
 /// How many individual entries go into the prompt, newest first — the
 /// per-category and per-month totals above them always cover everything,
 /// so capping this only trims detail, and keeps a long history from
-/// blowing up the prompt size.
-const int moneyAdviceMaxEntries = 200;
+/// blowing up the prompt (a longer prompt is a slower reply).
+const int moneyAdviceMaxEntries = 60;
 
-/// Plain-text summary of every money [entries] for Gemini's advice prompt:
-/// all-time totals, spending and income per category, per-month totals,
-/// then the most recent individual entries.
+/// Plain-text summary of the money [entries] for Gemini's advice prompt:
+/// the period they cover ([range], null = all time), totals, spending and
+/// income per category, per-month totals, then the most recent individual
+/// entries.
 ///
 /// Categories stay in their stored English names (they're data, not copy);
 /// the localized prompt tells Gemini which language to answer in. Numbers
 /// and dates are fixed-format rather than following the app locale, so
 /// Gemini always reads the same unambiguous shape.
-String buildMoneyAdviceSummary(List<MoneyEntry> entries, String currency) {
+String buildMoneyAdviceSummary(
+  List<MoneyEntry> entries,
+  String currency, {
+  DateTimeRange? range,
+}) {
   final spendingByCategory = <String, double>{};
   final incomeByCategory = <String, double>{};
   final byMonth = <String, (double, double)>{};
@@ -56,6 +63,7 @@ String buildMoneyAdviceSummary(List<MoneyEntry> entries, String currency) {
   final recent = entries.take(moneyAdviceMaxEntries);
 
   return [
+    'Period: ${range == null ? 'all time' : '${_day(range.start)} to ${_day(range.end)}'}',
     'Currency: $currency',
     'Total spending: ${_amount(totalSpending)}',
     'Total income: ${_amount(totalIncome)}',

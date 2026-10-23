@@ -3,6 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/l10n/app_language.dart';
+import '../../../core/theme/glass_style.dart';
 
 part 'settings_repository.g.dart';
 
@@ -19,6 +20,7 @@ class SettingsRepository {
   static const String _journalEveningReminderKey =
       'journal_evening_reminder_enabled';
   static const String _appLanguageKey = 'app_language';
+  static const String _glassStyleKey = 'glass_style';
 
   /// Whether the 8:00 AM journal reminder is on. Defaults to true.
   Future<bool> isJournalMorningReminderEnabled() =>
@@ -40,6 +42,16 @@ class SettingsRepository {
 
   Future<void> writeAppLanguage(AppLanguage language) =>
       _storage.write(key: _appLanguageKey, value: language.name);
+
+  /// The saved glass style; null if never set, so the caller can pick the
+  /// platform's default (GlassStyleController.defaultStyle).
+  Future<GlassStyle?> readGlassStyle() async {
+    final value = await _storage.read(key: _glassStyleKey);
+    return value == null ? null : GlassStyle.fromStorage(value);
+  }
+
+  Future<void> writeGlassStyle(GlassStyle style) =>
+      _storage.write(key: _glassStyleKey, value: style.name);
 
   Future<bool> _readBool(String key) async {
     final value = await _storage.read(key: key);

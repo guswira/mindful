@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:hive/hive.dart';
+import 'package:hive_ce/hive.dart';
 import 'package:mocktail/mocktail.dart';
 
 import 'package:mindful/core/theme/glass_theme.dart';
@@ -123,5 +123,45 @@ void main() {
     expect(find.text('Yearly'), findsOneWidget);
     expect(find.textContaining('of USD 12,000'), findsOneWidget);
     expect(find.text('Daily · Weekly · Monthly'), findsOneWidget);
+  });
+
+  testWidgets('more than two budgets collapse behind "Show more"', (
+    tester,
+  ) async {
+    BudgetSettings budget(BudgetType type, double amount) => BudgetSettings(
+      id: type.name,
+      userId: 'u1',
+      budgetType: type,
+      amount: amount,
+      currency: 'USD',
+      updatedAt: DateTime(2026, 1, 1),
+    );
+    for (final (type, amount) in [
+      (BudgetType.daily, 50.0),
+      (BudgetType.weekly, 300.0),
+      (BudgetType.monthly, 1000.0),
+      (BudgetType.yearly, 12000.0),
+    ]) {
+      when(
+        () => settingsBox.get('settings_${type.name}'),
+      ).thenReturn(budget(type, amount).toJson());
+    }
+
+    await tester.pumpWidget(buildTab());
+    await tester.pumpAndSettle();
+
+    expect(find.text('Daily'), findsOneWidget);
+    expect(find.text('Weekly'), findsOneWidget);
+    expect(find.text('Monthly'), findsNothing);
+    expect(find.text('Yearly'), findsNothing);
+
+    await tester.tap(find.text('Show 2 more'));
+    await tester.pumpAndSettle();
+    expect(find.text('Monthly'), findsOneWidget);
+    expect(find.text('Yearly'), findsOneWidget);
+
+    await tester.tap(find.text('Show less'));
+    await tester.pumpAndSettle();
+    expect(find.text('Yearly'), findsNothing);
   });
 }

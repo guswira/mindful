@@ -12,7 +12,7 @@ import '../../../shared/widgets/unsynced_badge.dart';
 import '../domain/journal_entry.dart';
 import 'journal_detail_sheet.dart';
 import 'journal_labels.dart';
-import 'journal_tab.dart' show journalPhotoUrlProvider;
+import 'journal_providers.dart';
 
 /// Glass search input for the journal history screen — its border highlights in
 /// journalAccent while focused. See SPEC.md Daily Journal Tab.

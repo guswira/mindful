@@ -52,7 +52,8 @@ class _DebugSectionState extends ConsumerState<DebugSection> {
 
   @override
   Widget build(BuildContext context) {
-    if (!kDebugMode) {
+    // Its one tool is a test notification, which a browser can't show.
+    if (!kDebugMode || kIsWeb) {
       return const SizedBox.shrink();
     }
 

@@ -1,9 +1,8 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../shared/widgets/dashed_border_container.dart';
+import '../../../shared/widgets/picked_image.dart';
 import 'journal_tab_list.dart' show JournalPhotoThumbnail;
 
 /// Horizontal strip of existing and newly-picked photos, plus an add tile.
@@ -39,7 +38,7 @@ class JournalPhotoStrip extends StatelessWidget {
           for (final photo in newPhotos)
             _PhotoTile(
               onRemove: () => onRemoveNew(photo),
-              child: Image.file(File(photo.path), fit: BoxFit.cover),
+              child: PickedImage(photo),
             ),
           GestureDetector(
             onTap: onAdd,

@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 
 import '../../../core/l10n/l10n.dart';
 import '../../recap/domain/recap_window.dart';
-import '../../recap/presentation/monthly_recap_screen.dart';
+import '../../recap/presentation/recap_navigation.dart';
 
 /// Settings' "Revisit a recap" menu: pick any recent month (this one so
 /// far, or one of the [recapRevisitMonths] - 1 before it) and replay its

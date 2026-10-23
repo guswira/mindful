@@ -6,27 +6,6 @@ import '../../../core/theme/glass_theme.dart';
 import '../domain/money_advice.dart';
 import 'money_advice_sheet_widgets.dart';
 
-/// Non-dismissible loading sheet shown while the advice request runs —
-/// dismissed by [requestMoneyAdvice] as soon as a busy retry starts, the
-/// same way [FoodAnalyzingSheet] is. See SPEC.md Money Flow Feature AI
-/// Advice.
-class MoneyAdviceLoadingSheet extends StatelessWidget {
-  const MoneyAdviceLoadingSheet({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        AdviceTitle(),
-        SizedBox(height: Spacing.md),
-        AdviceLoading(),
-      ],
-    );
-  }
-}
-
 /// Gemini's spending advice: where the money mostly goes and how to save.
 /// See SPEC.md Money Flow Feature AI Advice.
 class MoneyAdviceSheet extends StatelessWidget {

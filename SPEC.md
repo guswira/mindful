@@ -1,8 +1,11 @@
 # Mindful App
 
 A personal productivity app for daily journaling, habit tracking, and task
-management. Frosted glass dark theme throughout. Google Sign-In auth.
+management. Glass dark theme throughout — liquid glass (iOS 26/27 style,
+on iOS and Android) by default — frosted by default on web — or the
+original frosted glass, switched in Settings (see Glass style). Google Sign-In auth.
 Supabase primary database. Google Drive optional backup.
+Runs on iOS, Android, macOS and the web (see Web).
 
 ---
 
@@ -34,7 +37,8 @@ Supabase primary database. Google Drive optional backup.
 - Auth: google_sign_in + supabase_flutter
 - Backend: Supabase (database + photo storage)
 - Drive: googleapis (backup + restore only)
-- Local cache: Hive
+- Local cache: Hive — the hive_ce fork (same API + on-disk format as
+  hive 2.x; hive 2.x's web backend throws under WebAssembly, see Web)
 - Secure storage: flutter_secure_storage
 - Models: Freezed + json_serializable
 - Notifications: flutter_local_notifications
@@ -44,14 +48,31 @@ Supabase primary database. Google Drive optional backup.
 - Env vars: flutter_dotenv
 - Home widget: home_widget
 - App shortcuts: quick_actions
-- Animations: Flutter built-in only, no third-party animation packages
+- Liquid glass: liquid_glass_widgets (shader-based refraction, specular
+  rim, jelly/morph springs — the same on iOS and Android; see Liquid glass)
+- Code generation: build_runner with riverpod_generator / freezed /
+  json_serializable, restricted by build.yaml `generate_for` to data,
+  domain, *_controller.dart, *_providers.dart, shared services/models (+
+  habit_tab.dart, task_tab.dart, unsynced_banner.dart). riverpod_generator
+  2.x pins analyzer 7, which crashes on the newer Dart syntax in
+  liquid_glass_widgets and the current Flutter SDK, and a builder resolves
+  every file it runs on — so generated code (@riverpod, @freezed,
+  @JsonSerializable) never goes in a widget file, and those files never
+  import Flutter/glass widgets. appRouterProvider (router.dart),
+  glassStyleControllerProvider, habitDetailControllerProvider and
+  journalPhotoUrlProvider are hand-written providers for that reason —
+  and since build_runner can't run at all on the current SDK (analyzer 7
+  crashes on dot shorthands), new providers are hand-written too. Lifts once Riverpod
+  moves to 3.x.
+- Animations: Flutter built-in only, no third-party animation packages —
+  except the springs inside liquid_glass_widgets' own glass widgets
 - Text-to-speech: flutter_tts (breathing voice guide)
 - Audio playback: audioplayers (breathing ambience loops)
 - Screen wake lock: wakelock_plus (during a breathing session)
 
 ---
 
-## Theme — Frosted Glass Dark
+## Theme — Glass Dark (liquid or frosted)
 
 ### Background
 Color(0xFF0A1628) deep navy, full screen on all screens.
@@ -75,8 +96,8 @@ gallery; the current glass theme is applied on top of it, unchanged:
     scrim — GlassTheme.background at opacity 0.55
       (customBackgroundScrimOpacity), so white text and the 6%/8% glass
       cards stay readable on bright or busy photos
-    the 3 blobs, then the screen content (GlassCards blur the photo
-      through BackdropFilter like any other background)
+    the 3 blobs, then the screen content (glass cards and bars refract
+      and blur the photo like any other background)
   Applies wherever BlobBackground is used (all main tabs, journal editor,
     monthly recap); plain-Material screens like Settings stay as they are.
   Missing/unreadable file → falls back to the default background quietly.
@@ -101,16 +122,14 @@ Plumbing:
 
 ### GlassTheme (ThemeExtension — lib/core/theme/glass_theme.dart)
 
-Glass card:
+Colors and text only — the glass materials themselves live in
+LiquidGlassPresets (see Liquid glass). cardColor / cardBorder /
+strongCardColor / strongCardBorder stay for flat (non-glass) surfaces that
+should match the cards — e.g. dividers, chips, the dashed empty state:
   cardColor:        Color(0x0FFFFFFF)   // rgba(255,255,255,0.06)
   cardBorder:       Color(0x1FFFFFFF)   // rgba(255,255,255,0.12)
-  borderRadius:     18px
-  blur:             ImageFilter.blur(sigmaX:20, sigmaY:20)
-
-Glass strong:
   strongCardColor:  Color(0x14FFFFFF)   // rgba(255,255,255,0.08)
   strongCardBorder: Color(0x26FFFFFF)   // rgba(255,255,255,0.15)
-  blur:             ImageFilter.blur(sigmaX:24, sigmaY:24)
 
 Text:
   textPrimary:      Colors.white
@@ -121,14 +140,15 @@ Text:
 ### Feature accent colors (in GlassTheme)
 
 Each feature has its own accent color used for:
-active nav icon, active nav dot, pill buttons, progress bars,
+active nav icon + glow, the nav's indicator droplet tint, the write
+button's tint, pill buttons, progress bars,
 checkbox fills, card highlights.
 
   homeAccent:    Color(0xFFFFFFFF)   white
   taskAccent:    Color(0xFF60A5FA)   blue
   habitAccent:   Color(0xFFA78BFA)  purple
   journalAccent: Color(0xFFFCD34D)  yellow
-  writeAccent:   Color(0xFF14E6AA)  teal  ← write button + global success only
+  writeAccent:   Color(0xFF14E6AA)  teal  ← write button (Home) + global success only
 
 Legacy single accents (kept for non-feature use):
   accentTeal:    Color(0xFF14E6AA)
@@ -136,23 +156,132 @@ Legacy single accents (kept for non-feature use):
   accentAmber:   Color(0xFFF7C46A)
   accentBlue:    Color(0xFF6BB8F0)
 
+### Glass style (Settings → Glass style) — the one style reference
+
+GlassStyle (lib/core/theme/glass_style.dart, pure Dart — no Flutter
+import, see Code generation): liquid (default) | frosted (default on
+web — GlassStyleController.defaultStyle). It is the single
+style reference: every glass widget asks GlassStyleScope.of(context)
+(lib/core/theme/glass_style_scope.dart, an InheritedWidget — no
+ProviderScope needed, so widget tests work; no scope = liquid) and draws
+itself in that style. No widget decides its look on its own.
+
+  liquid   liquid_glass_widgets surfaces + springs, platform tab bar
+           positions (bottom / iPad top / iPhone Duo strip), minimize on
+           scroll (iPhone), write menu morph — see Liquid glass
+  frosted  the original look: BackdropFilter blur + translucent fill +
+           hairline border, flat TintedPills, the bottom nav island with
+           the radial-arc write button everywhere — see each widget's
+           "Frosted" line. Lighter on the GPU (older phones).
+
+Follows the style: GlassCard (so every sheet/dialog — GlassBottomSheet /
+GlassDialog use it), GlassIconButton, TintedPill, BlobBackground's
+backdrop group, ExperimentalBanner, LoginLanguageButton and the shell nav
+(HomeScreen). Not affected: the native home/lock screen widgets.
+
+Plumbing (like the language setting):
+  SettingsRepository readGlassStyle / writeGlassStyle — flutter_secure_storage
+    key `glass_style` ('liquid' | 'frosted'); unset → null, unknown →
+    liquid
+  GlassStyleController (hand-written Notifier,
+    core/theme/glass_style_controller.dart): restore() awaited in main()
+    before runApp (the app never shows a frame in the other style); unset
+    → defaultStyle: frosted on web (the shaders are heavy for a browser
+    tab, BackdropFilter blur is cheap there), liquid everywhere else — a
+    saved pick always wins,
+    select() persists + restyles instantly
+  App (app.dart) watches it and wraps everything in GlassStyleScope via
+    MaterialApp.builder (outermost, so root-navigator sheets see it too)
+  GlassStyleSection (settings/presentation/glass_style_section.dart):
+    Settings row under Background — blur_on icon, "Glass style" +
+    current style; tap → sheet with both styles (icon, name, one-line
+    description, check on the current one); picking one switches at once.
+  Device-local preference, not in Drive backup.
+
+### Liquid glass (liquid_glass_widgets)
+
+Every glass surface is liquid glass — a fragment shader that refracts and
+blurs what's behind it, with a specular rim light and chromatic edge —
+drawn by liquid_glass_widgets, the same on iOS and Android (Impeller:
+Metal / Vulkan; GLES devices get a lighter shader path automatically).
+Imported with a prefix everywhere (`as lg`): the package's GlassTheme,
+GlassCard, GlassIconButton and GlassDialog names clash with the app's.
+
+Setup:
+  main.dart: `await lg.LiquidGlassWidgets.initialize()` first (loads the
+    shaders disk → RAM before the first frame, no GPU work), and runApp
+    wraps everything in `lg.LiquidGlassWidgets.wrap(brightnessResolver:
+    Theme.maybeBrightnessOf, adaptiveQuality: true, ...)` — glass follows
+    the MaterialApp (always dark) theme, and quality steps down on slow or
+    throttling devices instead of dropping frames.
+  app.dart MaterialApp.builder: AppBackgroundScope → lg.GlassNavigationShell
+    (publishes iPhone Duo's vertical bar strip — see Floating Island Nav
+    Bar; inert elsewhere) → Material(type: transparency) → router (glass
+    menus portal to the root overlay, outside every route's Scaffold, and
+    their text needs a Material ancestor).
+  Accessibility comes with the package: Reduce Motion snaps every
+    spring; Increase Contrast swaps the shader for a plain frosted panel.
+
+Materials (LiquidGlassPresets — lib/core/theme/liquid_glass_presets.dart):
+  card        white 6% body, thickness 16, blur 14   ← GlassCard
+  strongCard  white 9% body, thickness 22, blur 18   ← strong GlassCard,
+              sheets, dialogs, ExperimentalBanner (tinted aiAccent 8%)
+  chrome      white 8% body, thickness 28, blur 8    ← tab bar, glass
+              icon buttons, LoginLanguageButton
+  tinted(c)   c at 80%, otherwise chrome             ← the write button
+  Cards blur more and refract less than chrome, so text on them stays
+  readable over a busy photo; chrome is thicker and clearer, so it
+  visibly bends the content scrolling under it.
+
+Liquid glass animations (all from the package):
+  tab bar indicator droplet — jelly slide between tabs, drag to scrub
+  tab bar minimize on scroll (iPhone)
+  GlassButton press — squeeze & stretch toward the finger, spring back,
+    touch glow (write button, GlassIconButton, LoginLanguageButton)
+  GlassMenu morph — the write menu pours out of the write button
+TintedPill's press (squash + elastic release) is built-in AnimatedScale.
+
 ### GlassCard widget (shared/widgets/glass_card.dart)
-ClipRRect → BackdropFilter → Container (glass bg + border) → child
+Liquid: Padding(margin) → lg.GlassCard (LiquidRoundedSuperellipse(borderRadius),
+  LiquidGlassPresets.card / strongCard, clip antiAlias) → child
+Frosted: Padding(margin) → border (0.5px cardBorder / strongCardBorder) →
+  ClipRRect → BackdropFilter.grouped blur 20 (strong 24) → cardColor /
+  strongCardColor fill → Padding → child
 params: child, strong:bool, borderRadius:double, padding:EdgeInsets, margin:EdgeInsets
-Wrap all main screens in RepaintBoundary for Android BackdropFilter compatibility.
-Uses BackdropFilter.grouped (also GlassIconButton, ExperimentalBanner);
-BlobBackground wraps its content in a BackdropGroup, so all glass on a
-screen shares one backdrop read (cheaper than one read per card).
+Liquid uses standard quality — the package's single-pass shader, the one
+that's safe in scrolling lists. Glass controls nested in a card don't refract through
+it (the package flattens them by design), so pills and icon buttons
+inside stay crisp.
+Wrap all main screens in RepaintBoundary for Android backdrop compatibility.
+BlobBackground wraps its content in a backdrop group matching the style —
+lg.GlassBackdropGroup (liquid, like SwiftUI's GlassEffectContainer) or
+Flutter's BackdropGroup (frosted, for BackdropFilter.grouped) — so all
+glass on a screen shares one backdrop read instead of one screen copy per
+card.
 Android overscroll: MaterialApp.scrollBehavior = GlassScrollBehavior
 (shared/widgets/glass_scroll_behavior.dart) — glow instead of the M3
 stretch. The stretch wraps the scroll view in a filtered Transform while
-pulling past an edge, and BackdropFilters inside it can't see the
+pulling past an edge, and backdrop-reading glass inside it can't see the
 background, so every card went see-through until release.
+
+### GlassIconButton (shared/widgets/glass_icon_button.dart)
+Liquid: lg.GlassButton, LiquidGlassPresets.chrome, circle.
+Frosted: ClipOval → BackdropFilter.grouped blur 12 → white 8% circle,
+  0.5px white 14% border.
+params: icon, onTap, size (38), iconSize (18), iconColor (white60),
+  tooltip (also the semantics label)
 
 ### TintedPill widget (shared/widgets/tinted_pill.dart)
 params: label:String, color:Color, onTap:VoidCallback?, icon:IconData?
-background: color.withOpacity(0.18)
-border: 0.5px color.withOpacity(0.25)
+Frosted: flat color.withOpacity(0.18) fill, 0.5px color.withOpacity(0.25)
+  border, no press animation.
+Liquid — tinted liquid glass, drawn without a shader (pills sit inside
+glass cards):
+background: vertical gradient — color 22% + white 12% sheen on top →
+  color 16% at the bottom (26% while pressed)
+border: 0.5px color.withOpacity(0.30) (0.45 while pressed)
+press: scales to 0.94 (90ms easeOut), springs back with elasticOut (420ms);
+  a pill without onTap has no gestures, so taps reach its row
 text: color, 13px, weight 600, borderRadius 20
 optional leading icon 16px in color; label + icon centered when the pill
   is given a tight width (full-width primary actions)
@@ -458,56 +587,89 @@ MONTHLY RECAP BANNER (below the unsynced banner, above the remaining
 
 ---
 
-### 4. Floating Island Nav Bar (shared/widgets/floating_nav_bar.dart)
+### 4. Floating Island Nav Bar — liquid glass tab bar / frosted island
 
-REPLACES standard BottomNavigationBar entirely.
-Positioned at bottom of shell route Scaffold via Stack.
+REPLACES standard BottomNavigationBar entirely. Drawn in the GlassStyle
+(see Glass style): liquid → the tab bar below, in its platform position;
+frosted → the original island (see Frosted nav at the end of this
+section), always at the bottom. HomeScreen picks it. A liquid_glass_widgets
+GlassTabBar (see Liquid glass) + a tinted liquid glass write button,
+overlaid on the shell route via Stack. Where it sits follows the iOS 26/27
+liquid glass positions (NavPlacement — shared/widgets/nav_placement.dart,
+resolveNavPlacement is pure):
 
-Layout — SafeArea → Padding(bottom:12, horizontal:14):
-Row:
-  LEFT — glass island (flex:1):
-    background: rgba(255,255,255,0.09)
-    border: 0.5px rgba(255,255,255,0.18)
-    borderRadius: 28px  ← more rounded
-    padding: EdgeInsets.symmetric(horizontal:10, vertical:13)
-    BackdropFilter blur(24)
-    Row _NavItem widgets (equal flex, one per tab — see Nav bar update)
+  bottom  (FloatingNavBar — floating_nav_bar.dart): iPhone, Android
+          (phones, tablets, foldables), Mac, and an iPad in a narrow Split
+          View / Slide Over column (shortest side < 600)
+  top     (TopNavBar — adaptive_nav_bars.dart): iPad at regular width
+          (iOS + shortest side ≥ 600, no hinge) — the iPadOS tab bar
+  verticalStrip (StripNavBar — adaptive_nav_bars.dart): iPhone Duo, where
+          the system reserves a vertical bar strip
+          (GlassVerticalBar.maybeOf — the outer display always, the inner
+          display in landscape; needs the iOS 27.1 SDK)
+  A hinge / half-open fold (Android dual screens) keeps the bottom bar on
+  the right screen, as before.
 
-  SizedBox(width:10)
+Tab bar (all placements — nav_tabs.dart):
+  5 icon-only tabs, NO text labels (the label is the semantics label);
+  icon 22px. Tabs + accents:
+    index 0 Home:              Icons.home_outlined           homeAccent white
+    index 1 Tasks & Routines:  Icons.checklist_outlined      taskAccent blue
+    index 2 Mindfulness:       Icons.menu_book_outlined      journalAccent yellow
+    index 3 Money:             Icons.account_balance_wallet_outlined moneyAccent
+    index 4 AI:                Icons.auto_awesome_outlined   aiAccent
+  inactive icon: white 28% (NavBarMetrics.inactiveIconColor)
+  active icon: the tab's accent + an accent glow
+  selection: a liquid glass droplet (the indicator) tinted 16% with the
+    selected tab's accent — it slides between tabs with jelly physics,
+    stretching mid-move; dragging along the bar scrubs it, magnifying the
+    icons under it (replaces the old accent dot)
+  glass: LiquidGlassPresets.chrome; capsule height 56
+    (NavBarMetrics.barHeight)
 
-  RIGHT — write button (52×52):
-    borderRadius: 22px
-    gradient: follows the current tab (writeButtonGradient) —
-      Home (and no tab): writeAccent → Color(0xFF0EB8DF), unchanged
-      other tabs: tab accent → the same accent, hue −12°, lightness −10%
-        (Tasks blue, Mindfulness yellow → amber, Money green, AI indigo)
-      animates between tabs (AnimatedContainer 250ms); the long-press
-      arc's active badge uses the same accent
-    boxShadow: gradient start .withOpacity(0.30) blurRadius 20 offset (0,4)
-    Icon(Icons.edit_outlined, color:Color(0xFF0A1628), size:22)
-    onTap: write menu for the current tab (below)
-    onLongPress: show radial arc overlay
+bottom — SafeArea → Padding(fromLTRB 14, 0, 14, 12) → centered, max 520:
+  Row: Expanded GlassTabBar.minimizable + SizedBox(10) + WriteButton (56)
+  iPhone (iOS) only: minimizes on scroll down
+    (GlassTabBarMinimizeController, behavior onScrollDown) — the bar
+    shrinks to the selected tab's circle (46) and the write button shrinks
+    with it (46); scrolling back up, reaching the top, tapping the circle
+    or switching tab expands it. HomeScreen feeds it the tabs' depth-0
+    ScrollNotifications (each tab owns its scroll view). Android and Mac:
+    behavior never.
+top — SafeArea(bottom: false) → Padding(fromLTRB 20, 8, 20, 8), 56 tall:
+  GlassTabBar.bottom hugging its tabs (64 per tab), centered; WriteButton
+  (56) at the trailing end of the row. Never minimizes. The tab content is
+  pushed down by NavBarMetrics.topBarExtent (72) via MediaQuery padding —
+  every tab insets itself with a SafeArea.
+verticalStrip — GlassTabBar.bottom fills the screen and lays itself out
+  vertically at the bottom of the strip (icon-only capsule); WriteButton
+  (48, the strip's control size) at the top of the strip (bar.top), 12
+  from the content edge / 24 from the screen edge. The system's lateral
+  inset already keeps content clear of the strip.
 
-_NavItem widget:
-  Column: icon (22px) + AnimatedContainer dot
-  NO text labels — icon + dot only
-  active icon color (per tab):
-    index 0 Home:              homeAccent    Color(0xFFFFFFFF) white
-    index 1 Tasks & Routines:  taskAccent    Color(0xFF60A5FA) blue
-    index 2 Mindfulness:       journalAccent Color(0xFFFCD34D) yellow
-    (+ Money, AI — see Money Flow / AI Lab)
-  inactive icon: Colors.white.withOpacity(0.28)
-  active dot: AnimatedContainer width 16, height 4, borderRadius 2,
-              color = tab accent color
-  inactive dot: width 4, transparent
-
-Tab icons (outline style):
-  Home:             Icons.home_outlined
-  Tasks & Routines: Icons.checklist_outlined
-  Mindfulness:      Icons.menu_book_outlined
-
-Shell Scaffold body: Stack [ child, Positioned bottom:0 FloatingNavBar ]
+HomeScreen keeps the same widgets around the shell (NotificationListener →
+_ContentInset → navigationShell) in every placement, so resizing across
+placements (an iPad Split View drag) keeps every tab's state.
 All tab screens: add bottom padding ≥ 88px so content clears the nav.
+
+WriteButton (floating_nav_write_button.dart):
+  lg.GlassButton, prominent tinted glass (LiquidGlassPresets.tinted —
+    80% of the accent), superellipse radius 40% of its size
+  tint follows the current tab (writeButtonGradient(...).first) —
+    Home (and no tab): writeAccent teal; other tabs: the tab accent
+    (writeButtonGradient's second stop — hue −12°, lightness −10% — is kept
+    for anything that wants the old gradient)
+    tint and size ease between values (250ms TweenAnimationBuilder)
+  Icon(Icons.edit_outlined, color:Color(0xFF0A1628), size:22)
+  press: squeezes/stretches toward the finger, springs back + accent glow
+  tap: the write menu morphs out of the button (lg.GlassMenu — the button
+    empties, a glass droplet inflates into the menu; closing pours it
+    back), one GlassMenuItem per item (icon in its accent + label) → its
+    add sheet
+  long press: the same menu opens under the finger (GlassMenuController
+    .open); slide onto an item (glideTo — it highlights, with a selection
+    haptic) and lift to open it (endGlide); lifting elsewhere leaves the
+    menu open for a tap
 
 Write button — the menu follows the current tab
 (writeOptionsFor, shared/widgets/write_options_sheet.dart; WriteButton
@@ -525,12 +687,38 @@ its add sheet:
   Money: "Add spending" (trending_down, moneySpending) / "Add income"
     (trending_up, moneyAccent) → AddMoneySheet(defaultType)
 
-Write button tap → glass bottom sheet, one ListTile per item.
+The home widget's pencil (`mindful://open-write-sheet`) has no button to
+morph from, so it opens the same items as a glass bottom sheet
+(showWriteOptionsSheet), one ListTile per item.
 
-Write button long press → radial arc overlay of the same items, filling
-  the slots left, up-left, up-right, right in menu order (4 items: all;
-  3: left, up-left, up-right; 2: up-left, up-right). Drag toward one and
-  release to open it; an empty slot or a downward drag opens nothing.
+Frosted nav (GlassStyle.frosted — FrostedNavBar, frosted_nav_bar.dart +
+FrostedWriteButton, frosted_write_button.dart), bottom of the shell in
+every placement (a hinge still puts it on the right screen), never
+minimizes:
+  Layout — SafeArea → Padding(bottom:12, horizontal:14), centered, max 520:
+  Row:
+    LEFT — glass island (flex:1):
+      background: rgba(255,255,255,0.09)
+      border: 0.5px rgba(255,255,255,0.18)
+      borderRadius: 28px
+      padding: EdgeInsets.symmetric(horizontal:10, vertical:11)
+      BackdropFilter blur(24)
+      Row _NavItem widgets (equal flex, one per tab — same icons/accents)
+    SizedBox(width:10)
+    RIGHT — FrostedWriteButton (52×52):
+      borderRadius: 22px
+      gradient: writeButtonGradient (both stops), AnimatedContainer 250ms
+      boxShadow: gradient start .withOpacity(0.30) blurRadius 20 offset (0,4)
+      Icon(Icons.edit_outlined, color:Color(0xFF0A1628), size:22)
+      onTap: glass bottom sheet, one ListTile per write-menu item
+      onLongPress: radial arc overlay of the same items, filling the slots
+        left, up-left, up-right, right in menu order (4 items: all; 3:
+        left, up-left, up-right; 2: up-left, up-right); drag toward one and
+        release to open it; an empty slot or a downward drag opens nothing;
+        the active badge uses the gradient's first stop
+  _NavItem: Column — icon (20px) + AnimatedContainer dot (active: 16×4,
+    radius 2, tab accent; inactive: 4 wide, transparent); NO labels;
+    inactive icon white 28%
 
 ---
 
@@ -831,6 +1019,9 @@ NOT in bottom nav.
 
 Language: "System default (<device language>)" / English / Bahasa Indonesia
   picker (see Localization). Default follows the device language.
+Glass style (glass_style_section.dart): row under Background — current
+  style; tap → sheet: "Liquid glass" / "Frosted glass", each with a
+  one-line description; switches the whole app at once. See Glass style.
 Background (background_section.dart): row with a 40×40 thumbnail of the
   current photo (or wallpaper icon) + "Default" / "Custom photo"; tap →
   sheet: "Choose from gallery", "Reset to default" (only when custom).
@@ -1018,6 +1209,110 @@ Android widget background (res/drawable/widget_glass_background.xml):
 
 ---
 
+## Web
+
+Same app in a browser (Flutter web, CanvasKit/skwasm), hosted as static
+files — not on Supabase (Storage serves .html as text/plain and has no SPA
+rewrites); Cloudflare Pages or Netlify. Build + deploy live with tool/build_web.sh
+(→ build/web, then `wrangler pages deploy` to the `mindful` Cloudflare
+Pages project's production branch; WebAssembly by default — `--no-wasm`
+for JS only; `--no-deploy` only builds, `--preview` deploys to
+preview.<project>.pages.dev instead; other flags go to flutter build). web/_redirects sends every path to index.html (go_router
+resolves it — usePathUrlStrategy, so URLs are /home/today, not
+/#/home/today); web/_headers keeps index.html / bootstrap / service worker
+uncached so a deploy shows up on the next load.
+
+Load speed:
+  web/index.html paints a loader at once: no icon, just the login
+    tagline ("Your day, a little more mindful." / Bahasa when the browser
+    is Indonesian — ARB loginTagline, keep in sync) centred in muted
+    system-font text, fading in; a writeAccent spinner fades in below it
+    only after 1s. Returning visitors get no text (localStorage
+    `mindful.loadedBefore`, set when the loader first hands over) — just
+    navy, then the app fading in. It keeps it up through the splash (auth
+    check); router.dart fades it out (450ms, window.mindfulHideLoader via
+    shared/web/web_loader.dart) after the first real screen — login or
+    home — has painted, so there's no Flutter spinner in between; on a
+    Home tab (signed in) it first waits for the cached data Home's cards
+    show (tasks, routines, budgets, quote, journal, breathing — up to
+    1.5s; network-only data isn't waited for), so Home fades in complete (a 10s
+    backstop after Flutter's first frame hides it regardless); preconnects to www.gstatic.com
+    (CanvasKit), fonts.gstatic.com (Roboto) and — injected by
+    build_web.sh from .env — the Supabase origin; an inline script
+    preloads the main file flutter.js will pick (main.dart.wasm + .mjs on
+    Blink with WasmGC + WebGL, else main.dart.js — mirrors flutter.js's
+    rules, re-check after a Flutter upgrade; build_web.sh --no-wasm turns
+    the wasm branch off).
+  google_sign_in isn't initialized on web at launch (it downloads
+    Google's ~100 KB sign-in script): web sign-in is Supabase's redirect;
+    Settings → Drive and sign-out initialize it on first use.
+  main() runs its independent startup steps side by side (glass shaders,
+    .env → Supabase, Hive, date formats; then language + glass style).
+  Rarely opened screens are deferred imports in router.dart, loaded via
+    DeferredScreen (shared/widgets/deferred_screen.dart — background, a
+    spinner after 300ms, retry on a failed download): Settings, monthly
+    recap, breathing session, exercise activity. Nothing else may import
+    them eagerly, or they fold back into main.dart.js — open the recap
+    with openMonthlyRecap (recap/presentation/recap_navigation.dart).
+  The fonts the engine waits for before starting the app (Roboto from
+    fonts.gstatic.com, FontManifest, MaterialIcons, CupertinoIcons) and
+    .env are <link rel="preload" as="fetch" crossorigin> in index.html,
+    so they download alongside main.dart.js instead of after it boots;
+    the Roboto URL is pinned in the engine — re-check after a Flutter
+    upgrade. main() loads the liquid glass shaders only in liquid style;
+    frosted (the web default) never fetches them unless the user switches
+    to liquid (GlassStyleController.select loads them first).
+  WebAssembly build by default (skwasm in Chrome/Edge/Firefox; Safari and
+    older browsers get the main.dart.js build shipped alongside).
+    Single-threaded by decision: COOP same-origin + COEP would enable
+    skwasm's threads (smoother frames, same download) but breaks the GIS
+    popup Settings → Drive uses on web — web/flutter_bootstrap.js
+    (custom template) sets suppressMultithreadingWarning and registers no
+    (deprecated) service worker. Chrome's "preloaded but not used within a
+    few seconds" warnings are expected: the preloads are consumed (one
+    request each) once the wasm has booted, seconds after window load. Every web dependency must
+    work under dart2wasm at runtime, not just compile — hive 2.x compiled
+    but threw UnimplementedError on every box, hence hive_ce. Smoke-test a
+    --preview deploy's console before going live.
+
+Platform checks: never `dart:io` Platform (it throws on web) —
+platform_features.dart: isPhonePlatform, isNativeIOS, isNativeAndroid,
+isWebPlatform. defaultTargetPlatform alone isn't enough for plugins:
+Safari on an iPhone still reports iOS. Layout may follow it (iPad Safari
+gets the iPad top tab bar; desktop browsers the bottom bar like Mac).
+
+Auth: google_sign_in v7 has no authenticate() in a browser, so web signs
+in with Supabase's Google redirect (signInWithOAuth, redirectTo the
+page's origin) — the page leaves for Google and comes back with the
+session in its URL, which Supabase.initialize picks up before the splash
+check. AuthNotifier.signIn returns false for that (the login spinner stays
+up until the page leaves). Drive (Settings) asks GoogleSignIn's app-level
+authorizationClient for the scope in a Google popup; the token lives in
+the page, so Drive reads as disconnected again after a reload.
+  Setup: Supabase Auth → URL Configuration: the site URL + redirect URLs
+  (also http://localhost:<port> for `flutter run -d chrome --web-port`);
+  Google Cloud Web OAuth client: the same origins as authorized JavaScript
+  origins, and the Supabase callback as a redirect URI.
+
+Files: no file system. Picked photos are read as bytes (XFile.readAsBytes)
+and drawn with PickedImage (shared/widgets/picked_image.dart — a blob: URL
+on web); the AI scan compresses bytes (compressWithList). The custom
+background is stored as a data: URI in the Hive box `custom_background`
+(device preference — not an account box) and drawn through
+backgroundImageProvider (app_background_scope.dart).
+
+Not on web (hidden, or quietly skipped):
+  reminders + every notification — flutter_local_notifications has no web
+    implementation and no-ops; the task/habit reminder rows, Settings →
+    Notifications and the debug test notification are hidden (kIsWeb). AI
+    retries still run, with progress only in the sheet/SnackBar.
+  home/lock screen widgets, app shortcuts, iOS App Intents, the camera
+    source (gallery only — mobile browsers offer the camera from it)
+Storage: Hive → IndexedDB, flutter_secure_storage → encrypted
+localStorage; the Supabase session is kept by supabase_flutter itself.
+
+---
+
 ## Localization
 
 Supported languages: English (`en`, fallback) and Bahasa Indonesia (`id`)
@@ -1043,6 +1338,12 @@ lib/core/l10n/:
     BuildContext (NotificationService, GeminiService, quick actions).
     setCurrentAppLocale() also sets Intl.defaultLocale so every DateFormat /
     NumberFormat follows the app language.
+  date_symbols_subset.dart — GENERATED by tool/gen_date_symbols.py:
+    intl's date symbols/patterns for en, en_US and id only;
+    initializeAppDateFormatting() (sync, main()) replaces intl's
+    initializeDateFormatting(), which bundles every locale. Re-run the
+    script after upgrading intl; add a locale there when adding a
+    language.
 
 Persistence: flutter_secure_storage key `app_language`
   ('system' | 'english' | 'bahasa'), via SettingsRepository. Unset → system.
@@ -1127,11 +1428,12 @@ Redirects:
              picker shows the symbol too)
   Keep the three maps in sync when adding a preset. Icon maps: moodIcon / journalTypeIcon (journal_labels.dart),
   categoryIcon (money_labels.dart).
-- Floating island nav bar — 5 tabs, NO profile tab, NO labels
+- Liquid glass tab bar — 5 tabs, NO profile tab, NO labels; bottom on
+  iPhone/Android/Mac, top on iPad, the vertical strip on iPhone Duo
 - Settings accessed via gear icon top-right of HomeScreen only
 - Each tab has its own accent color (see Feature accent colors)
-- Write button bottom-right of nav row — teal gradient on Home, the
-  current tab's accent elsewhere
+- Write button beside the tab bar (trailing end) — tinted glass, teal on
+  Home, the current tab's accent elsewhere
 - All add actions → bottom sheet (NOT full page navigation)
 - Detail views → bottom sheet (NOT full page, except habit calendar)
 - Primary actions always at bottom of sheet/screen
@@ -1141,7 +1443,7 @@ Redirects:
 - Autofocus first TextField on every add sheet
 - GlassCard for all content cards throughout app
 - BlobBackground on all main screens
-- RepaintBoundary wrapping all screens (Android BackdropFilter fix)
+- RepaintBoundary wrapping all screens (Android backdrop fix)
 - Full-page screens outside the shell (habit detail, journal editor,
   journal history, exercise activity) use GlassPageScaffold
   (shared/widgets/glass_page_scaffold.dart): transparent AppBar
@@ -1149,15 +1451,17 @@ Redirects:
   body in SafeArea — so the bar shows the blobs/custom photo instead of a
   plain dark strip
 - Unsynced dot: small subtle, never disruptive
-- Write button long press: radial arc overlay for quick access
+- Write button: tap → the menu morphs out of it; long press → slide to
+  an item and lift to open it
 - Full-page exceptions to "detail views are sheets": habit calendar, the
   monthly recap slideshow, a breathing session, the journal history and
   the exercise activity calendar
 - ShakeWidget on empty required field submit attempt
 - Big screens (macOS, iPad — core/constants/layout.dart AppLayout): the
   phone layout, centered rather than stretched. BlobBackground caps its
-  content at 720 (background still fills the window); the nav island +
-  write button are centered at 520; from 720 wide, showGlassBottomSheet
+  content at 720 (background still fills the window); the bottom tab bar +
+  write button are centered at 520 (Mac); an iPad gets the top tab bar
+  instead (see Floating Island Nav Bar); from 720 wide, showGlassBottomSheet
   opens the same content as a centered 560 GlassDialog (still a route, so
   pop-with-result works unchanged). Phones are below every cap. macOS
   window min size 380×640 (MainFlutterWindow.swift). Phone-only plugins
@@ -1188,11 +1492,16 @@ lib/
 │   ├── l10n/
 │   │   ├── app_language.dart
 │   │   ├── app_language_controller.dart
-│   │   └── l10n.dart
+│   │   ├── l10n.dart
+│   │   └── date_symbols_subset.dart ← generated: en/id date data only
 │   ├── router/router.dart
 │   └── theme/
 │       ├── app_theme.dart
-│       └── glass_theme.dart
+│       ├── glass_theme.dart
+│       ├── glass_style.dart          ← liquid | frosted (pure Dart)
+│       ├── glass_style_scope.dart    ← the one style reference widgets read
+│       ├── glass_style_controller.dart ← persisted choice (Settings)
+│       └── liquid_glass_presets.dart ← card / strong / chrome / tinted glass
 ├── features/
 │   ├── onboarding/
 │   │   └── presentation/
@@ -1233,6 +1542,7 @@ lib/
 │   │   │   └── journal_grouping.dart       ← by-day/month/search (pure)
 │   │   └── presentation/
 │   │       ├── journal_tab.dart            ← Mindfulness tab
+│   │       ├── journal_providers.dart      ← journalPhotoUrl (generated)
 │   │       ├── journal_today_section.dart  ← today strip / prompts + view all
 │   │       ├── journal_prompt_rows.dart    ← plan / review rows (home + tab)
 │   │       ├── journal_history_screen.dart ← full page calendar + list
@@ -1254,6 +1564,7 @@ lib/
 │   │       ├── habit_tab.dart          ← HabitTabController (today's habits)
 │   │       ├── habit_tab_list.dart     ← RoutineSection (used by PlanTab)
 │   │       ├── habit_detail_screen.dart    ← full page calendar
+│   │       ├── habit_detail_controller.dart ← HabitDetailController (generated)
 │   │       ├── habit_action_summary_card.dart ← per-action monthly counts
 │   │       ├── habit_day_log_sheet.dart    ← tap a calendar day: view/change
 │   │       ├── archived_habits_sheet.dart  ← "Archived (N)" link + sheet
@@ -1282,6 +1593,7 @@ lib/
 │       └── presentation/
 │           ├── settings_screen.dart
 │           ├── background_section.dart
+│           ├── glass_style_section.dart ← liquid / frosted picker
 │           ├── custom_background_controller.dart
 │           └── monthly_recap_section.dart
 └── shared/
@@ -1293,7 +1605,16 @@ lib/
     │   ├── intro_card.dart       ← empty state: icon + title + why + action
     │   ├── section_header.dart   ← title + "view all"-style action
     │   ├── unsynced_badge.dart
-    │   ├── floating_nav_bar.dart    ← island nav + write button
+    │   ├── floating_nav_bar.dart    ← bottom liquid glass tab bar
+    │   ├── adaptive_nav_bars.dart   ← iPad top bar + iPhone Duo strip
+    │   ├── nav_placement.dart       ← bottom / top / vertical strip (pure)
+    │   ├── nav_tabs.dart            ← the 5 tabs, accents, bar metrics
+    │   ├── floating_nav_write_button.dart ← write button + morphing menu
+    │   ├── frosted_nav_bar.dart     ← frosted style: bottom island
+    │   ├── frosted_write_button.dart ← frosted style: gradient + radial arc
+    │   ├── glass_icon_button.dart   ← liquid glass circle button
+    │   ├── picked_image.dart        ← a just-picked photo (file / web blob)
+    │   ├── deferred_screen.dart     ← route screen from a deferred import
     │   └── shake_widget.dart        ← invalid field animation
     ├── services/
     │   ├── notification_service.dart
@@ -1367,7 +1688,8 @@ manager, ...).
 3. Auth → Providers → Google (enable, add client ID + secret)
 4. Storage bucket `photos` — private, RLS enabled
 5. .env (never commit, template in .env.example): SUPABASE_URL, SUPABASE_ANON_KEY,
-   GEMINI_API_KEY, GOOGLE_SERVER_CLIENT_ID
+   GOOGLE_SERVER_CLIENT_ID — nothing secret: on web it's a public file
+   (GEMINI_API_KEY goes in the gemini-proxy function's secrets instead)
 6. ios/Flutter/Secrets.xcconfig (never commit, template in
    Secrets.xcconfig.example): GOOGLE_IOS_CLIENT_ID + its reversed form,
    substituted into Info.plist (GIDClientID, CFBundleURLSchemes)
@@ -1390,7 +1712,8 @@ flutter:
 - No conflict resolution beyond skip-existing on restore
 - No offline-first guarantee (Hive cache is best-effort)
 - No iPad layout v1
-- No third-party animation packages — Flutter built-in only
+- No third-party animation packages — Flutter built-in only (the
+  liquid_glass_widgets springs inside its glass widgets are the exception)
 - No profile tab in nav — settings accessed via home gear icon only
 
 
@@ -1525,11 +1848,15 @@ BUDGET CARD (budget_card.dart, top) — one strong GlassCard (padding
     card):
       period label ("Daily" / "Weekly" / "Monthly" / "Yearly") 12px
         textSecondary
-      remaining "[currency] [amount]" 17px bold — moneyAccent, red at or
-        below 0; scales down instead of clipping
-      4px rounded bar of the share USED + "72%" 11px muted to its right —
-        moneyAccent < 80%, amber 80–99%, red at 100%
+      remaining "[currency] [amount]" 17px bold; scales down instead of
+        clipping
+      4px rounded bar of the share USED + "72%" 11px muted to its right
+      remaining + bar share one color by share used — moneyAccent up to
+        50%, amber (accentAmber) over 50%, red at 100% (used up / over)
       "of [currency] [budget]" 11px muted (showTotal — Cashflow only)
+  only the first 2 tiles (one grid row) show; with more budgets set, a
+    centered "Show N more" / "Show less" toggle (expand_more / less,
+    textSecondary 12px) under the grid expands the rest (AnimatedSize)
   while some period isn't set: a "+ Weekly · Yearly" moneyAccent link
     under the grid → BudgetSettingsSheet
   no budget set at all: IntroCard track_changes_rounded moneyAccent
@@ -1549,7 +1876,9 @@ REMAINING BUDGET INDICATOR (between budget card and list):
 PERIOD SELECTOR (glass pill toggle):
   Today | This Week | This Month | All
   selected pill: moneyAccent tinted
-  filters the entry list below
+  filters the entry list below and scopes the recap's AI advice
+  (moneyPeriodProvider — money_period.dart, hand-written, default This
+  Month, kept while the app runs)
 
 No quick add buttons on the tab — adding goes through the nav bar's
 write button ("Add spending" / "Add income" on this tab) or the empty
@@ -1587,8 +1916,10 @@ RECAP SECTION (below list, collapsible):
       two rows: income total (moneyAccent) vs spending total (red)
       net: income - spending, color based on positive/negative
     top spending category highlighted
-    AI advice button (bottom of the recap, only if any entry exists):
-      TintedPill("AI advice", aiAccent, icon: auto_awesome_outlined) → MoneyAdviceSheet (see AI Advice)
+    AI advice button (bottom of the recap, only if the selected period
+      has entries):
+      TintedPill("AI advice", aiAccent, icon: auto_awesome_outlined),
+      right-aligned → MoneyAdviceSheet (see AI Advice)
 
 ### AI Advice (MoneyAdviceSheet)
 
@@ -1597,10 +1928,14 @@ Opened from the Recap section's "AI advice" pill. Experimental, uses
 the same Gemini setup as AI Lab (see AI Lab Feature GeminiService).
 
 Data sent (money_advice_summary.dart — buildMoneyAdviceSummary):
-  ALL money entries (all-time, not just the recap's month) + currency:
-    total spending / income, spending and income per category (largest
-    first), per-month spending / income, and the newest 200 individual
-    entries (date, type, category, amount, note).
+  the money entries of the period selected on the tab (Today / This
+  Week / This Month / All — e.g. This Month → only this month's entries)
+  + currency: the period ("2026-10-01 to 2026-10-23" / "all time"), total
+    spending / income, spending and income per category (largest first),
+    per-month spending / income, and the newest 60 individual entries
+    (date, type, category, amount, note) — fewer tokens, faster reply.
+  no entries in that period → the "Add some spending or income first"
+  SnackBar.
   Categories stay in their stored English names; numbers/dates are fixed
   format (not the app locale) so Gemini always reads the same shape.
 
@@ -1624,24 +1959,23 @@ notification mechanism as the food scan (see AI Lab Food Scan Flow):
      already running (still retrying in the background) → SnackBar
        "Still working on your advice...", stop — one run at a time, since
        they'd share the same notification id
-  1. show MoneyAdviceLoadingSheet (non-dismissible): title row
-     Icon(auto_awesome_outlined, aiAccent) + "AI spending advice",
-     CircularProgressIndicator aiAccent + "Looking at your spending..."
+  1. AI activity pill (see AI activity indicator): "Looking at your
+     spending..." — nothing blocks the app
   2. show progress notification (id 4003, see Notification IDs below)
   3. GeminiService.adviseOnMoney via runWithRetry (food_scan_retry.dart,
      generic, shared with the food scan):
-       busy → wait 1 minute and retry, up to 5 attempts total; each retry
-         updates the notification "attempt N/5"
-       on the first retry: dismiss the loading sheet — the notification
-         carries progress from here
+       busy / timeout → retry after 5s, 15s, 30s, then 1 min
+         (FoodScanRetryPolicy.delayBefore), up to 5 attempts total; each retry
+         updates the notification and the pill "attempt N/5"
        any other error, or still busy after 5 attempts → final failure
-  4. success: cancel the notification, show MoneyAdviceSheet(advice):
+  4. success: cancel the notification; the pill turns into "Spending
+     advice ready — tap to view" → MoneyAdviceSheet(advice):
        title row, "Overview" summary, "Where your money goes" bullets
        (moneySpending), "How to save" bullets (moneyAccent), footer
        info_outline icon + "Experimental AI advice... not financial advice."
        white30 11px
-     final failure: cancel the notification; if the sheet was already
-       dismissed for a retry, also show a failure notification (id 4003)
+     final failure: clear the pill, cancel the notification; if it had
+       retried, also show a failure notification (id 4003)
        with a "Retry" action — it and the body reopen /home/money (the user
        taps "AI advice" again); SnackBar with the classified message
   Holds the root NavigatorState / ScaffoldMessenger / ProviderContainer
@@ -1668,13 +2002,21 @@ amount field:
   no border, hint "0"
   system keyboard suppressed (TextInputType.none) — typed via the in-sheet
     AmountKeypad (amount_keypad.dart) at the bottom of the sheet instead:
-    1–9 / 000 0 ⌫ (long-press ⌫ clears), max 10 digits. Neither iOS nor
-    Android lets an app add a "000" key to the system keyboard.
+    1–9 / 000 0 in a 3-column pad, and a right-hand column with ⌫
+    (long-press clears) over a tall "Next" key (keyboard_return icon +
+    "Next", moneyAccent — like a number pad's return key) that moves focus
+    to the note field; max 10 digits. Without onNext the pad is the plain
+    3×4 with ⌫ next to 0. Neither iOS nor Android lets an app add a "000"
+    key to the system keyboard.
     Shown only while the amount field is focused; the note field gets the
-    normal system keyboard.
+    normal system keyboard (action: done).
     Layout: the header, the Save pill and the keypad are pinned; only the
     form between them scrolls, so the whole keypad (all 4 rows) is always
     on screen however tall the form gets (e.g. with Spending type shown).
+
+note field — right below the amount (before the category), centered like
+  the amount; the keypad's Next key jumps here:
+  TextField hint "Add a note..." 14px white60 no border
 
 category picker:
   Wrap of category chips (glass pills)
@@ -1692,9 +2034,6 @@ spending type (SpendingTypePicker — spending_type_picker.dart; Spending
     budgets. Counts toward monthly and yearly." / "Only counts toward your
     yearly budget." ...) — see Spending type
   edit mode keeps the entry's type
-
-note field:
-  TextField hint "Add a note..." 14px white60 no border
 
 date row:
   Icon calendar + formatted date (defaults today)
@@ -1737,12 +2076,19 @@ on save: upsert that period's budget_settings row in Supabase
 ### Home Screen — Money Flow integration
 
 REMAINING BUDGET WIDGET (after the recap banner, before Be mindful):
-  GlassCard (padding 16), the same 2-column BudgetTileGrid of
-  BudgetProgressTiles as the Cashflow card (no total line, labels
-  "Daily / Weekly / Monthly / Yearly remaining"); remaining from
-  MoneyRepository.getRemaining, so bills skip the shorter budgets
-
-  tap → context.go('/home/money')
+  GlassCard (padding 16), Column:
+    Row: one BudgetProgressTile — the DAILY budget ("Daily remaining", no
+      total line); without a daily budget, the shortest one that is set —
+      + on the right a "view all ›" link (commonViewAll 13px textMuted +
+      chevron_right_rounded 18) → context.go('/home/money') for the other
+      budgets
+    12px gap
+    Row of two equal TintedPills: "Add spending" (trending_down_rounded,
+      moneySpending) → AddMoneySheet(spending) / "Add income"
+      (trending_up_rounded, moneyAccent) → AddMoneySheet(income)
+  remaining from MoneyRepository.getRemaining, so bills skip the shorter
+  budgets
+  tap anywhere else on the card → context.go('/home/money')
   only shown if at least one budget is configured (amount > 0)
 
 ### Write menu — Money Flow addition
@@ -1773,9 +2119,10 @@ lib/features/money/
     spending_type_picker.dart   ← Everyday / weekly / monthly / yearly bill
     money_detail_sheet.dart
     budget_settings_sheet.dart
-    money_advice_sheet.dart     ← AI advice loading + result sheets
+    money_advice_sheet.dart     ← AI advice result sheet
     money_advice_flow.dart      ← retry + notification orchestration
     money_advice_summary.dart   ← entries → prompt data
+    money_period.dart           ← Today/Week/Month/All pills (shared)
     widgets/
       budget_card.dart          ← one card: header + gear, tile grid
       budget_progress_tile.dart ← one budget's tile + 2-column grid
@@ -1823,9 +2170,30 @@ Add aiAccent to GlassTheme.
 - Model: gemini-3.8-flash (fast, cheap, good vision — gemini-1.5-flash was
   retired and now 404s on every request; re-check ai.google.dev/gemini-api/docs/models
   if this one is later deprecated too)
-- API key stored in .env as GEMINI_API_KEY
+- API key lives in the `gemini-proxy` Supabase Edge Function's secrets
+  (supabase/functions/gemini-proxy) — `supabase secrets set
+  GEMINI_API_KEY=...`, `supabase functions deploy gemini-proxy`. The app
+  sends the SDK's own request through it (GeminiProxyClient,
+  shared/services/gemini_proxy_client.dart) with the user's Supabase JWT;
+  the function only forwards `models/gemini-*:generateContent` and passes
+  Google's response back unchanged, so error classification is the same.
+- A native build with GEMINI_API_KEY still in .env talks to Gemini
+  directly (transition only — leave it out). Web always uses the proxy,
+  and tool/build_web.sh refuses to build while .env has the key: every web
+  asset, .env included, is a public file.
 - Never hardcode the key anywhere
-- Add GEMINI_API_KEY to .env and .gitignore
+- Latency: gemini-3.x flash thinks by default, which pushed food scans past
+  the 30s timeout. GeminiThinkingClient (shared/services/
+  gemini_thinking_client.dart — wraps the HTTP client in both modes, since
+  google_generative_ai 0.4.x has no field for it) adds
+  generationConfig.thinkingConfig.thinkingLevel: minimal for both
+  requests, and generationConfig.mediaResolution MEDIA_RESOLUTION_MEDIUM
+  for the food scan (~560 image tokens instead of the default ~1120). A
+  400 naming either field resends once without them. Both requests use
+  responseMimeType application/json; money advice caps maxOutputTokens
+  at 1024. GeminiService debugPrints each reply's time + token counts,
+  ImageCompressionService the compression time — to see where a slow
+  request spends it.
 
 ### Supabase schema
 
@@ -1884,10 +2252,11 @@ FoodScan (Freezed, stored in Supabase):
 
 class GeminiService:
   late GenerativeModel _model
-  init from dotenv GEMINI_API_KEY, model: 'gemini-3.8-flash'
+  init: model 'gemini-3.8-flash', via the gemini-proxy Edge Function
+    (see Gemini API setup)
 
-  Future<FoodAnalysis?> analyzeFood(File compressedImage):
-    bytes = await compressedImage.readAsBytes()
+  Future<FoodAnalysis?> analyzeFood(Uint8List compressedImage):
+    bytes = compressedImage   (bytes, not a File — the web has no files)
     prompt = TextPart with this exact text:
       "You are a nutrition expert. Analyze this food image carefully.
        Respond with a single JSON object only — no markdown, no explanation.
@@ -1927,7 +2296,8 @@ class GeminiService:
       message contains 'PERMISSION_DENIED' → apiError,
         "AI access denied. Check your API key's permissions."
       else → apiError, "AI service error. Try again later."
-    timeout after 30 seconds → FoodScanErrorType.timeout
+    timeout after 30 seconds (money advice: 60) → FoodScanErrorType.timeout
+      (retried like busy — see runWithRetry)
     SocketException (no connection) → FoodScanErrorType.networkError
     the raw exception is always debugPrint'd — the UI never shows it
     directly, only the classified message above
@@ -1936,7 +2306,7 @@ ImageCompressionService (shared/services/image_compression_service.dart):
   Future<File> compress(File original):
     use flutter_image_compress package
     output path: path_provider's getTemporaryDirectory()
-    target: quality 75, minWidth 1024, minHeight 1024
+    target: quality 75, short side scaled to 768 (minWidth/minHeight 768)
     return compressed file
     if compressed > 4MB: reduce quality to 50 and retry
 
@@ -2020,76 +2390,74 @@ _openCamera():
   final photo = await picker.pickImage(
     source: ImageSource.camera,
     preferredCameraDevice: CameraDevice.rear,
-    imageQuality: 85)
+    maxWidth: 1536, maxHeight: 1536,   ← the picker downscales natively,
+    imageQuality: 85)                     so a 48MP original is never decoded
   if photo == null: return
   _analyzeImage(File(photo.path))
 
 _pickFromGallery():
-  final photo = await picker.pickImage(source: ImageSource.gallery)
+  final photo = await picker.pickImage(source: ImageSource.gallery,
+    maxWidth: 1536, maxHeight: 1536)
   if photo == null: return
   _analyzeImage(File(photo.path))
 
-_analyzeImage(File image) — auto-retries a busy Gemini response instead of
-failing on the first one, since the shared Flash capacity 503s under load
-often enough to be worth it:
-  1. show FoodAnalyzingSheet (loading state), non-dismissible
+_analyzeImage → scanFood(context, bytes) (food_scan_flow.dart) — runs
+without blocking the app (the user can switch tabs or use other
+features meanwhile) and auto-retries a busy or slow Gemini response, since
+the shared Flash capacity 503s under load often enough to be worth it.
+One scan at a time (they share notification 4002): starting another while
+one runs → SnackBar "Still analyzing your last photo...".
+  1. AI activity pill (see AI activity indicator below): "Analyzing your
+     food..."
   2. show/update a progress notification (id 4002, see Notification IDs
-     addition below) — keeps tracking the scan even after the sheet is
-     dismissed
+     addition below) — tracks the scan while the app is in the background
   3. compress image via ImageCompressionService
      — a compression failure is NOT retried; treated as an immediate
        final failure (step 5)
   4. call GeminiService.analyzeFood(compressed) via runWithRetry
      (lib/features/ai/presentation/food_scan_retry.dart):
-       - FoodScanErrorType.busy → wait 1 minute and retry, up to 5
-         attempts total (1 initial + 4 retries); each retry updates the
-         progress notification with an "attempt N/5" count
-       - on the first retry: dismiss FoodAnalyzingSheet — the
-         notification carries progress from here, freeing up the UI
+       - FoodScanErrorType.busy or timeout → retry after 5s, 15s, 30s,
+         then 1 min, up to 5 attempts total (1 initial + 4 retries); each retry updates
+         the notification and the pill with an "attempt N/5" count
        - any other error, or still busy after 5 attempts → final failure
          (step 5)
   5. on success:
        cancel the progress notification
-       if analysis == null: show SnackBar "Couldn't identify food. Try a
-         clearer photo."
-       else: show FoodResultSheet(analysis) — onSave writes to
-         food_scans and shows "Scan saved!"
+       if analysis == null: clear the pill, SnackBar "Couldn't identify
+         food. Try a clearer photo."
+       else: the pill turns into "Food result ready — tap to view" → tap
+         shows FoodResultSheet(analysis) — onSave writes to food_scans
+         and shows "Scan saved!". Never pops a sheet on its own.
      on final failure:
-       cancel the progress notification
-       if the sheet was already dismissed for a retry: also show a
-         failure notification (id 4002, reused) with a "Retry" action —
-         tapping it, or the notification body, reopens the AI tab; there
-         is no way to safely resume the exact same photo across a
-         killed-and-relaunched app, so "retry" just means letting the
-         user scan again
+       clear the pill, cancel the progress notification
+       if it had retried: also show a failure notification (id 4002,
+         reused) with a "Retry" action — tapping it, or the notification
+         body, reopens the AI tab; there is no way to safely resume the
+         exact same photo across a killed-and-relaunched app, so "retry"
+         just means letting the user scan again
        show SnackBar with the classified error message (see Error
          handling below)
+  Holds the root NavigatorState / ScaffoldMessenger / ProviderContainer,
+  not the AI tab's context, since the scan outlives the tab.
 
-### FoodAnalyzingSheet (loading bottom sheet)
+### AI activity indicator (shared/widgets/ai_activity_indicator.dart)
 
-lib/features/ai/presentation/food_analyzing_sheet.dart
-showAppBottomSheet content:
-  GlassCard strong:
-    drag handle
-    SizedBox 32
-    Column centered:
-      AnimatedBuilder on controller:
-        Stack centered:
-          CircularProgressIndicator aiAccent strokeWidth 2 size 64
-          Icon(Icons.restaurant_outlined, white60, 28px) centered
-      SizedBox 24
-      Text "Analyzing your food..." 16px white85 bold
-      SizedBox 8
-      Text rotating tips (AnimatedSwitcher every 2s):
-        "Identifying ingredients..."
-        "Estimating portions..."
-        "Calculating nutrition..."
-        "Almost done..."
-      SizedBox 32
-    non-dismissible (isDismissible: false)
-    dismissed programmatically (not by the user) as soon as a busy retry
-    starts — see Food Scan Flow; a companion notification tracks
-    progress from there
+Shows that an AI request (food scan, money advice) is still running
+without blocking anything — no loading sheets.
+  State: aiActivityProvider (shared/services/ai_activity.dart,
+    hand-written Notifier) — AiActivity {id, kind, attempt, maxAttempts,
+    open}; start / retrying / ready(open) / finish. A new request
+    replaces an unopened result of the same kind.
+  AiActivityOverlay — app.dart MaterialApp.builder, over the router (so
+    over sheets and dialogs too): top center, below the status bar (and
+    below the iPad top tab bar), max 360 wide. One pill per activity:
+    running — strong GlassCard pill, 14px aiAccent spinner + "Analyzing
+      your food..." / "Looking at your spending..." (+ " · attempt N/5"
+      while retrying); IgnorePointer, taps go straight through
+    ready — auto_awesome_outlined aiAccent + "Food result ready — tap to
+      view" / "Spending advice ready — tap to view" + close (×); tap →
+      opens the result sheet and clears the pill; × → clears it unopened
+  Fades/slides in and out (250ms; none with disableAnimations).
 
 ### FoodResultSheet (result bottom sheet)
 
@@ -2180,7 +2548,7 @@ lib/features/ai/
     food_scan.dart
   presentation/
     ai_tab.dart
-    food_analyzing_sheet.dart
+    food_scan_flow.dart         ← non-blocking scan + retry orchestration
     food_result_sheet.dart
     food_scan_retry.dart        ← retry policy + notification helpers
     widgets/
@@ -2189,6 +2557,15 @@ lib/features/ai/
 
 lib/shared/services/
   gemini_service.dart
+  gemini_proxy_client.dart      ← Gemini via the gemini-proxy function
+  gemini_thinking_client.dart   ← sets thinkingLevel on every request
+  ai_activity.dart              ← running / ready AI requests (indicator state)
+
+lib/shared/widgets/
+  ai_activity_indicator.dart    ← the non-blocking AI activity pill
+
+supabase/functions/gemini-proxy/index.ts  ← holds GEMINI_API_KEY
+tool/build_web.sh                         ← web build, refuses a keyed .env
   image_compression_service.dart
 ```
 
@@ -2206,7 +2583,8 @@ Add to glass_theme.dart:
   3 Money               moneyAccent green
   4 AI                  aiAccent indigo
 
-Icon size 20px.
+Icon size 22px. See Floating Island Nav Bar for placement and the
+liquid glass indicator.
 
 ### Error handling
 
@@ -2214,7 +2592,8 @@ FoodScanException class:
   message: String
   type: FoodScanErrorType
     (notFood, networkError, apiError, busy, timeout, unknown)
-  busy is the one retryable type — see Food Scan Flow's runWithRetry and
+  busy and timeout are the retryable types — see Food Scan Flow's
+  runWithRetry and
   GeminiService's error classification above.
 
 Show error as SnackBar on AITab — apiError, busy and unknown carry a
@@ -2338,7 +2717,8 @@ lib/features/recap/
     recap_window.dart           ← banner window, revisit months, yyyy-MM keys
   presentation/
     monthly_recap_providers.dart ← monthlyRecap, monthlyRecapBannerMonth
-    monthly_recap_screen.dart    ← route screen + openMonthlyRecap()
+    monthly_recap_screen.dart    ← route screen (deferred import)
+    recap_navigation.dart        ← openMonthlyRecap()
     recap_slide_data.dart
     recap_slides.dart            ← MonthlyRecap → slides + motivation
     widgets/

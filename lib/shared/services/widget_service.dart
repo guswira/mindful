@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -123,14 +122,14 @@ class WidgetService {
     // widget it doesn't recognize (an Android class name on iOS, or a
     // missing `ios` name on Android), so only the matching platform's
     // widgets are asked to redraw.
-    if (Platform.isAndroid) {
+    if (isNativeAndroid) {
       await HomeWidget.updateWidget(
         qualifiedAndroidName: WidgetProviderNames.mediumAndroidQualified,
       );
       await HomeWidget.updateWidget(
         qualifiedAndroidName: WidgetProviderNames.smallAndroidQualified,
       );
-    } else if (Platform.isIOS) {
+    } else if (isNativeIOS) {
       for (final kind in const [
         WidgetProviderNames.iOSMediumWidget,
         WidgetProviderNames.iOSSmallWidget,

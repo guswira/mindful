@@ -32,11 +32,4 @@ void main() {
     expect(find.text('Cook at home.'), findsOneWidget);
     expect(find.textContaining('not financial advice'), findsOneWidget);
   });
-
-  testWidgets('loading sheet shows a spinner and status text', (tester) async {
-    await tester.pumpWidget(wrap(const MoneyAdviceLoadingSheet()));
-
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
-    expect(find.text('Looking at your spending...'), findsOneWidget);
-  });
 }

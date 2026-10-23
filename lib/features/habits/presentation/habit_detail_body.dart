@@ -11,6 +11,7 @@ import '../domain/habit_log.dart';
 import 'habit_action_summary_card.dart';
 import 'habit_calendar.dart';
 import 'habit_day_log_sheet.dart';
+import 'habit_detail_controller.dart';
 import 'habit_detail_screen.dart';
 import 'habit_form.dart';
 

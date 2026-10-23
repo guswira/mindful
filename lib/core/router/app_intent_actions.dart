@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
+import '../platform/platform_features.dart';
 import 'sheet_navigation.dart';
 
 /// The channel `AppActionBridge` (ios/Runner/AppDelegate.swift) sends App
@@ -19,7 +19,7 @@ const MethodChannel appActionsChannel = MethodChannel('mindful/app_actions');
 /// `takePendingAction`) as well as ones arriving while it's running. No-op
 /// off iOS.
 void listenForAppIntentActions(GoRouter router) {
-  if (defaultTargetPlatform != TargetPlatform.iOS) {
+  if (!isNativeIOS) {
     return;
   }
   appActionsChannel.setMethodCallHandler((call) async {

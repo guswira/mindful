@@ -18,21 +18,164 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+  <meta name="description" content="Daily journaling, routines, tasks and money, in one calm place.">
+  <meta name="theme-color" content="#0A1628">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="mindful">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Mindful">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
 
-  <title>mindful</title>
+  <title>Mindful</title>
   <link rel="manifest" href="manifest.json">
+  <!-- Start these connections while main.dart.js downloads: CanvasKit
+       (www.gstatic.com) and the Roboto font (fonts.gstatic.com) come from
+       Google's CDN. tool/build_web.sh adds the Supabase origin below. -->
+  <script>
+    // Before anything paints: has the app loaded in this browser before?
+    // Set by mindfulHideLoader below. Storage can be blocked (private
+    // mode) — then it's treated as a first visit.
+    try {
+      if (localStorage.getItem('mindful.loadedBefore')) {
+        document.documentElement.classList.add('returning');
+      }
+    } catch (e) {}
+  </script>
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- supabase-preconnect -->
+  <script>
+    // Starts the app's main file downloading now instead of after
+    // flutter_bootstrap.js has run (~0.8s later on a slow phone). Which
+    // file depends on the build flutter.js will pick, so this mirrors its
+    // rules (Flutter 3.47 flutter.js): the WebAssembly build only on Blink
+    // (Chrome/Edge — its default wasmAllowList) with WasmGC and WebGL,
+    // else main.dart.js. Getting it wrong only costs a wasted download, so
+    // re-check after a Flutter upgrade. tool/build_web.sh sets
+    // hasWasmBuild to false for a --no-wasm build.
+    (function () {
+      var hasWasmBuild = true;
+      function add(href, as) {
+        var link = document.createElement('link');
+        link.href = href;
+        if (as === 'module') {
+          link.rel = 'modulepreload';
+        } else {
+          link.rel = 'preload';
+          link.as = as;
+          if (as === 'fetch') link.crossOrigin = 'anonymous';
+        }
+        document.head.appendChild(link);
+      }
+      function usesWasm() {
+        var blink = navigator.vendor === 'Google Inc.' ||
+          navigator.userAgent.indexOf('Edg/') !== -1;
+        if (!hasWasmBuild || !blink) return false;
+        try {
+          if (!WebAssembly.validate(new Uint8Array(
+              [0, 97, 115, 109, 1, 0, 0, 0, 1, 5, 1, 95, 1, 120, 0]))) {
+            return false;
+          }
+          var canvas = document.createElement('canvas');
+          return !!(canvas.getContext('webgl2') || canvas.getContext('webgl'));
+        } catch (e) {
+          return false;
+        }
+      }
+      if (usesWasm()) {
+        add('main.dart.wasm', 'fetch');
+        add('main.dart.mjs', 'module');
+      } else {
+        add('main.dart.js', 'script');
+      }
+    })();
+  </script>
+  <!-- The engine downloads every font in FontManifest.json (plus Roboto
+       from Google) and only then starts the app, and main() needs .env
+       next — but none of them are requested until main.dart.wasm/js has
+       downloaded and booted. Fetching them now, alongside it, takes them
+       off the critical path. URLs must match the engine's exactly (it uses
+       fetch(), hence as="fetch" + crossorigin); the Roboto one is pinned
+       in the engine (skwasm/canvaskit font_collection) — re-check it after
+       a Flutter upgrade. -->
+  <link rel="preload" href="https://fonts.gstatic.com/s/roboto/v32/KFOmCnqEu92Fr1Me4GZLCzYlKw.woff2" as="fetch" crossorigin>
+  <link rel="preload" href="assets/FontManifest.json" as="fetch" crossorigin>
+  <link rel="preload" href="assets/fonts/MaterialIcons-Regular.otf" as="fetch" crossorigin>
+  <link rel="preload" href="assets/packages/cupertino_icons/assets/CupertinoIcons.ttf" as="fetch" crossorigin>
+  <link rel="preload" href="assets/.env" as="fetch" crossorigin>
+
+  <!-- The app's navy (GlassTheme.background) from the first paint, so there's
+       no white flash while Flutter loads, plus a loader until Flutter draws
+       its first frame. -->
+  <style>
+    html, body { margin: 0; height: 100%; background: #0A1628; }
+    #loader {
+      position: fixed; inset: 0; display: flex;
+      align-items: center; justify-content: center;
+      background: #0A1628; transition: opacity 450ms ease-out; z-index: 1;
+    }
+    #loader.done { opacity: 0; pointer-events: none; }
+    /* Returning visitors (the app has loaded here before) get no text —
+       just the navy, then the app fading in. */
+    .returning #loader .tagline { display: none; }
+    /* Same copy as the login screen (ARB loginTagline). System fonts:
+       Flutter's own fonts aren't usable here yet. */
+    #loader .tagline {
+      margin: 0 24px; text-align: center;
+      font: 400 15px/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      letter-spacing: 0.2px; color: rgba(255, 255, 255, 0.55);
+      opacity: 0; animation: appear 400ms ease-out 100ms forwards;
+    }
+    /* Only shows up on a slow load, below the text so the text never moves. */
+    #loader .spinner {
+      position: absolute; top: calc(50% + 40px); left: 50%;
+      width: 20px; height: 20px; margin-left: -12px; border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.12);
+      border-top-color: #14E6AA; opacity: 0;
+      animation: spin 0.9s linear infinite, appear 300ms ease-out 1s forwards;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes appear { to { opacity: 1; } }
+    @media (prefers-reduced-motion: reduce) {
+      #loader .tagline { animation: none; opacity: 1; }
+      #loader .spinner { animation: appear 300ms ease-out 1s forwards; }
+    }
+  </style>
 </head>
 <body>
+  <div id="loader" aria-busy="true" aria-label="Loading Mindful">
+    <p class="tagline" data-id="Harimu, sedikit lebih mindful.">Your day, a little more mindful.</p>
+    <div class="spinner"></div>
+  </div>
+  <script>
+    // The app's two languages (ARB loginTagline); the saved app language
+    // isn't readable before Flutter starts, so this follows the browser.
+    if ((navigator.language || '').toLowerCase().indexOf('id') === 0) {
+      var tagline = document.querySelector('#loader .tagline');
+      tagline.textContent = tagline.getAttribute('data-id');
+    }
+  </script>
+  <script>
+    // The app calls this once its first real screen (login or home, not
+    // the splash) has painted — see router.dart _hideWebLoaderOnceOffSplash
+    // — so the navy overlay fades away and the screen fades in beneath it.
+    window.mindfulHideLoader = function () {
+      var loader = document.getElementById('loader');
+      if (!loader || loader.classList.contains('done')) return;
+      loader.classList.add('done');
+      try { localStorage.setItem('mindful.loadedBefore', '1'); } catch (e) {}
+      setTimeout(function () { loader.remove(); }, 500);
+    };
+    // Backstop: never leave the loader over a running app (e.g. if it
+    // fails before reaching a real screen).
+    window.addEventListener('flutter-first-frame', function () {
+      setTimeout(window.mindfulHideLoader, 10000);
+    }, { once: true });
+  </script>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

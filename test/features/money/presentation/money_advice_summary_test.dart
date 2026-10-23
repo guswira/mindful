@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart' show DateTimeRange;
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:mindful/features/money/domain/entry_type.dart';
@@ -53,6 +54,24 @@ void main() {
     expect(summary, contains('- 2026-09-01, spending, Transport, 50.00, Taxi'));
   });
 
+  test('names the period it covers', () {
+    expect(
+      buildMoneyAdviceSummary(entries, 'USD'),
+      contains('Period: all time'),
+    );
+    expect(
+      buildMoneyAdviceSummary(
+        entries,
+        'USD',
+        range: DateTimeRange(
+          start: DateTime(2026, 9, 1),
+          end: DateTime(2026, 9, 2),
+        ),
+      ),
+      contains('Period: 2026-09-01 to 2026-09-02'),
+    );
+  });
+
   test('sorts spending categories by amount, largest first', () {
     final summary = buildMoneyAdviceSummary(entries, 'USD');
 
@@ -74,6 +93,9 @@ void main() {
       RegExp('spending, Food').allMatches(summary).length,
       moneyAdviceMaxEntries,
     );
-    expect(summary, contains('Total spending: 210.00'));
+    expect(
+      summary,
+      contains('Total spending: ${moneyAdviceMaxEntries + 10}.00'),
+    );
   });
 }

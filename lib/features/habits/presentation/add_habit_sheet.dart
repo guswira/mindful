@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -284,17 +285,20 @@ class _AddHabitSheetState extends ConsumerState<AddHabitSheet> {
             selected: _color,
             onChanged: (color) => setState(() => _color = color),
           ),
-          const SizedBox(height: 20),
-          _SectionLabel(l10n.habitSectionReminder),
-          const SizedBox(height: Spacing.sm),
-          HabitReminderSection(
-            enabled: _reminderEnabled,
-            time: _reminderTime,
-            days: _reminderDays,
-            onEnabledChanged: _setReminderEnabled,
-            onPickTime: _pickTime,
-            onDayToggled: _toggleDay,
-          ),
+          // No reminders in a browser — see SPEC.md Web.
+          if (!kIsWeb) ...[
+            const SizedBox(height: 20),
+            _SectionLabel(l10n.habitSectionReminder),
+            const SizedBox(height: Spacing.sm),
+            HabitReminderSection(
+              enabled: _reminderEnabled,
+              time: _reminderTime,
+              days: _reminderDays,
+              onEnabledChanged: _setReminderEnabled,
+              onPickTime: _pickTime,
+              onDayToggled: _toggleDay,
+            ),
+          ],
           const SizedBox(height: 20),
           _SectionLabel(l10n.habitSectionCustomActions),
           const SizedBox(height: Spacing.xs),

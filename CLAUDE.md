@@ -1,6 +1,6 @@
 # Project
 
-Flutter app. Targets iOS + Android. Dart 3.9+, Flutter 3.35+.
+Flutter app. Targets iOS + Android (+ macOS, web — see SPEC.md Web). Dart 3.9+, Flutter 3.35+.
 
 ## Commands — use exactly these (output is quieted)
 

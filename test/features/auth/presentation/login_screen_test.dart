@@ -18,7 +18,7 @@ class _FailingAuthNotifier extends AuthNotifier {
   AuthState build() => const AuthState.unauthenticated();
 
   @override
-  Future<void> signIn() async =>
+  Future<bool> signIn() async =>
       throw const AuthException('Unacceptable audience in id_token');
 }
 

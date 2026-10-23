@@ -34,7 +34,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     setState(() => _isSigningIn = true);
     Object? error;
     try {
-      await ref.read(authNotifierProvider.notifier).signIn();
+      final finished = await ref.read(authNotifierProvider.notifier).signIn();
+      // Web: the page is leaving for Google — keep the spinner up until it
+      // does, instead of flashing the button back.
+      if (!finished) return;
     } catch (e) {
       // Not just GoogleSignInException — the Supabase token exchange that
       // follows a successful Google sign-in throws AuthException, and

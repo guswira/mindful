@@ -1,22 +1,29 @@
-import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:liquid_glass_widgets/liquid_glass_widgets.dart' as lg;
 
 import '../../core/constants/layout.dart';
+import '../../core/theme/glass_style.dart';
+import '../../core/theme/glass_style_scope.dart';
 import '../../core/theme/glass_theme.dart';
 import 'app_background_scope.dart';
 
 /// The 3-blob blurred background layer used behind content on every main
-/// screen, per the frosted glass dark theme.
+/// screen — the "wallpaper" the liquid glass cards and bars refract.
 ///
 /// With a custom photo set in Settings (via [AppBackgroundScope]) the photo
 /// fills the screen under a background-colored scrim, and the blobs and
 /// glass content sit on top as usual — so cards and text stay legible on
 /// any photo, bright or busy.
 ///
-/// [child] sits in a [BackdropGroup], so every `GlassCard` on the screen
-/// shares one backdrop read — see `GlassCard` for why.
+/// [child] sits in a backdrop group matching the [GlassStyle] — a
+/// [lg.GlassBackdropGroup] for liquid glass (like SwiftUI's
+/// `GlassEffectContainer`), a [BackdropGroup] for frosted — so every glass
+/// surface on the screen shares one backdrop read instead of each card
+/// copying the screen. Cheaper, and Android's renderer used to draw some
+/// cards see-through for a frame while a list of separately-read cards
+/// scrolled.
 class BlobBackground extends StatelessWidget {
   const BlobBackground({
     required this.child,
@@ -40,7 +47,10 @@ class BlobBackground extends StatelessWidget {
       alignment: Alignment.topCenter,
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: maxContentWidth),
-        child: BackdropGroup(child: child),
+        child: switch (GlassStyleScope.of(context)) {
+          GlassStyle.liquid => lg.GlassBackdropGroup(child: child),
+          GlassStyle.frosted => BackdropGroup(child: child),
+        },
       ),
     );
     return Stack(
@@ -85,8 +95,8 @@ class _CustomPhoto extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          Image.file(
-            File(path),
+          Image(
+            image: backgroundImageProvider(path),
             fit: BoxFit.cover,
             gaplessPlayback: true,
             // The file can vanish (cleared app data, restored backup) —
