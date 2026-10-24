@@ -44,6 +44,11 @@ Future<T?> showGlassBottomSheet<T>({
   );
 }
 
+/// Marks sheet content that makes room for the keyboard itself (e.g.
+/// [AddMoneySheet], whose own keypad and the system keyboard share one
+/// space), so [GlassBottomSheet] doesn't also lift it by the keyboard height.
+abstract interface class OwnsKeyboardInset {}
+
 /// A drag handle above a strong [GlassCard], riding up with the keyboard.
 ///
 /// Caps its own height to whatever's left of the screen above the keyboard
@@ -74,13 +79,17 @@ class GlassBottomSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
-    final keyboardHeight = mediaQuery.viewInsets.bottom;
+    final ownsInset = child is OwnsKeyboardInset;
+    final keyboardHeight = ownsInset ? 0.0 : mediaQuery.viewInsets.bottom;
     return AnimatedPadding(
       duration: _keyboardAnimationDuration,
       curve: Curves.easeOut,
       padding: EdgeInsets.only(bottom: keyboardHeight),
       child: SafeArea(
         top: false,
+        // Keeps the home-indicator gap steady while the keyboard comes and
+        // goes, for content sizing itself around the keyboard.
+        maintainBottomViewPadding: ownsInset,
         child: AnimatedContainer(
           duration: _keyboardAnimationDuration,
           curve: Curves.easeOut,

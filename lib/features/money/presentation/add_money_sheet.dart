@@ -6,6 +6,7 @@ import '../../../core/constants/spacing.dart';
 import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/glass_theme.dart';
 import '../../../shared/services/widget_service.dart';
+import '../../../shared/widgets/glass_bottom_sheet.dart';
 import '../../../shared/widgets/shake_widget.dart';
 import '../../../shared/widgets/sheet_header.dart';
 import '../../../shared/widgets/tinted_pill.dart';
@@ -16,7 +17,7 @@ import '../domain/entry_type.dart';
 import '../domain/money_entry.dart';
 import 'add_money_sheet_widgets.dart';
 import 'amount_input_formatter.dart';
-import 'amount_keypad.dart';
+import 'amount_keypad_slot.dart';
 import 'money_providers.dart';
 import 'spending_type_picker.dart';
 
@@ -27,7 +28,8 @@ import 'spending_type_picker.dart';
 ///
 /// Passing [entry] pre-fills the form and switches saving to an update;
 /// [defaultType] picks the initial spending/income toggle for a new entry.
-class AddMoneySheet extends ConsumerStatefulWidget {
+class AddMoneySheet extends ConsumerStatefulWidget
+    implements OwnsKeyboardInset {
   const AddMoneySheet({
     this.defaultType = EntryType.spending,
     this.entry,
@@ -252,7 +254,7 @@ class _AddMoneySheetState extends ConsumerState<AddMoneySheet> {
                   onTap: _save,
                 ),
         ),
-        FocusedAmountKeypad(
+        AmountKeypadSlot(
           focusNode: _amountFocus,
           controller: _amountController,
           onNext: _noteFocus.requestFocus,

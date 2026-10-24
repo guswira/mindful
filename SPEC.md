@@ -1652,7 +1652,11 @@ Colors: background #1E3B3F, sun #D9824F, ripples #A9C7B5, horizon #F1E9D8.
   icon at 256px, on every AndroidNotificationDetails.
 - Both notification icons listed in res/raw/keep.xml so release resource
   shrinking keeps them (the plugin looks them up by name).
-- Web: web/favicon.png + web/icons/Icon-*.png from the pack.
+- Web: web/favicon.png + web/icons/Icon-192/512.png from the pack.
+  Icon-maskable-*.png (what Android uses for an installed web app) are
+  NOT copies of those: full-bleed background (no transparent corners —
+  the launcher applies its own circle/squircle) with the app_icon.png
+  artwork scaled to 72%, well inside the maskable safe zone.
 
 ## Notification IDs
 - 1001 journal 8am, 1002 journal 10pm

@@ -54,6 +54,9 @@ class AmountKeypad extends StatelessWidget {
     ['000', '0'],
   ];
 
+  /// The pad's full height: 4 key rows, each with its padding.
+  static const double height = 4 * (_KeypadKey._height + Spacing.xs * 2);
+
   /// Rows of keys a "Next" key spans in the right-hand column.
   static const int _nextKeyRows = 3;
 
@@ -160,40 +163,6 @@ class _NextKeyLabel extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-/// [AmountKeypad] shown only while [focusNode] (the amount field) has focus,
-/// so it gives way to the system keyboard when the note field is tapped.
-class FocusedAmountKeypad extends StatelessWidget {
-  const FocusedAmountKeypad({
-    required this.focusNode,
-    required this.controller,
-    this.onNext,
-    super.key,
-  });
-
-  final FocusNode focusNode;
-  final TextEditingController controller;
-
-  /// See [AmountKeypad.onNext].
-  final VoidCallback? onNext;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: focusNode,
-      builder: (context, _) => AnimatedSize(
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeOutCubic,
-        child: focusNode.hasFocus
-            ? Padding(
-                padding: const EdgeInsets.only(top: Spacing.md),
-                child: AmountKeypad(controller: controller, onNext: onNext),
-              )
-            : const SizedBox(width: double.infinity),
-      ),
     );
   }
 }

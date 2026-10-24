@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -291,5 +292,65 @@ void main() {
     await tester.tap(key('9'));
     await tester.tap(key('000'));
     expect(find.text('9.000'), findsOneWidget);
+  });
+
+  testWidgets('a mouse click on a key keeps the keypad open', (tester) async {
+    // A mouse tap outside a text field unfocuses it (also any tap on web),
+    // and the keypad used to count as outside the amount field.
+    await tester.binding.setSurfaceSize(const Size(400, 1200));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(buildSheet());
+    await tester.pumpAndSettle();
+
+    Finder key(String label) => find.descendant(
+      of: find.byType(AmountKeypad),
+      matching: find.text(label),
+    );
+    await tester.tap(key('4'), kind: PointerDeviceKind.mouse);
+    await tester.pumpAndSettle();
+    await tester.tap(key('000'), kind: PointerDeviceKind.mouse);
+    await tester.pumpAndSettle();
+
+    expect(find.text('4.000'), findsOneWidget);
+    expect(find.byType(AmountKeypad), findsOneWidget);
+  });
+
+  testWidgets('the keypad holds its space until the keyboard takes over', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(400, 1200));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    var keyboard = 0.0;
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (context, setState) => MediaQuery(
+          data: MediaQueryData(
+            size: const Size(400, 1200),
+            viewInsets: EdgeInsets.only(bottom: keyboard),
+          ),
+          child: buildSheet(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final saveY = tester.getCenter(find.widgetWithText(TintedPill, 'Save')).dy;
+
+    await tester.tap(find.text('Next'));
+    // The keyboard hasn't started rising yet: Save mustn't drop.
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(
+      tester.getCenter(find.widgetWithText(TintedPill, 'Save')).dy,
+      lessThanOrEqualTo(saveY + 1),
+    );
+
+    // Once up, a keyboard taller than the keypad lifts Save above it.
+    tester.state<State<StatefulWidget>>(find.byType(StatefulBuilder))
+        // ignore: invalid_use_of_protected_member
+        .setState(() => keyboard = 400);
+    await tester.pumpAndSettle();
+    expect(
+      tester.getRect(find.widgetWithText(TintedPill, 'Save')).bottom,
+      lessThanOrEqualTo(1200 - 400),
+    );
   });
 }
