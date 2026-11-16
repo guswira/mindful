@@ -2,7 +2,8 @@ import 'package:flutter/material.dart' show DateTimeRange;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// The Money tab's period pills (Today | This Week | This Month | All).
-/// They filter the entry list and scope the AI advice. See SPEC.md Money
+/// They filter the entry list (the Recap's AI advice follows the recap's
+/// month instead). See SPEC.md Money
 /// Flow Feature Money Flow Tab, Period Selector.
 enum MoneyPeriod {
   today,
@@ -29,8 +30,7 @@ enum MoneyPeriod {
   }
 }
 
-/// Holds the selected [MoneyPeriod], shared so the recap's AI advice
-/// button covers what the entry list below it shows.
+/// Holds the selected [MoneyPeriod], kept while the app runs.
 class MoneyPeriodController extends Notifier<MoneyPeriod> {
   @override
   MoneyPeriod build() => MoneyPeriod.month;

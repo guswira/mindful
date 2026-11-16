@@ -5,6 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/l10n/l10n.dart';
 import '../../../core/platform/platform_features.dart';
+import 'calm_voice_picker.dart';
 
 part 'breathing_voice.g.dart';
 
@@ -40,23 +41,53 @@ class BreathingVoice {
     }
   }
 
-  /// (Re)applies the voice language whenever the app language changed
-  /// since the last call, and on iOS shares the audio session so speech
+  /// (Re)applies the voice whenever the app language changed since the
+  /// last call — the calmest natural voice the device has for it (see
+  /// [pickCalmVoice]) — and on iOS shares the audio session so speech
   /// plays over the ambience instead of stopping it.
   Future<void> _configure() async {
     final locale = currentL10n.localeName;
     if (_configuredLocale == locale) {
       return;
     }
-    await _tts.setLanguage(locale == 'id' ? 'id-ID' : 'en-US');
-    await _tts.setSpeechRate(0.45);
+    final languageCode = locale == 'id' ? 'id' : 'en';
+    await _tts.setLanguage(languageCode == 'id' ? 'id-ID' : 'en-US');
+    // setLanguage resets the voice on iOS, so the voice goes after it.
+    final voicesLoaded = await _applyCalmVoice(languageCode);
+    // Web rates are relative to 1.0 normal; iOS/Android (via the plugin)
+    // treat 0.5 as normal — both land just under a natural pace.
+    await _tts.setSpeechRate(kIsWeb ? 0.85 : 0.42);
+    await _tts.setPitch(0.95);
     if (isNativeIOS) {
       await _tts.setSharedInstance(true);
       await _tts.setIosAudioCategory(IosTextToSpeechAudioCategory.playback, [
         IosTextToSpeechAudioCategoryOptions.mixWithOthers,
       ]);
     }
-    _configuredLocale = locale;
+    // Browsers load their voice list lazily — try again on the next word.
+    if (voicesLoaded) {
+      _configuredLocale = locale;
+    }
+  }
+
+  /// Sets the voice; false when the engine hasn't listed its voices yet.
+  Future<bool> _applyCalmVoice(String languageCode) async {
+    final raw = await _tts.getVoices;
+    final voices = raw is List
+        ? [
+            for (final voice in raw)
+              if (voice is Map)
+                {
+                  for (final entry in voice.entries)
+                    if (entry.value != null) '${entry.key}': '${entry.value}',
+                },
+          ]
+        : const <TtsVoice>[];
+    final voice = pickCalmVoice(voices, languageCode);
+    if (voice != null) {
+      await _tts.setVoice(voice);
+    }
+    return voices.isNotEmpty;
   }
 }
 

@@ -79,7 +79,7 @@ void main() {
     ).thenAnswer((_) async {});
   });
 
-  Widget buildApp() => ProviderScope(
+  Widget buildApp({DateTime? month}) => ProviderScope(
     overrides: [
       moneyRepositoryProvider.overrideWith(
         (ref) async => MoneyRepository(
@@ -96,7 +96,7 @@ void main() {
       home: Scaffold(
         body: Builder(
           builder: (context) => TextButton(
-            onPressed: () => requestMoneyAdvice(context),
+            onPressed: () => requestMoneyAdvice(context, month: month),
             child: const Text('advise'),
           ),
         ),
@@ -161,6 +161,27 @@ void main() {
             as String;
     expect(summary, contains('Total spending: 12.50'));
     expect(summary, isNot(contains('99.00')));
+  });
+
+  testWidgets('a month sends only that month\'s entries', (tester) async {
+    when(
+      () => entriesBox.values,
+    ).thenReturn([_food.toJson(), _oldFood.toJson()]);
+    when(
+      () => gemini.adviseOnMoney(any()),
+    ).thenAnswer((_) async => const MoneyAdvice(summary: 'ok'));
+
+    await tester.pumpWidget(buildApp(month: _oldFood.date));
+    await tester.tap(find.text('advise'));
+    await tester.pumpAndSettle();
+
+    final summary =
+        verify(() => gemini.adviseOnMoney(captureAny())).captured.single
+            as String;
+    final year = _oldFood.date.year;
+    expect(summary, contains('Period: $year-01-01 to $year-01-31'));
+    expect(summary, contains('Total spending: 99.00'));
+    expect(summary, isNot(contains('12.50')));
   });
 
   testWidgets('busy retries after a wait, tracking the attempt', (

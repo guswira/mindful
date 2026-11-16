@@ -29,47 +29,91 @@ enum GeminiMediaResolution {
 /// Also sets [mediaResolution] when given — an image left at Gemini 3's
 /// default is read at the highest (slowest) resolution.
 ///
-/// If Google ever rejects either field (400 naming it), the request is sent
-/// once more without them, so a model that doesn't know them still
-/// answers — just slower.
+/// If Google rejects either field (a 400 naming it), the request is sent
+/// again without the rejected one — or, when only the thinking level's
+/// value is unsupported ("Thinking level MINIMAL is not supported for this
+/// model"), with the next level up — and this client keeps that from then
+/// on, so later requests don't pay for a failed round trip first. One
+/// client per model, so what one model rejects never changes another's.
 class GeminiThinkingClient extends http.BaseClient {
   GeminiThinkingClient(this.level, {this.mediaResolution, http.Client? inner})
-    : _inner = inner ?? http.Client();
+    : _inner = inner ?? http.Client(),
+      _level = level;
 
-  /// Applied to every request this client sends.
-  final GeminiThinkingLevel level;
+  /// The level asked for — the least thinking, bumped up (or dropped) only
+  /// if this client's model refuses it; null sends none (the model's
+  /// default).
+  final GeminiThinkingLevel? level;
 
-  /// Applied to every request this client sends; null keeps Gemini's
-  /// default.
+  /// Applied to every request this client sends, until Google rejects it;
+  /// null keeps Gemini's default.
   final GeminiMediaResolution? mediaResolution;
 
   final http.Client _inner;
+
+  /// What's actually sent; null once the field itself is rejected.
+  GeminiThinkingLevel? _level;
+  bool _mediaResolutionRejected = false;
 
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) async {
     if (request is! http.Request) {
       return _inner.send(request);
     }
-    final tuned = withThinkingLevel(
-      request.bodyBytes,
-      level,
-      mediaResolution: mediaResolution,
-    );
-    if (tuned == null) {
-      return _inner.send(request);
+    // Each pass raises the level or drops a field, so this always ends.
+    while (true) {
+      final tuned = withThinkingLevel(
+        request.bodyBytes,
+        _level,
+        mediaResolution: _mediaResolutionRejected ? null : mediaResolution,
+      );
+      if (tuned == null) {
+        return _inner.send(request);
+      }
+      final response = await _inner.send(_copy(request, tuned));
+      if (response.statusCode != 400) {
+        return response;
+      }
+      final body = await response.stream.toBytes();
+      final error = utf8.decode(body, allowMalformed: true);
+      if (!_adjustToRejection(error.toLowerCase())) {
+        return _replay(response, body);
+      }
+      debugPrint(
+        'Gemini rejected a tuning field; now sending thinking level '
+        '${_level?.name ?? 'none'}: $error',
+      );
     }
-    final response = await _inner.send(_copy(request, tuned));
-    if (response.statusCode != 400) {
-      return response;
-    }
-    final body = await response.stream.toBytes();
-    final error = utf8.decode(body, allowMalformed: true).toLowerCase();
-    if (!_tunedFields.any(error.contains)) {
-      return _replay(response, body);
-    }
-    debugPrint('Gemini rejected a tuning field; retrying without them');
-    return _inner.send(_copy(request, request.bodyBytes));
   }
+
+  /// Adjusts what's sent to the field [error] (lowercased) rejects; false
+  /// when it names nothing still being sent — then the 400 is about
+  /// something else.
+  bool _adjustToRejection(String error) {
+    var dropped = false;
+    final level = _level;
+    if (level != null && error.contains('thinking')) {
+      _level = _unsupportedLevel(error) ? _nextLevel(level) : null;
+      dropped = true;
+    }
+    if (!_mediaResolutionRejected &&
+        mediaResolution != null &&
+        _mediaResolutionNames.any(error.contains)) {
+      _mediaResolutionRejected = true;
+      dropped = true;
+    }
+    return dropped;
+  }
+
+  /// Whether [error] refuses the level's value rather than the field.
+  static bool _unsupportedLevel(String error) =>
+      error.contains('thinking level') && error.contains('not supported');
+
+  /// The next level up, or null past the highest.
+  static GeminiThinkingLevel? _nextLevel(GeminiThinkingLevel level) =>
+      level.index + 1 < GeminiThinkingLevel.values.length
+      ? GeminiThinkingLevel.values[level.index + 1]
+      : null;
 
   @override
   void close() {
@@ -77,10 +121,9 @@ class GeminiThinkingClient extends http.BaseClient {
     super.close();
   }
 
-  /// How a 400 names the fields this client adds (camelCase or
-  /// snake_case, lowercased).
-  static const List<String> _tunedFields = [
-    'thinking',
+  /// How a 400 names `mediaResolution` (camelCase or snake_case,
+  /// lowercased).
+  static const List<String> _mediaResolutionNames = [
     'mediaresolution',
     'media_resolution',
   ];
@@ -104,15 +147,19 @@ class GeminiThinkingClient extends http.BaseClient {
 }
 
 /// [body] (a generateContent JSON request) with
-/// `generationConfig.thinkingConfig.thinkingLevel` set to [level] (and
-/// `generationConfig.mediaResolution` when [mediaResolution] is given), or
-/// null when it isn't a JSON object to add them to.
+/// `generationConfig.thinkingConfig.thinkingLevel` set to [level] and
+/// `generationConfig.mediaResolution` to [mediaResolution] (each only when
+/// given), or null when there's nothing to add or it isn't a JSON object
+/// to add them to.
 @visibleForTesting
 List<int>? withThinkingLevel(
   List<int> body,
-  GeminiThinkingLevel level, {
+  GeminiThinkingLevel? level, {
   GeminiMediaResolution? mediaResolution,
 }) {
+  if (level == null && mediaResolution == null) {
+    return null;
+  }
   final Object? json;
   try {
     json = jsonDecode(utf8.decode(body));
@@ -128,7 +175,10 @@ List<int>? withThinkingLevel(
   };
   json['generationConfig'] = {
     ...config,
-    'thinkingConfig': {'thinkingLevel': level.name},
+    'thinkingConfig': ?switch (level) {
+      final level? => {'thinkingLevel': level.name},
+      null => null,
+    },
     'mediaResolution': ?mediaResolution?.apiValue,
   };
   return utf8.encode(jsonEncode(json));

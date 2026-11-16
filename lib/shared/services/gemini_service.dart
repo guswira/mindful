@@ -18,6 +18,25 @@ import 'gemini_thinking_client.dart';
 
 part 'gemini_service.g.dart';
 
+/// One Gemini model the app may ask, with the least thinking it accepts.
+typedef GeminiModelChoice = ({String name, GeminiThinkingLevel? thinking});
+
+/// The models a request tries, in order — the next one only when the one
+/// before is overloaded (503), out of quota (429, which is per model) or
+/// gone (404). Each runs on its own capacity and free-tier quota, so a
+/// busy newest model rarely fails a request on its own.
+const List<GeminiModelChoice> geminiModels = [
+  // Newest and best — and the busiest. Refuses MINIMAL thinking ("not
+  // supported for this model"), so LOW is its least.
+  (name: 'gemini-3.8-flash', thinking: GeminiThinkingLevel.low),
+  // Older, stable, usually has room. Gemini 2.5 has no thinking levels
+  // (it takes a token budget instead), so it thinks at its default.
+  (name: 'gemini-2.5-flash', thinking: null),
+  // Google's alias for the newest Flash-Lite: fastest, least busy,
+  // slightly rougher estimates; the alias never gets retired under us.
+  (name: 'gemini-flash-lite-latest', thinking: GeminiThinkingLevel.minimal),
+];
+
 const String _foodAnalysisPrompt = '''
 You are a nutrition expert. Analyze this food image carefully.
 Respond with a single JSON object only — no markdown, no explanation, no code blocks.
@@ -41,16 +60,32 @@ If the image is not food or you cannot identify it, respond with exactly: null''
 /// spending advice (SPEC.md Money Flow Feature AI Advice).
 class GeminiService {
   GeminiService()
-    // Neither a one-photo nutrition estimate nor spending advice gains much
-    // from reasoning, so both get the least thinking (fastest). The photo
-    // is read at medium resolution — half the image tokens of the default,
-    // still plenty to tell dishes apart (low starts to blur them).
-    : _foodModel = _createModel(
-        GeminiThinkingLevel.minimal,
-        mediaResolution: GeminiMediaResolution.medium,
-      ),
-      _adviceModel = _createModel(
-        GeminiThinkingLevel.minimal,
+    : this.withModels(
+        food: [for (final model in geminiModels) _foodModelFor(model)],
+        advice: [for (final model in geminiModels) _adviceModelFor(model)],
+      );
+
+  /// Uses the given models, tried in order — [GeminiService.new] builds
+  /// the real ones from [geminiModels].
+  @visibleForTesting
+  GeminiService.withModels({
+    required List<GenerativeModel> food,
+    required List<GenerativeModel> advice,
+  }) : assert(food.isNotEmpty && advice.isNotEmpty),
+       _foodModels = food,
+       _adviceModels = advice;
+
+  // Neither a one-photo nutrition estimate nor spending advice gains much
+  // from reasoning, so both get the least thinking their model takes
+  // (fastest). The photo is read at medium resolution — half the image
+  // tokens of the default, still plenty to tell dishes apart (low starts
+  // to blur them).
+  static GenerativeModel _foodModelFor(GeminiModelChoice model) =>
+      _createModel(model, mediaResolution: GeminiMediaResolution.medium);
+
+  static GenerativeModel _adviceModelFor(GeminiModelChoice model) =>
+      _createModel(
+        model,
         // The reply is a short summary + a few bullets; the cap stops a
         // rambling answer from adding seconds.
         maxOutputTokens: 1024,
@@ -60,21 +95,18 @@ class GeminiService {
   /// `GEMINI_API_KEY` in its `.env`; otherwise (always on web) through the
   /// `gemini-proxy` Edge Function, which keeps the key server-side.
   static GenerativeModel _createModel(
-    GeminiThinkingLevel thinking, {
+    GeminiModelChoice model, {
     GeminiMediaResolution? mediaResolution,
     int? maxOutputTokens,
   }) {
     final apiKey = dotenv.maybeGet('GEMINI_API_KEY') ?? '';
     final direct = !kIsWeb && apiKey.isNotEmpty;
     return GenerativeModel(
-      // gemini-1.5-flash (SPEC.md's original pick) was fully retired —
-      // every request to it now 404s. gemini-3.8-flash is the current
-      // stable, vision-capable flash model.
-      model: 'gemini-3.8-flash',
+      model: model.name,
       // The proxy swaps this placeholder for the user's Supabase JWT.
       apiKey: direct ? apiKey : 'proxy',
       httpClient: GeminiThinkingClient(
-        thinking,
+        model.thinking,
         mediaResolution: mediaResolution,
         inner: direct ? null : GeminiProxyClient(),
       ),
@@ -87,8 +119,8 @@ class GeminiService {
     );
   }
 
-  final GenerativeModel _foodModel;
-  final GenerativeModel _adviceModel;
+  final List<GenerativeModel> _foodModels;
+  final List<GenerativeModel> _adviceModels;
 
   static const Duration _foodTimeout = Duration(seconds: 30);
 
@@ -100,7 +132,7 @@ class GeminiService {
   /// [FoodScanException] for every other failure — timeout, no
   /// connection, an API-side error, or a response that isn't valid JSON.
   Future<FoodAnalysis?> analyzeFood(Uint8List compressedImage) async {
-    final text = await _generate(_foodModel, _foodTimeout, [
+    final text = await _generate(_foodModels, _foodTimeout, [
       Content.multi([
         TextPart(_foodAnalysisPrompt),
         DataPart('image/jpeg', compressedImage),
@@ -117,7 +149,7 @@ class GeminiService {
   /// back in the app language. Throws [FoodScanException] on any failure,
   /// same as [analyzeFood] — it shares the same error classification.
   Future<MoneyAdvice> adviseOnMoney(String moneySummary) async {
-    final text = await _generate(_adviceModel, _adviceTimeout, [
+    final text = await _generate(_adviceModels, _adviceTimeout, [
       Content.text(currentL10n.moneyAdvicePrompt(moneySummary)),
     ]);
     if (text == null || text.isEmpty) {
@@ -131,21 +163,39 @@ class GeminiService {
 
   /// Sends [content] and returns Gemini's trimmed reply text, mapping
   /// every failure onto a [FoodScanException] with a user-facing message.
+  ///
+  /// Tries [models] in order, moving on right away when one is
+  /// overloaded, out of quota or gone ([_triesNextModel]). When every one
+  /// fails that way, the first busy error stands, so the caller's retry
+  /// ([runWithRetry]) still kicks in. A timeout or any other error stops
+  /// at once — a timeout has already used up the wait.
   Future<String?> _generate(
-    GenerativeModel model,
+    List<GenerativeModel> models,
     Duration timeout,
     List<Content> content,
   ) async {
-    final stopwatch = Stopwatch()..start();
     try {
-      final response = await model.generateContent(content).timeout(timeout);
-      final usage = response.usageMetadata;
-      debugPrint(
-        'Gemini replied in ${stopwatch.elapsedMilliseconds}ms '
-        '(prompt ${usage?.promptTokenCount} tokens, '
-        'reply ${usage?.candidatesTokenCount} tokens)',
-      );
-      return response.text?.trim();
+      GenerativeAIException? busy;
+      GenerativeAIException? last;
+      for (final (index, model) in models.indexed) {
+        try {
+          return await _ask(model, timeout, content);
+        } on GenerativeAIException catch (error) {
+          if (!_triesNextModel(error)) {
+            rethrow;
+          }
+          debugPrint(
+            'Gemini model ${index + 1}/${models.length} unavailable: '
+            '${error.message}',
+          );
+          last = error;
+          if (busy == null && _isBusy(error)) {
+            busy = error;
+          }
+        }
+      }
+      // Every model failed in a way worth trying the next one for.
+      throw busy ?? last ?? StateError('No Gemini models to ask');
     } on TimeoutException {
       throw FoodScanException(
         currentL10n.aiErrorTimeout,
@@ -174,6 +224,30 @@ class GeminiService {
         FoodScanErrorType.unknown,
       );
     }
+  }
+
+  /// Whether [error] is the asked model's own problem — another model may
+  /// well answer.
+  static bool _triesNextModel(GenerativeAIException error) =>
+      _isBusy(error) || isGeminiModelMissing(error);
+
+  static bool _isBusy(GenerativeAIException error) =>
+      isGeminiOverloaded(error) || isGeminiOutOfQuota(error);
+
+  static Future<String?> _ask(
+    GenerativeModel model,
+    Duration timeout,
+    List<Content> content,
+  ) async {
+    final stopwatch = Stopwatch()..start();
+    final response = await model.generateContent(content).timeout(timeout);
+    final usage = response.usageMetadata;
+    debugPrint(
+      'Gemini replied in ${stopwatch.elapsedMilliseconds}ms '
+      '(prompt ${usage?.promptTokenCount} tokens, '
+      'reply ${usage?.candidatesTokenCount} tokens)',
+    );
+    return response.text?.trim();
   }
 
   /// Parses [text] with [fromJson], after stripping any accidental
@@ -211,13 +285,13 @@ class GeminiService {
     return (FoodScanErrorType.apiError, currentL10n.geminiErrorInvalidKey);
   }
   final message = error.message;
-  if (message.contains('UNAVAILABLE') || message.contains('high demand')) {
+  if (isGeminiOverloaded(error)) {
     return (FoodScanErrorType.busy, currentL10n.geminiErrorBusy);
   }
-  if (message.contains('RESOURCE_EXHAUSTED') || message.contains('quota')) {
+  if (isGeminiOutOfQuota(error)) {
     return (FoodScanErrorType.busy, currentL10n.geminiErrorQuota);
   }
-  if (message.contains('NOT_FOUND')) {
+  if (isGeminiModelMissing(error)) {
     return (
       FoodScanErrorType.apiError,
       currentL10n.geminiErrorModelUnavailable,
@@ -231,6 +305,29 @@ class GeminiService {
   }
   return (FoodScanErrorType.apiError, currentL10n.geminiErrorGeneric);
 }
+
+/// Whether [error] is Google's 503 "model overloaded" (the SDK keeps only
+/// the message, not the status, so it's matched by wording) — a capacity
+/// problem of that one model.
+@visibleForTesting
+bool isGeminiOverloaded(GenerativeAIException error) =>
+    error.message.contains('UNAVAILABLE') ||
+    error.message.contains('high demand') ||
+    error.message.contains('overloaded');
+
+/// Whether [error] is a 404 for the model itself — retired, renamed or
+/// never existed ("models/x is not found for API version v1beta").
+@visibleForTesting
+bool isGeminiModelMissing(GenerativeAIException error) =>
+    error.message.contains('NOT_FOUND') ||
+    error.message.contains('is not found');
+
+/// Whether [error] is a 429 — that model's quota is used up for now.
+/// Quotas are per model, so another model may still have room.
+@visibleForTesting
+bool isGeminiOutOfQuota(GenerativeAIException error) =>
+    error.message.contains('RESOURCE_EXHAUSTED') ||
+    error.message.contains('quota');
 
 /// The app-wide [GeminiService].
 @riverpod

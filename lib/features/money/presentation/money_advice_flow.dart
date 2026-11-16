@@ -15,6 +15,7 @@ import '../data/money_repository.dart';
 import '../domain/money_advice.dart';
 import 'money_advice_sheet.dart';
 import 'money_advice_summary.dart';
+import 'money_months.dart';
 import 'money_period.dart';
 
 /// Whether a [requestMoneyAdvice] run is still going — possibly minutes
@@ -22,9 +23,10 @@ import 'money_period.dart';
 /// notification id.
 bool _inFlight = false;
 
-/// Sends the money entries of the Money tab's selected period
-/// ([moneyPeriodProvider] — e.g. This Month → just this month's) to Gemini
-/// and offers the advice — the same
+/// Sends one [month]'s money entries (the Recap's month — up to today for
+/// the month in progress) to Gemini and offers the advice; without a
+/// [month], the Money tab's selected period ([moneyPeriodProvider]).
+/// Offers the advice — the same
 /// non-blocking flow as the food scan's: the AI activity pill at the top of the
 /// screen shows it's running (and any retry), then "ready — tap to view";
 /// a progress notification (id 4003) tracks it in the background, and a
@@ -35,7 +37,7 @@ bool _inFlight = false;
 /// Holds on to the root [NavigatorState], [ScaffoldMessengerState] and
 /// [ProviderContainer] rather than [context] itself, since the retries
 /// can outlive the widget that started them (e.g. the user switches tab).
-Future<void> requestMoneyAdvice(BuildContext context) async {
+Future<void> requestMoneyAdvice(BuildContext context, {DateTime? month}) async {
   final messenger = ScaffoldMessenger.of(context);
   if (_inFlight) {
     messenger.showSnackBar(
@@ -49,6 +51,7 @@ Future<void> requestMoneyAdvice(BuildContext context) async {
       container: ProviderScope.containerOf(context),
       navigator: Navigator.of(context, rootNavigator: true),
       messenger: messenger,
+      month: month,
     );
   } finally {
     _inFlight = false;
@@ -59,11 +62,13 @@ Future<void> _run({
   required ProviderContainer container,
   required NavigatorState navigator,
   required ScaffoldMessengerState messenger,
+  DateTime? month,
 }) async {
   final repository = await container.read(moneyRepositoryProvider.future);
-  final range = container
-      .read(moneyPeriodProvider)
-      .rangeEndingAt(DateTime.now());
+  final now = DateTime.now();
+  final range = month != null
+      ? moneyMonthRange(month, now)
+      : container.read(moneyPeriodProvider).rangeEndingAt(now);
   final entries = repository.getEntries(range: range);
   if (entries.isEmpty) {
     messenger.showSnackBar(

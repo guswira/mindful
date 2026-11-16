@@ -1880,8 +1880,8 @@ REMAINING BUDGET INDICATOR (between budget card and list):
 PERIOD SELECTOR (glass pill toggle):
   Today | This Week | This Month | All
   selected pill: moneyAccent tinted
-  filters the entry list below and scopes the recap's AI advice
-  (moneyPeriodProvider — money_period.dart, hand-written, default This
+  filters the entry list below — the Recap and its AI advice follow
+  their own month instead (moneyPeriodProvider — money_period.dart, hand-written, default This
   Month, kept while the app runs)
 
 No quick add buttons on the tab — adding goes through the nav bar's
@@ -1911,30 +1911,46 @@ ENTRY LIST (grouped by date, newest first):
     tap → MoneyEntryDetailSheet
     long press → sheet: Edit / Delete
 
-RECAP SECTION (below list, collapsible):
-  ExpansionTile "Recap" glass style:
+RECAP SECTION (between the budget card and the list, collapsible):
+  ExpansionTile "Recap" glass style, subtitle this month ("November
+  2026") — the recap always covers THIS month (1st → today).
+  One month's recap (MoneyMonthRecap — widgets/money_month_recap.dart,
+  shared with the history sheet; bars/rows in money_recap_parts.dart):
     spending by category: horizontal bar chart (CustomPaint)
       each category bar: category name + amount + % of total spending
       bar color: red opacity proportional
+      no spending: "No spending this month"
     income vs spending summary:
       two rows: income total (moneyAccent) vs spending total (red)
       net: income - spending, color based on positive/negative
     top spending category highlighted
-    AI advice button (bottom of the recap, only if the selected period
-      has entries):
-      TintedPill("AI advice", aiAccent, icon: auto_awesome_outlined),
-      right-aligned → MoneyAdviceSheet (see AI Advice)
+    bottom row:
+      left — "Previous months ›" (history_rounded, textSecondary 13px;
+        tab recap only, only when an earlier month has entries) →
+        MoneyRecapHistorySheet
+      right — AI advice (only if that month has entries):
+        TintedPill("AI advice", aiAccent, icon: auto_awesome_outlined)
+        → advice for THAT month (see AI Advice)
+
+  MoneyRecapHistorySheet (money_recap_history_sheet.dart) — "Cashflow
+    history": MonthCalendarHeader (‹ month ›) over the same
+    MoneyMonthRecap for the picked month, each with its own AI advice.
+    Opens on the latest earlier month; the chevrons page only through
+    months that have entries (moneyHistoryMonths — money_months.dart,
+    pure), never into the current month (that's the tab's recap).
 
 ### AI Advice (MoneyAdviceSheet)
 
 lib/features/money/presentation/money_advice_sheet.dart
-Opened from the Recap section's "AI advice" pill. Experimental, uses
+Opened from a month recap's "AI advice" pill (the tab's Recap or the
+cashflow history sheet). Experimental, uses
 the same Gemini setup as AI Lab (see AI Lab Feature GeminiService).
 
 Data sent (money_advice_summary.dart — buildMoneyAdviceSummary):
-  the money entries of the period selected on the tab (Today / This
-  Week / This Month / All — e.g. This Month → only this month's entries)
-  + currency: the period ("2026-10-01 to 2026-10-23" / "all time"), total
+  the money entries of the recap's month (requestMoneyAdvice(context,
+  month:) — moneyMonthRange: the 1st → the month's last day, or → today
+  for this month; without a month it falls back to the tab's period
+  pills) + currency: the period ("2026-10-01 to 2026-10-31"), total
     spending / income, spending and income per category (largest first),
     per-month spending / income, and the newest 60 individual entries
     (date, type, category, amount, note) — fewer tokens, faster reply.
@@ -2127,12 +2143,16 @@ lib/features/money/
     money_advice_flow.dart      ← retry + notification orchestration
     money_advice_summary.dart   ← entries → prompt data
     money_period.dart           ← Today/Week/Month/All pills (shared)
+    money_months.dart           ← month range + history months (pure)
+    money_recap_history_sheet.dart ← earlier months' recaps + AI advice
     widgets/
       budget_card.dart          ← one card: header + gear, tile grid
       budget_progress_tile.dart ← one budget's tile + 2-column grid
                                    (shared with the home card)
       entry_list.dart           ← grouped by date
-      recap_section.dart        ← bar chart + summary
+      recap_section.dart        ← this month's recap + history link
+      money_month_recap.dart    ← one month: chart, summary, AI advice
+      money_recap_parts.dart    ← category bars + summary rows
       remaining_budget_widget.dart ← home screen card
 ```
 
@@ -2173,7 +2193,17 @@ Add aiAccent to GlassTheme.
 - Package: google_generative_ai (latest)
 - Model: gemini-3.8-flash (fast, cheap, good vision — gemini-1.5-flash was
   retired and now 404s on every request; re-check ai.google.dev/gemini-api/docs/models
-  if this one is later deprecated too)
+  if this one is later deprecated too) — GeminiService.geminiModel
+- Model list (GeminiService.geminiModels), tried in order:
+    gemini-3.8-flash          thinking low (it refuses minimal)
+    gemini-2.5-flash          no thinkingLevel (2.5 has none — default)
+    gemini-flash-lite-latest  thinking minimal (Google's alias for the
+                              newest Flash-Lite)
+  A request moves to the next model at once when one answers 503
+  overloaded / "high demand", 429 quota (free-tier quotas are per model:
+  3.8 Flash is 5 RPM / 20 RPD) or 404 model not found. When every model
+  fails that way, the first busy error stands and runWithRetry's waits
+  take over. A timeout or any other error never moves on.
 - API key lives in the `gemini-proxy` Supabase Edge Function's secrets
   (supabase/functions/gemini-proxy) — `supabase secrets set
   GEMINI_API_KEY=...`, `supabase functions deploy gemini-proxy`. The app
@@ -2190,10 +2220,14 @@ Add aiAccent to GlassTheme.
   the 30s timeout. GeminiThinkingClient (shared/services/
   gemini_thinking_client.dart — wraps the HTTP client in both modes, since
   google_generative_ai 0.4.x has no field for it) adds
-  generationConfig.thinkingConfig.thinkingLevel: minimal for both
-  requests, and generationConfig.mediaResolution MEDIA_RESOLUTION_MEDIUM
+  generationConfig.thinkingConfig.thinkingLevel for both requests, per
+  model (see the model list) — and generationConfig.mediaResolution MEDIA_RESOLUTION_MEDIUM
   for the food scan (~560 image tokens instead of the default ~1120). A
-  400 naming either field resends once without them. Both requests use
+  400 naming a field resends without THAT field (its error body is
+  debugPrint'd) — or, for "thinking level X is not supported", with the
+  next level up — and that client stops sending it for the rest of the
+  run — one GeminiThinkingClient per model, so each model learns on its
+  own — instead of paying a failed round trip on every request. Both requests use
   responseMimeType application/json; money advice caps maxOutputTokens
   at 1024. GeminiService debugPrints each reply's time + token counts,
   ImageCompressionService the compression time — to see where a slow
@@ -2256,8 +2290,9 @@ FoodScan (Freezed, stored in Supabase):
 
 class GeminiService:
   late GenerativeModel _model
-  init: model 'gemini-3.8-flash', via the gemini-proxy Edge Function
-    (see Gemini API setup)
+  init: one GenerativeModel per entry of geminiModels (3.8 Flash →
+    2.5 Flash → Flash-Lite, see Gemini API setup), via the gemini-proxy
+    Edge Function
 
   Future<FoodAnalysis?> analyzeFood(Uint8List compressedImage):
     bytes = compressedImage   (bytes, not a File — the web has no files)
@@ -2842,7 +2877,13 @@ Opened from the session's music-note button; every change applies live to
 the running session and persists (sliders persist on release only):
   Voice guide Switch + volume slider — flutter_tts speaks each step word
     (the same ARB copy as the circle) in the app language (en-US / id-ID),
-    rate 0.45; the previous word is cut off, never queued. On iOS the TTS
+    in the calmest natural voice the device has for that language
+    (pickCalmVoice, data/calm_voice_picker.dart — iOS premium/enhanced/Siri
+    voices, Android offline high-quality voices, browser neural voices;
+    never the robotic Eloquence/novelty voices), re-picked when the
+    language changes; rate 0.42 (web 0.85), pitch 0.95; the previous word
+    is cut off, never queued. iOS premium voices (e.g. Ava) only exist once
+    downloaded in Settings → Accessibility → Spoken Content → Voices. On iOS the TTS
     uses a shared playback session with mixWithOthers so it plays over
     the ambience. Android 11+ needs the TTS_SERVICE <queries> entry
     (AndroidManifest.xml).
@@ -2899,6 +2940,7 @@ lib/features/exercise/
     supabase_breathing_datasource.dart
     breathing_preferences_repository.dart
     breathing_voice.dart                ← flutter_tts wrapper
+    calm_voice_picker.dart              ← ranks device voices (pure)
     ambience_player.dart                ← audioplayers loop wrapper
     keep_screen_on.dart                 ← wakelock_plus wrapper
   domain/

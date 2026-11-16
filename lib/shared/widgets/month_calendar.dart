@@ -6,7 +6,8 @@ import '../../core/theme/glass_theme.dart';
 import '../../features/habits/presentation/habit_form.dart';
 
 /// Month title between previous/next chevrons. [onNext] null disables
-/// paging forward (callers stop at the current month).
+/// paging forward (callers stop at the current month); [onPrevious] null
+/// disables paging back (e.g. at the oldest month with data).
 class MonthCalendarHeader extends StatelessWidget {
   const MonthCalendarHeader({
     required this.month,
@@ -16,7 +17,7 @@ class MonthCalendarHeader extends StatelessWidget {
   });
 
   final DateTime month;
-  final VoidCallback onPrevious;
+  final VoidCallback? onPrevious;
   final VoidCallback? onNext;
 
   @override

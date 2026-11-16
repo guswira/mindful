@@ -561,7 +561,9 @@
   "moneySpendingIntroBody": "Log what you spend and earn in a few taps. Mindful groups it by day and category, so you can see where your money really goes.",
   "moneySpendingIntroAction": "Record spending",
   "moneyRecapTitle": "Recap",
-  "moneyRecapNoSpending": "No spending yet this period",
+  "moneyRecapNoSpending": "No spending this month",
+  "moneyRecapHistory": "Previous months",
+  "moneyRecapHistoryTitle": "Cashflow history",
   "moneyRecapNet": "Net",
   "moneyRecapTopCategory": "Top category: {category}",
   "@moneyRecapTopCategory": {

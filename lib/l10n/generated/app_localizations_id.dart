@@ -1023,7 +1023,13 @@ class AppLocalizationsId extends AppLocalizations {
   String get moneyRecapTitle => 'Rekap';
 
   @override
-  String get moneyRecapNoSpending => 'Belum ada pengeluaran di periode ini';
+  String get moneyRecapNoSpending => 'Tidak ada pengeluaran di bulan ini';
+
+  @override
+  String get moneyRecapHistory => 'Bulan sebelumnya';
+
+  @override
+  String get moneyRecapHistoryTitle => 'Riwayat arus kas';
 
   @override
   String get moneyRecapNet => 'Bersih';

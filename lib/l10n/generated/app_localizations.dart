@@ -1901,8 +1901,20 @@ abstract class AppLocalizations {
   /// No description provided for @moneyRecapNoSpending.
   ///
   /// In en, this message translates to:
-  /// **'No spending yet this period'**
+  /// **'No spending this month'**
   String get moneyRecapNoSpending;
+
+  /// No description provided for @moneyRecapHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous months'**
+  String get moneyRecapHistory;
+
+  /// No description provided for @moneyRecapHistoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cashflow history'**
+  String get moneyRecapHistoryTitle;
 
   /// No description provided for @moneyRecapNet.
   ///

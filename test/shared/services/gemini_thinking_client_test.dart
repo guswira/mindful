@@ -106,7 +106,7 @@ void main() {
       expect(bodies.last.containsKey('generationConfig'), isFalse);
     });
 
-    test('resends without them when Google rejects mediaResolution', () async {
+    test('resends without it when Google rejects mediaResolution', () async {
       final bodies = <Map<String, dynamic>>[];
       final client = GeminiThinkingClient(
         GeminiThinkingLevel.minimal,
@@ -128,7 +128,93 @@ void main() {
       );
 
       expect(response.statusCode, 200);
+      expect(
+        (bodies.last['generationConfig'] as Map).containsKey('mediaResolution'),
+        isFalse,
+      );
+    });
+
+    test('stops sending a rejected field on later requests', () async {
+      final bodies = <Map<String, dynamic>>[];
+      final client = GeminiThinkingClient(
+        GeminiThinkingLevel.minimal,
+        inner: MockClient((request) async {
+          bodies.add(_decode(request.bodyBytes));
+          return bodies.length == 1
+              ? http.Response(
+                  '{"error":{"message":"Unknown thinking_level"}}',
+                  400,
+                )
+              : http.Response('{}', 200);
+        }),
+      );
+      final url = Uri.parse(
+        'https://example.com/v1beta/models/m:generateContent',
+      );
+
+      await client.post(url, body: jsonEncode({'contents': <Object>[]}));
+      await client.post(url, body: jsonEncode({'contents': <Object>[]}));
+
+      // 400 + resend, then straight through: no failed call the 2nd time.
+      expect(bodies, hasLength(3));
       expect(bodies.last.containsKey('generationConfig'), isFalse);
+    });
+
+    test('an unsupported level steps up to the next one', () async {
+      final bodies = <Map<String, dynamic>>[];
+      final client = GeminiThinkingClient(
+        GeminiThinkingLevel.minimal,
+        inner: MockClient((request) async {
+          bodies.add(_decode(request.bodyBytes));
+          return bodies.length == 1
+              ? http.Response(
+                  '{"error":{"code":400,"message":"Thinking level MINIMAL is '
+                  'not supported for this model. Please retry with other '
+                  'thinking level.","status":"INVALID_ARGUMENT"}}',
+                  400,
+                )
+              : http.Response('{}', 200);
+        }),
+      );
+      final url = Uri.parse(
+        'https://example.com/v1beta/models/m:generateContent',
+      );
+
+      await client.post(url, body: jsonEncode({'contents': <Object>[]}));
+      await client.post(url, body: jsonEncode({'contents': <Object>[]}));
+
+      expect(bodies, hasLength(3));
+      for (final body in bodies.skip(1)) {
+        expect(body['generationConfig'], {
+          'thinkingConfig': {'thinkingLevel': 'low'},
+        });
+      }
+    });
+
+    test('drops only the field Google names', () async {
+      final bodies = <Map<String, dynamic>>[];
+      final client = GeminiThinkingClient(
+        GeminiThinkingLevel.minimal,
+        mediaResolution: GeminiMediaResolution.medium,
+        inner: MockClient((request) async {
+          bodies.add(_decode(request.bodyBytes));
+          return bodies.length == 1
+              ? http.Response(
+                  '{"error":{"message":"Invalid media_resolution"}}',
+                  400,
+                )
+              : http.Response('{}', 200);
+        }),
+      );
+
+      await client.post(
+        Uri.parse('https://example.com/v1beta/models/m:generateContent'),
+        body: jsonEncode({'contents': <Object>[]}),
+      );
+
+      expect(bodies.last['generationConfig'], {
+        'thinkingConfig': {'thinkingLevel': 'minimal'},
+      });
     });
 
     test('passes any other 400 through untouched', () async {

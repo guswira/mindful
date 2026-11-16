@@ -1019,7 +1019,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get moneyRecapTitle => 'Recap';
 
   @override
-  String get moneyRecapNoSpending => 'No spending yet this period';
+  String get moneyRecapNoSpending => 'No spending this month';
+
+  @override
+  String get moneyRecapHistory => 'Previous months';
+
+  @override
+  String get moneyRecapHistoryTitle => 'Cashflow history';
 
   @override
   String get moneyRecapNet => 'Net';

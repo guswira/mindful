@@ -344,7 +344,8 @@ void main() {
     );
 
     // Once up, a keyboard taller than the keypad lifts Save above it.
-    tester.state<State<StatefulWidget>>(find.byType(StatefulBuilder))
+    tester
+        .state<State<StatefulWidget>>(find.byType(StatefulBuilder))
         // ignore: invalid_use_of_protected_member
         .setState(() => keyboard = 400);
     await tester.pumpAndSettle();
