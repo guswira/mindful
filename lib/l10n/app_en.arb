@@ -564,6 +564,26 @@
   "moneyRecapNoSpending": "No spending this month",
   "moneyRecapHistory": "Previous months",
   "moneyRecapHistoryTitle": "Cashflow history",
+  "moneyRecapDayHint": "Tap a day to see what you spent",
+  "moneyRecapDaySpent": "{date}: spent {amount}",
+  "@moneyRecapDaySpent": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "moneyRecapDayEmpty": "{date}: no spending",
+  "@moneyRecapDayEmpty": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "moneyRecapNet": "Net",
   "moneyRecapTopCategory": "Top category: {category}",
   "@moneyRecapTopCategory": {

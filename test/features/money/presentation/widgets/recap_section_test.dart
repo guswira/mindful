@@ -95,6 +95,24 @@ void main() {
     // Each month offers its own advice; the tab's recap has one too.
     expect(find.text('AI advice'), findsNWidgets(2));
 
+    // The calendar shows the tapped day's spending.
+    expect(find.text('Tap a day to see what you spent'), findsOneWidget);
+    await tester.tap(find.text('10').last);
+    await tester.pumpAndSettle();
+    expect(
+      find.text('${DateFormat.MMMd().format(lastMonth)}: spent 20.00'),
+      findsOneWidget,
+    );
+    await tester.tap(find.text('11').last);
+    await tester.pumpAndSettle();
+    expect(
+      find.text(
+        '${DateFormat.MMMd().format(lastMonth.add(const Duration(days: 1)))}'
+        ': no spending',
+      ),
+      findsOneWidget,
+    );
+
     await tester.tap(find.byTooltip('Previous month'));
     await tester.pumpAndSettle();
 

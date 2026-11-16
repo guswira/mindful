@@ -1028,6 +1028,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get moneyRecapHistoryTitle => 'Cashflow history';
 
   @override
+  String get moneyRecapDayHint => 'Tap a day to see what you spent';
+
+  @override
+  String moneyRecapDaySpent(String date, String amount) {
+    return '$date: spent $amount';
+  }
+
+  @override
+  String moneyRecapDayEmpty(String date) {
+    return '$date: no spending';
+  }
+
+  @override
   String get moneyRecapNet => 'Net';
 
   @override

@@ -1893,7 +1893,10 @@ ENTRY LIST (grouped by date, newest first):
     a short why + TintedPill("Record spending") → AddMoneySheet
     (Spending), in place of the period pills + list
   income but no spending yet: the same IntroCard above the pills + list
-  date header: Text "Today" / "Yesterday" / "Mon, Oct 26" white45 12px
+  date header: Text "Today" / "Yesterday" / "Mon, Oct 26" white45 12px,
+    the day's totals on the right (12px): "+[amount]" moneyAccent if
+    anything was earned, then "-[amount]" moneySpending if anything was
+    spent (every entry, bills included)
   each entry GlassCard:
     Row:
       category icon circle (36px):
@@ -1933,8 +1936,14 @@ RECAP SECTION (between the budget card and the list, collapsible):
         → advice for THAT month (see AI Advice)
 
   MoneyRecapHistorySheet (money_recap_history_sheet.dart) — "Cashflow
-    history": MonthCalendarHeader (‹ month ›) over the same
-    MoneyMonthRecap for the picked month, each with its own AI advice.
+    history": MonthCalendarHeader (‹ month ›), then MoneySpendingCalendar
+    (widgets/money_spending_calendar.dart — shared MonthCalendarGrid, each
+    day tinted moneySpending by what was spent that day, 25% → 75% alpha
+    relative to the month's biggest day; tap a day → "Oct 2: spent
+    120.00" / "Oct 2: no spending" below the grid, tap again → "Tap a
+    day to see what you spent"; daily totals = every spending entry,
+    bills included — moneyDailySpending, money_months.dart, pure), then the
+    same MoneyMonthRecap for the picked month, each with its own AI advice.
     Opens on the latest earlier month; the chevrons page only through
     months that have entries (moneyHistoryMonths — money_months.dart,
     pure), never into the current month (that's the tab's recap).
@@ -2153,6 +2162,7 @@ lib/features/money/
       recap_section.dart        ← this month's recap + history link
       money_month_recap.dart    ← one month: chart, summary, AI advice
       money_recap_parts.dart    ← category bars + summary rows
+      money_spending_calendar.dart ← history: spending per day
       remaining_budget_widget.dart ← home screen card
 ```
 

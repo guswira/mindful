@@ -4,9 +4,10 @@ import '../../../core/constants/spacing.dart';
 import '../../../core/l10n/l10n.dart';
 import '../../../shared/widgets/month_calendar.dart';
 import 'widgets/money_month_recap.dart';
+import 'widgets/money_spending_calendar.dart';
 
-/// Earlier months' cashflow recaps, one month at a time, each with its
-/// own AI advice. Opened from the Money tab's Recap "Previous months"
+/// Earlier months' cashflow recaps, one month at a time — a calendar of
+/// each day's spending over the recap, with its own AI advice. Opened from the Money tab's Recap "Previous months"
 /// link. See SPEC.md Money Flow Feature Money Flow Tab, Recap Section.
 class MoneyRecapHistorySheet extends StatefulWidget {
   const MoneyRecapHistorySheet({required this.months, super.key});
@@ -51,7 +52,11 @@ class _MoneyRecapHistorySheetState extends State<MoneyRecapHistorySheet> {
             onPrevious: _hasOlder ? _showOlder : null,
             onNext: _index > 0 ? _showNewer : null,
           ),
-          const SizedBox(height: Spacing.sm),
+          MoneySpendingCalendar(
+            key: ValueKey((#calendar, month)),
+            month: month,
+          ),
+          const SizedBox(height: Spacing.md),
           MoneyMonthRecap(key: ValueKey(month), month: month),
         ],
       ),

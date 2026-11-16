@@ -8,7 +8,10 @@ import 'package:mindful/core/theme/glass_theme.dart';
 import 'package:mindful/features/money/data/money_repository.dart';
 import 'package:mindful/features/money/domain/budget_settings.dart';
 import 'package:mindful/features/money/domain/budget_type.dart';
+import 'package:mindful/features/money/domain/entry_type.dart';
+import 'package:mindful/features/money/domain/money_entry.dart';
 import 'package:mindful/features/money/presentation/money_tab.dart';
+import 'package:mindful/shared/models/sync_status.dart';
 
 class _MockBox extends Mock implements Box<dynamic> {}
 
@@ -163,5 +166,36 @@ void main() {
     await tester.tap(find.text('Show less'));
     await tester.pumpAndSettle();
     expect(find.text('Yearly'), findsNothing);
+  });
+
+  testWidgets('each day header shows what was spent and earned that day', (
+    tester,
+  ) async {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    MoneyEntry entry(String id, EntryType type, double amount) => MoneyEntry(
+      id: id,
+      userId: 'u1',
+      type: type,
+      amount: amount,
+      category: type == EntryType.spending ? 'Food' : 'Salary',
+      date: today,
+      createdAt: today,
+      updatedAt: today,
+      syncStatus: SyncStatus.synced,
+    );
+    when(() => entriesBox.values).thenReturn([
+      entry('a', EntryType.spending, 23).toJson(),
+      entry('b', EntryType.spending, 115).toJson(),
+      entry('c', EntryType.income, 50).toJson(),
+    ]);
+
+    await tester.pumpWidget(buildTab());
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(find.text('-138.00'), 200);
+
+    expect(find.text('-138.00'), findsOneWidget);
+    // The day's income total matches its one entry's amount.
+    expect(find.text('+50.00'), findsNWidgets(2));
   });
 }

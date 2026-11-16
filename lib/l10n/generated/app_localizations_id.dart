@@ -1032,6 +1032,19 @@ class AppLocalizationsId extends AppLocalizations {
   String get moneyRecapHistoryTitle => 'Riwayat arus kas';
 
   @override
+  String get moneyRecapDayHint => 'Ketuk satu hari untuk lihat pengeluaranmu';
+
+  @override
+  String moneyRecapDaySpent(String date, String amount) {
+    return '$date: keluar $amount';
+  }
+
+  @override
+  String moneyRecapDayEmpty(String date) {
+    return '$date: tidak ada pengeluaran';
+  }
+
+  @override
   String get moneyRecapNet => 'Bersih';
 
   @override

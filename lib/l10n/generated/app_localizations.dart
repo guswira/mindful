@@ -1916,6 +1916,24 @@ abstract class AppLocalizations {
   /// **'Cashflow history'**
   String get moneyRecapHistoryTitle;
 
+  /// No description provided for @moneyRecapDayHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a day to see what you spent'**
+  String get moneyRecapDayHint;
+
+  /// No description provided for @moneyRecapDaySpent.
+  ///
+  /// In en, this message translates to:
+  /// **'{date}: spent {amount}'**
+  String moneyRecapDaySpent(String date, String amount);
+
+  /// No description provided for @moneyRecapDayEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'{date}: no spending'**
+  String moneyRecapDayEmpty(String date);
+
   /// No description provided for @moneyRecapNet.
   ///
   /// In en, this message translates to:

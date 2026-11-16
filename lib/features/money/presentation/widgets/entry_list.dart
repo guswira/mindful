@@ -174,7 +174,7 @@ class _GroupedEntries extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         for (final group in groups.entries) ...[
-          _DateGroupHeader(group.key),
+          _DateGroupHeader(label: group.key, entries: group.value),
           const SizedBox(height: Spacing.xs),
           for (final entry in group.value) ...[
             _EntryCard(entry: entry),
@@ -200,15 +200,45 @@ class _GroupedEntries extends StatelessWidget {
   }
 }
 
+/// The day's label, with what was spent (and earned, if anything) that
+/// day on the right — every entry, bills included.
 class _DateGroupHeader extends StatelessWidget {
-  const _DateGroupHeader(this.label);
+  const _DateGroupHeader({required this.label, required this.entries});
 
   final String label;
+  final List<MoneyEntry> entries;
+
+  double _total(EntryType type) => entries
+      .where((entry) => entry.type == type)
+      .fold(0, (sum, entry) => sum + entry.amount);
 
   @override
   Widget build(BuildContext context) {
     final glass = Theme.of(context).extension<GlassTheme>()!;
-    return Text(label, style: TextStyle(color: glass.textHint, fontSize: 12));
+    final format = NumberFormat('#,##0.00');
+    final spent = _total(EntryType.spending);
+    final earned = _total(EntryType.income);
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            label,
+            style: TextStyle(color: glass.textHint, fontSize: 12),
+          ),
+        ),
+        if (earned > 0)
+          Text(
+            '+${format.format(earned)}',
+            style: TextStyle(color: glass.moneyAccent, fontSize: 12),
+          ),
+        if (earned > 0 && spent > 0) const SizedBox(width: Spacing.sm),
+        if (spent > 0)
+          Text(
+            '-${format.format(spent)}',
+            style: TextStyle(color: glass.moneySpending, fontSize: 12),
+          ),
+      ],
+    );
   }
 }
 

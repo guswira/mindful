@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart' show DateTimeRange;
 
+import '../domain/entry_type.dart';
+import '../domain/money_entry.dart';
+
 /// [month]'s first day → its last day, both inclusive — or → today for
 /// the month still in progress, so "this month" never counts future-dated
 /// entries.
@@ -21,4 +24,24 @@ List<DateTime> moneyHistoryMonths(Iterable<DateTime> entryDates, DateTime now) {
     for (final date in entryDates) DateTime(date.year, date.month),
   }..removeWhere((month) => !month.isBefore(current));
   return months.toList()..sort((a, b) => b.compareTo(a));
+}
+
+/// Total spending per day (local midnight) of [month] — every spending
+/// entry, bills included, since this is what was spent, not a budget.
+Map<DateTime, double> moneyDailySpending(
+  Iterable<MoneyEntry> entries,
+  DateTime month,
+) {
+  final totals = <DateTime, double>{};
+  for (final entry in entries) {
+    final date = entry.date;
+    if (entry.type != EntryType.spending ||
+        date.year != month.year ||
+        date.month != month.month) {
+      continue;
+    }
+    final day = DateTime(date.year, date.month, date.day);
+    totals[day] = (totals[day] ?? 0) + entry.amount;
+  }
+  return totals;
 }
