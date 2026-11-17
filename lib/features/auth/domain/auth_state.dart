@@ -11,6 +11,7 @@ import '../../../shared/services/widget_service.dart';
 import '../../exercise/data/breathing_session_repository.dart';
 import '../../habits/data/habit_repository.dart';
 import '../../journal/data/journal_repository.dart';
+import '../../money/data/money_partner_repository.dart';
 import '../../money/data/money_repository.dart';
 import '../../tasks/data/task_repository.dart';
 import '../data/auth_repository.dart';
@@ -107,6 +108,7 @@ class AuthNotifier extends _$AuthNotifier {
     habitRepositoryProvider,
     taskRepositoryProvider,
     moneyRepositoryProvider,
+    moneyPartnerRepositoryProvider,
     breathingSessionRepositoryProvider,
   ];
 
@@ -124,6 +126,8 @@ class AuthNotifier extends _$AuthNotifier {
     TaskRepository.boxName,
     MoneyRepository.entriesBoxName,
     MoneyRepository.settingsBoxName,
+    MoneyPartnerRepository.partnerBoxName,
+    MoneyPartnerRepository.entriesBoxName,
     BreathingSessionRepository.boxName,
   ];
 

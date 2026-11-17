@@ -8,6 +8,7 @@ class SupabaseConstants {
   static const String tasksTable = 'tasks';
   static const String moneyEntriesTable = 'money_entries';
   static const String budgetSettingsTable = 'budget_settings';
+  static const String moneyLinksTable = 'money_links';
   static const String foodScansTable = 'food_scans';
   static const String breathingSessionsTable = 'breathing_sessions';
   static const String photosBucket = 'photos';

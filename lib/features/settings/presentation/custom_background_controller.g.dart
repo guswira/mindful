@@ -7,7 +7,7 @@ part of 'custom_background_controller.dart';
 // **************************************************************************
 
 String _$customBackgroundControllerHash() =>
-    r'df6b816bd9e86da241a6bc29e955ec98c0f2df70';
+    r'6953d3b39c84937134ddcf5119d0d2441c9763ce';
 
 /// The custom background photo's path (null = the default navy + blobs),
 /// read by [App] and handed to every [BlobBackground] via

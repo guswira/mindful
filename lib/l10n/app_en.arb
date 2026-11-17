@@ -584,6 +584,102 @@
       }
     }
   },
+  "moneyPartnerButton": "Linked partner",
+  "moneyLinkTitle": "Link a partner",
+  "moneyLinkIntro": "Link with one other account to see each other's shared spending and spend from the same budgets. Private spending stays yours.",
+  "moneyLinkShowCode": "My code",
+  "moneyLinkScanCode": "Scan code",
+  "moneyLinkShowHint": "On your partner's phone: Money → Link a partner → Scan code, then point it at this.",
+  "moneyLinkWaiting": "Waiting for your partner to scan…",
+  "moneyLinkValidFor": "Valid for 10 minutes",
+  "moneyLinkExpired": "This code has expired.",
+  "moneyLinkNewCode": "New code",
+  "moneyLinkCodeError": "Couldn't create a code. Check your connection and try again.",
+  "moneyLinkScanHint": "Point the camera at your partner's code.",
+  "moneyLinkCameraError": "Camera unavailable — type the code instead.",
+  "moneyLinkTypeHint": "Or type the code (A1B2-C3D4)",
+  "moneyLinkButton": "Link",
+  "moneyLinkLinked": "Linked with {name}",
+  "@moneyLinkLinked": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "moneyLinkErrorInvalid": "That code is wrong or has expired. Ask for a new one.",
+  "moneyLinkErrorOwn": "That's your own code — scan your partner's phone.",
+  "moneyLinkErrorAlreadyLinked": "One of you is already linked with someone. Unlink first.",
+  "moneyLinkErrorUnknown": "Couldn't link right now. Check your connection and try again.",
+  "moneyPartnerSince": "Linked since {date}",
+  "@moneyPartnerSince": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "moneyPartnerExplain": "You see each other's shared spending, and it counts toward both your budgets. Private spending and income stay yours.",
+  "moneyPartnerUnlink": "Unlink",
+  "moneyPartnerUnlinkTitle": "Unlink {name}?",
+  "@moneyPartnerUnlinkTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "moneyPartnerUnlinkBody": "You'll stop seeing each other's spending, and theirs stops counting toward your budgets. Nothing is deleted.",
+  "moneyPartnerUnlinked": "Unlinked",
+  "moneyPartnerUnlinkError": "Couldn't unlink. Check your connection and try again.",
+  "moneyVisibilityHeading": "Who sees it",
+  "moneyVisibilityShared": "Shared with {name}",
+  "@moneyVisibilityShared": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "moneyVisibilityPrivate": "Private",
+  "moneyVisibilitySharedHint": "{name} sees it, and it counts toward both your budgets.",
+  "@moneyVisibilitySharedHint": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "moneyVisibilityPrivateHint": "Only you see it.",
+  "moneyVisibilitySharedTag": "Shared",
+  "moneyScopeTogether": "Together",
+  "moneyScopeMine": "You",
+  "moneyTogetherTitle": "With {name} · this month",
+  "@moneyTogetherTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "moneyTogetherYou": "You",
+  "moneyTogetherPartner": "{name} (shared)",
+  "@moneyTogetherPartner": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "moneyTogetherTotal": "Together",
+  "moneyEntryAddedBy": "Added by {name}",
+  "@moneyEntryAddedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "moneyRecapNet": "Net",
   "moneyRecapTopCategory": "Top category: {category}",
   "@moneyRecapTopCategory": {

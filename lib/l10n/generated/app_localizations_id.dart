@@ -1045,6 +1045,152 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
+  String get moneyPartnerButton => 'Pasangan tertaut';
+
+  @override
+  String get moneyLinkTitle => 'Tautkan pasangan';
+
+  @override
+  String get moneyLinkIntro =>
+      'Tautkan dengan satu akun lain untuk saling lihat pengeluaran bersama dan memakai anggaran yang sama. Pengeluaran pribadi tetap milikmu.';
+
+  @override
+  String get moneyLinkShowCode => 'Kodeku';
+
+  @override
+  String get moneyLinkScanCode => 'Pindai kode';
+
+  @override
+  String get moneyLinkShowHint =>
+      'Di HP pasanganmu: Keuangan → Tautkan pasangan → Pindai kode, lalu arahkan ke sini.';
+
+  @override
+  String get moneyLinkWaiting => 'Menunggu pasanganmu memindai…';
+
+  @override
+  String get moneyLinkValidFor => 'Berlaku 10 menit';
+
+  @override
+  String get moneyLinkExpired => 'Kode ini sudah kedaluwarsa.';
+
+  @override
+  String get moneyLinkNewCode => 'Kode baru';
+
+  @override
+  String get moneyLinkCodeError =>
+      'Gagal membuat kode. Cek koneksimu dan coba lagi.';
+
+  @override
+  String get moneyLinkScanHint => 'Arahkan kamera ke kode pasanganmu.';
+
+  @override
+  String get moneyLinkCameraError =>
+      'Kamera tidak tersedia — ketik kodenya saja.';
+
+  @override
+  String get moneyLinkTypeHint => 'Atau ketik kodenya (A1B2-C3D4)';
+
+  @override
+  String get moneyLinkButton => 'Tautkan';
+
+  @override
+  String moneyLinkLinked(String name) {
+    return 'Tertaut dengan $name';
+  }
+
+  @override
+  String get moneyLinkErrorInvalid =>
+      'Kodenya salah atau sudah kedaluwarsa. Minta kode baru, ya.';
+
+  @override
+  String get moneyLinkErrorOwn => 'Itu kodemu sendiri — pindai HP pasanganmu.';
+
+  @override
+  String get moneyLinkErrorAlreadyLinked =>
+      'Salah satu dari kalian sudah tertaut dengan orang lain. Lepas tautan dulu.';
+
+  @override
+  String get moneyLinkErrorUnknown =>
+      'Gagal menautkan sekarang. Cek koneksimu dan coba lagi.';
+
+  @override
+  String moneyPartnerSince(String date) {
+    return 'Tertaut sejak $date';
+  }
+
+  @override
+  String get moneyPartnerExplain =>
+      'Kalian saling lihat pengeluaran bersama, dan itu dihitung ke anggaran kalian berdua. Pengeluaran pribadi dan pemasukan tetap milikmu.';
+
+  @override
+  String get moneyPartnerUnlink => 'Lepas tautan';
+
+  @override
+  String moneyPartnerUnlinkTitle(String name) {
+    return 'Lepas tautan dengan $name?';
+  }
+
+  @override
+  String get moneyPartnerUnlinkBody =>
+      'Kalian tidak akan saling lihat pengeluaran lagi, dan pengeluarannya tidak dihitung ke anggaranmu. Tidak ada yang dihapus.';
+
+  @override
+  String get moneyPartnerUnlinked => 'Tautan dilepas';
+
+  @override
+  String get moneyPartnerUnlinkError =>
+      'Gagal melepas tautan. Cek koneksimu dan coba lagi.';
+
+  @override
+  String get moneyVisibilityHeading => 'Siapa yang lihat';
+
+  @override
+  String moneyVisibilityShared(String name) {
+    return 'Bersama $name';
+  }
+
+  @override
+  String get moneyVisibilityPrivate => 'Pribadi';
+
+  @override
+  String moneyVisibilitySharedHint(String name) {
+    return '$name bisa lihat, dan ini dihitung ke anggaran kalian berdua.';
+  }
+
+  @override
+  String get moneyVisibilityPrivateHint => 'Hanya kamu yang lihat.';
+
+  @override
+  String get moneyVisibilitySharedTag => 'Bersama';
+
+  @override
+  String get moneyScopeTogether => 'Bersama';
+
+  @override
+  String get moneyScopeMine => 'Kamu';
+
+  @override
+  String moneyTogetherTitle(String name) {
+    return 'Dengan $name · bulan ini';
+  }
+
+  @override
+  String get moneyTogetherYou => 'Kamu';
+
+  @override
+  String moneyTogetherPartner(String name) {
+    return '$name (bersama)';
+  }
+
+  @override
+  String get moneyTogetherTotal => 'Total bersama';
+
+  @override
+  String moneyEntryAddedBy(String name) {
+    return 'Dicatat oleh $name';
+  }
+
+  @override
   String get moneyRecapNet => 'Bersih';
 
   @override

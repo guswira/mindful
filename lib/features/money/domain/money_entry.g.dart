@@ -20,6 +20,9 @@ _MoneyEntry _$MoneyEntryFromJson(Map<String, dynamic> json) => _MoneyEntry(
   syncStatus:
       $enumDecodeNullable(_$SyncStatusEnumMap, json['sync_status']) ??
       SyncStatus.synced,
+  visibility:
+      $enumDecodeNullable(_$EntryVisibilityEnumMap, json['visibility']) ??
+      EntryVisibility.private,
 );
 
 Map<String, dynamic> _$MoneyEntryToJson(_MoneyEntry instance) =>
@@ -36,6 +39,7 @@ Map<String, dynamic> _$MoneyEntryToJson(_MoneyEntry instance) =>
       if (_$BudgetTypeEnumMap[instance.budgetPeriod] case final value?)
         'budget_period': value,
       'sync_status': _$SyncStatusEnumMap[instance.syncStatus]!,
+      'visibility': _$EntryVisibilityEnumMap[instance.visibility]!,
     };
 
 const _$EntryTypeEnumMap = {
@@ -53,4 +57,9 @@ const _$BudgetTypeEnumMap = {
 const _$SyncStatusEnumMap = {
   SyncStatus.synced: 'synced',
   SyncStatus.pending: 'pending',
+};
+
+const _$EntryVisibilityEnumMap = {
+  EntryVisibility.shared: 'shared',
+  EntryVisibility.private: 'private',
 };

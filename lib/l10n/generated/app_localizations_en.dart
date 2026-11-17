@@ -1041,6 +1041,153 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get moneyPartnerButton => 'Linked partner';
+
+  @override
+  String get moneyLinkTitle => 'Link a partner';
+
+  @override
+  String get moneyLinkIntro =>
+      'Link with one other account to see each other\'s shared spending and spend from the same budgets. Private spending stays yours.';
+
+  @override
+  String get moneyLinkShowCode => 'My code';
+
+  @override
+  String get moneyLinkScanCode => 'Scan code';
+
+  @override
+  String get moneyLinkShowHint =>
+      'On your partner\'s phone: Money → Link a partner → Scan code, then point it at this.';
+
+  @override
+  String get moneyLinkWaiting => 'Waiting for your partner to scan…';
+
+  @override
+  String get moneyLinkValidFor => 'Valid for 10 minutes';
+
+  @override
+  String get moneyLinkExpired => 'This code has expired.';
+
+  @override
+  String get moneyLinkNewCode => 'New code';
+
+  @override
+  String get moneyLinkCodeError =>
+      'Couldn\'t create a code. Check your connection and try again.';
+
+  @override
+  String get moneyLinkScanHint => 'Point the camera at your partner\'s code.';
+
+  @override
+  String get moneyLinkCameraError =>
+      'Camera unavailable — type the code instead.';
+
+  @override
+  String get moneyLinkTypeHint => 'Or type the code (A1B2-C3D4)';
+
+  @override
+  String get moneyLinkButton => 'Link';
+
+  @override
+  String moneyLinkLinked(String name) {
+    return 'Linked with $name';
+  }
+
+  @override
+  String get moneyLinkErrorInvalid =>
+      'That code is wrong or has expired. Ask for a new one.';
+
+  @override
+  String get moneyLinkErrorOwn =>
+      'That\'s your own code — scan your partner\'s phone.';
+
+  @override
+  String get moneyLinkErrorAlreadyLinked =>
+      'One of you is already linked with someone. Unlink first.';
+
+  @override
+  String get moneyLinkErrorUnknown =>
+      'Couldn\'t link right now. Check your connection and try again.';
+
+  @override
+  String moneyPartnerSince(String date) {
+    return 'Linked since $date';
+  }
+
+  @override
+  String get moneyPartnerExplain =>
+      'You see each other\'s shared spending, and it counts toward both your budgets. Private spending and income stay yours.';
+
+  @override
+  String get moneyPartnerUnlink => 'Unlink';
+
+  @override
+  String moneyPartnerUnlinkTitle(String name) {
+    return 'Unlink $name?';
+  }
+
+  @override
+  String get moneyPartnerUnlinkBody =>
+      'You\'ll stop seeing each other\'s spending, and theirs stops counting toward your budgets. Nothing is deleted.';
+
+  @override
+  String get moneyPartnerUnlinked => 'Unlinked';
+
+  @override
+  String get moneyPartnerUnlinkError =>
+      'Couldn\'t unlink. Check your connection and try again.';
+
+  @override
+  String get moneyVisibilityHeading => 'Who sees it';
+
+  @override
+  String moneyVisibilityShared(String name) {
+    return 'Shared with $name';
+  }
+
+  @override
+  String get moneyVisibilityPrivate => 'Private';
+
+  @override
+  String moneyVisibilitySharedHint(String name) {
+    return '$name sees it, and it counts toward both your budgets.';
+  }
+
+  @override
+  String get moneyVisibilityPrivateHint => 'Only you see it.';
+
+  @override
+  String get moneyVisibilitySharedTag => 'Shared';
+
+  @override
+  String get moneyScopeTogether => 'Together';
+
+  @override
+  String get moneyScopeMine => 'You';
+
+  @override
+  String moneyTogetherTitle(String name) {
+    return 'With $name · this month';
+  }
+
+  @override
+  String get moneyTogetherYou => 'You';
+
+  @override
+  String moneyTogetherPartner(String name) {
+    return '$name (shared)';
+  }
+
+  @override
+  String get moneyTogetherTotal => 'Together';
+
+  @override
+  String moneyEntryAddedBy(String name) {
+    return 'Added by $name';
+  }
+
+  @override
   String get moneyRecapNet => 'Net';
 
   @override

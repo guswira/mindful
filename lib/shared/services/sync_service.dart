@@ -5,6 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../features/exercise/data/breathing_session_repository.dart';
 import '../../features/habits/data/habit_repository.dart';
 import '../../features/journal/data/journal_repository.dart';
+import '../../features/money/data/money_partner_repository.dart';
 import '../../features/money/data/money_repository.dart';
 import '../../features/tasks/data/task_repository.dart';
 import 'widget_service.dart';
@@ -78,6 +79,9 @@ Future<SyncService> syncService(Ref ref) async {
   final habitRepository = await ref.watch(habitRepositoryProvider.future);
   final taskRepository = await ref.watch(taskRepositoryProvider.future);
   final moneyRepository = await ref.watch(moneyRepositoryProvider.future);
+  final moneyPartnerRepository = await ref.watch(
+    moneyPartnerRepositoryProvider.future,
+  );
   final breathingRepository = await ref.watch(
     breathingSessionRepositoryProvider.future,
   );
@@ -91,6 +95,7 @@ Future<SyncService> syncService(Ref ref) async {
         await taskRepository.refresh();
       },
       () => moneyRepository.refresh(),
+      () => moneyPartnerRepository.refresh(),
       () => breathingRepository.refresh(),
     ],
     retryPending: [

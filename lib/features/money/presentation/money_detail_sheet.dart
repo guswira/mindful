@@ -10,10 +10,14 @@ import '../../../shared/widgets/glass_bottom_sheet.dart';
 import '../data/money_repository.dart';
 import '../domain/budget_type.dart';
 import '../domain/entry_type.dart';
+import '../domain/entry_visibility.dart';
 import '../domain/money_entry.dart';
+import '../domain/money_partner.dart';
 import 'add_money_sheet.dart';
 import 'money_labels.dart';
+import 'money_partner_providers.dart';
 import 'money_providers.dart';
+import 'visibility_picker.dart';
 
 enum _MoreAction { edit, delete }
 
@@ -21,16 +25,24 @@ enum _MoreAction { edit, delete }
 /// note and date, with edit/delete via the overflow menu. See SPEC.md
 /// Money Flow Feature Money Entry Detail Sheet and the bottom-sheet
 /// design rules.
+///
+/// A linked partner's entry ([owner] set) has no overflow menu — only
+/// they can change it — and says who added it.
 class MoneyDetailSheet extends ConsumerWidget {
-  const MoneyDetailSheet({required this.entry, super.key});
+  const MoneyDetailSheet({required this.entry, this.owner, super.key});
 
   final MoneyEntry entry;
+
+  /// The partner who recorded [entry]; null for this user's own.
+  final MoneyPartner? owner;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final glass = Theme.of(context).extension<GlassTheme>()!;
     final isSpending = entry.type == EntryType.spending;
     final color = isSpending ? glass.moneySpending : glass.moneyAccent;
+    final owner = this.owner;
+    final partner = ref.watch(moneyPartnerProvider).valueOrNull;
 
     return SingleChildScrollView(
       child: Column(
@@ -41,10 +53,11 @@ class MoneyDetailSheet extends ConsumerWidget {
             children: [
               _TypeBadge(isSpending: isSpending, color: color),
               const Spacer(),
-              IconButton(
-                icon: const Icon(Icons.more_vert),
-                onPressed: () => _showMoreActions(context),
-              ),
+              if (owner == null)
+                IconButton(
+                  icon: const Icon(Icons.more_vert),
+                  onPressed: () => _showMoreActions(context),
+                ),
             ],
           ),
           const SizedBox(height: Spacing.sm),
@@ -78,6 +91,24 @@ class MoneyDetailSheet extends ConsumerWidget {
               '${budgetPeriodLabel(context.l10n, period)} · '
               '${budgetPeriodHint(context.l10n, period)}',
               style: TextStyle(color: glass.textMuted, fontSize: 13),
+            ),
+          ],
+          if (owner != null) ...[
+            const SizedBox(height: Spacing.sm),
+            _InfoLine(
+              icon: Icons.people_outline,
+              text: context.l10n.moneyEntryAddedBy(owner.name),
+            ),
+          ] else if (isSpending && partner != null) ...[
+            const SizedBox(height: Spacing.sm),
+            _InfoLine(
+              icon: visibilityIcon(entry.visibility),
+              text: switch (entry.visibility) {
+                EntryVisibility.shared =>
+                  context.l10n.moneyVisibilitySharedHint(partner.firstName),
+                EntryVisibility.private =>
+                  context.l10n.moneyVisibilityPrivateHint,
+              },
             ),
           ],
           if (entry.note case final note? when note.isNotEmpty) ...[
@@ -206,6 +237,31 @@ class _TypeBadge extends StatelessWidget {
           fontWeight: FontWeight.w600,
         ),
       ),
+    );
+  }
+}
+
+/// A small muted icon + line of text.
+class _InfoLine extends StatelessWidget {
+  const _InfoLine({required this.icon, required this.text});
+
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final glass = Theme.of(context).extension<GlassTheme>()!;
+    return Row(
+      children: [
+        Icon(icon, size: 14, color: glass.textMuted),
+        const SizedBox(width: Spacing.xs),
+        Expanded(
+          child: Text(
+            text,
+            style: TextStyle(color: glass.textMuted, fontSize: 13),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -14,12 +14,16 @@ import '../../auth/domain/auth_state.dart';
 import '../data/money_repository.dart';
 import '../domain/budget_type.dart';
 import '../domain/entry_type.dart';
+import '../domain/entry_visibility.dart';
 import '../domain/money_entry.dart';
+import '../domain/money_partner.dart';
 import 'add_money_sheet_widgets.dart';
 import 'amount_input_formatter.dart';
 import 'amount_keypad_slot.dart';
+import 'money_partner_providers.dart';
 import 'money_providers.dart';
 import 'spending_type_picker.dart';
+import 'visibility_picker.dart';
 
 /// Bottom sheet to create or edit a money entry: type, amount, category,
 /// note, category, spending type (which budgets it counts toward) and
@@ -52,6 +56,10 @@ class _AddMoneySheetState extends ConsumerState<AddMoneySheet> {
   final _noteFocus = FocusNode();
   late String _selectedCategory;
   BudgetType? _budgetPeriod;
+
+  /// Null until picked: a new entry is then shared while linked, private
+  /// otherwise — so nothing made before linking ever shows up.
+  EntryVisibility? _visibility;
   DateTime _selectedDate = DateTime.now();
   bool _isSaving = false;
 
@@ -62,6 +70,7 @@ class _AddMoneySheetState extends ConsumerState<AddMoneySheet> {
     _type = entry?.type ?? widget.defaultType;
     _selectedCategory = entry?.category ?? _categoriesFor(_type).first;
     _budgetPeriod = entry?.budgetPeriod;
+    _visibility = entry?.visibility;
     if (entry != null) {
       _amountController.text = formatAmountForInput(entry.amount);
       _noteController.text = entry.note ?? '';
@@ -125,6 +134,10 @@ class _AddMoneySheetState extends ConsumerState<AddMoneySheet> {
     );
     // Income never counts against a budget, so it has no spending type.
     final budgetPeriod = _type == EntryType.spending ? _budgetPeriod : null;
+    // Income is always private; only spending is shared with a partner.
+    final visibility = _type == EntryType.spending
+        ? _visibilityOrDefault(ref.read(moneyPartnerProvider).valueOrNull)
+        : EntryVisibility.private;
     final existing = widget.entry;
     final entry = existing == null
         ? MoneyEntry(
@@ -135,6 +148,7 @@ class _AddMoneySheetState extends ConsumerState<AddMoneySheet> {
             category: _selectedCategory,
             note: note.isEmpty ? null : note,
             budgetPeriod: budgetPeriod,
+            visibility: visibility,
             date: date,
             createdAt: now,
             updatedAt: now,
@@ -145,6 +159,7 @@ class _AddMoneySheetState extends ConsumerState<AddMoneySheet> {
             category: _selectedCategory,
             note: note.isEmpty ? null : note,
             budgetPeriod: budgetPeriod,
+            visibility: visibility,
             date: date,
             updatedAt: now,
           );
@@ -166,9 +181,14 @@ class _AddMoneySheetState extends ConsumerState<AddMoneySheet> {
     Navigator.pop(context);
   }
 
+  EntryVisibility _visibilityOrDefault(MoneyPartner? partner) =>
+      _visibility ??
+      (partner == null ? EntryVisibility.private : EntryVisibility.shared);
+
   @override
   Widget build(BuildContext context) {
     final glass = Theme.of(context).extension<GlassTheme>()!;
+    final partner = ref.watch(moneyPartnerProvider).valueOrNull;
     final activeColor = _type == EntryType.spending
         ? glass.moneySpending
         : glass.moneyAccent;
@@ -234,6 +254,15 @@ class _AddMoneySheetState extends ConsumerState<AddMoneySheet> {
                     onChanged: (period) =>
                         setState(() => _budgetPeriod = period),
                   ),
+                  if (partner != null) ...[
+                    const SizedBox(height: Spacing.md),
+                    VisibilityPicker(
+                      selected: _visibilityOrDefault(partner),
+                      partnerName: partner.firstName,
+                      onChanged: (visibility) =>
+                          setState(() => _visibility = visibility),
+                    ),
+                  ],
                 ],
                 const SizedBox(height: Spacing.sm),
                 DateRow(date: _selectedDate, onTap: _pickDate),

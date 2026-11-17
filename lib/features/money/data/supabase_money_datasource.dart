@@ -46,11 +46,17 @@ class SupabaseMoneyDatasource {
         .upsert(settings.toJson(), onConflict: 'user_id,budget_type');
   }
 
-  /// Every money entry belonging to the signed-in user (RLS-scoped),
-  /// newest first — optionally restricted to dates within [range]
-  /// (inclusive).
+  /// Every money entry belonging to the signed-in user, newest first —
+  /// optionally restricted to dates within [range] (inclusive).
+  ///
+  /// Filtered by user explicitly: RLS also lets a linked partner's shared
+  /// spending through, and that must never land in this user's own cache.
   Future<List<MoneyEntry>> getEntries({DateTimeRange? range}) async {
     var query = _client.from(SupabaseConstants.moneyEntriesTable).select();
+    final userId = _client.auth.currentUser?.id;
+    if (userId != null) {
+      query = query.eq('user_id', userId);
+    }
     if (range != null) {
       query = query
           .gte('date', _dateOnly(range.start))
@@ -63,10 +69,27 @@ class SupabaseMoneyDatasource {
   }
 
   /// Inserts a new money entry row.
-  Future<void> createEntry(MoneyEntry entry) async {
-    await _client
-        .from(SupabaseConstants.moneyEntriesTable)
-        .insert(entry.toJson());
+  Future<void> createEntry(MoneyEntry entry) => _withoutMissingVisibility(
+    entry.toJson(),
+    (json) => _client.from(SupabaseConstants.moneyEntriesTable).insert(json),
+  );
+
+  /// Runs [write] with [json]; when the database hasn't got the
+  /// `visibility` column yet (not migrated), retries without it — the
+  /// entry then stays private, which is what the column defaults to.
+  Future<void> _withoutMissingVisibility(
+    Map<String, dynamic> json,
+    Future<void> Function(Map<String, dynamic> json) write,
+  ) async {
+    try {
+      await write(json);
+    } on PostgrestException catch (error) {
+      if (error.code != _unknownColumnCode ||
+          !error.message.contains(_visibilityColumn)) {
+        rethrow;
+      }
+      await write({...json}..remove(_visibilityColumn));
+    }
   }
 
   /// Updates an existing money entry row.
@@ -90,16 +113,19 @@ class SupabaseMoneyDatasource {
   }
 
   static const String _budgetPeriodColumn = 'budget_period';
+  static const String _visibilityColumn = 'visibility';
 
   /// PostgREST's "column not found in the schema cache".
   static const String _unknownColumnCode = 'PGRST204';
 
-  Future<void> _update(String id, Map<String, dynamic> json) async {
-    await _client
-        .from(SupabaseConstants.moneyEntriesTable)
-        .update(json)
-        .eq('id', id);
-  }
+  Future<void> _update(String id, Map<String, dynamic> json) =>
+      _withoutMissingVisibility(
+        json,
+        (json) => _client
+            .from(SupabaseConstants.moneyEntriesTable)
+            .update(json)
+            .eq('id', id),
+      );
 
   /// Deletes the money entry with [id].
   Future<void> deleteEntry(String id) async {

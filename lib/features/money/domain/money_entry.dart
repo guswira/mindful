@@ -8,6 +8,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../../shared/models/sync_status.dart';
 import 'budget_type.dart';
 import 'entry_type.dart';
+import 'entry_visibility.dart';
 
 part 'money_entry.freezed.dart';
 part 'money_entry.g.dart';
@@ -36,6 +37,8 @@ abstract class MoneyEntry with _$MoneyEntry {
     @JsonKey(name: 'sync_status')
     @Default(SyncStatus.synced)
     SyncStatus syncStatus,
+    // Rows from before linked partners existed read as private.
+    @Default(EntryVisibility.private) EntryVisibility visibility,
   }) = _MoneyEntry;
 
   factory MoneyEntry.fromJson(Map<String, dynamic> json) =>

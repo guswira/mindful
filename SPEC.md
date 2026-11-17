@@ -20,8 +20,8 @@ Runs on iOS, Android, macOS and the web (see Web).
     task/habit reminders cancelled + their ids freed
       (NotificationService.forgetAllItemReminders)
     every account Hive box cleared (AuthNotifier.userDataBoxNames: journal,
-      habits, habit logs, tasks, money entries, budget settings, breathing
-      sessions) — add any new account box there
+      habits, habit logs, tasks, money entries, budget settings, money
+      partner + partner money entries, breathing sessions) — add any new account box there
     SyncService recreated, so its 5-minute throttle can't skip the next
       account's first sync
     home/lock screen widgets redrawn from the empty cache
@@ -43,6 +43,7 @@ Runs on iOS, Android, macOS and the web (see Web).
 - Models: Freezed + json_serializable
 - Notifications: flutter_local_notifications
 - Images: image_picker + cached_network_image
+- QR codes: qr_flutter (show) + mobile_scanner (scan) — linked partner
 - Date/time: intl
 - Localization: flutter_localizations + gen-l10n (ARB files), English + Bahasa Indonesia
 - Env vars: flutter_dotenv
@@ -1753,11 +1754,15 @@ create table money_entries (
   budget_period text,  -- spending type: null (everyday) | 'weekly' |
                        -- 'monthly' | 'yearly' — see Spending type
   date date not null default current_date,
+  visibility text not null default 'private',  -- 'shared' | 'private'
+                       -- — see Linked partner
   sync_status text default 'synced',
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
 -- existing projects: alter table money_entries add column budget_period text;
+--   alter table money_entries
+--     add column visibility text not null default 'private';
 --   (and drop any check constraint on budget_settings.budget_type that only
 --   allows 'monthly' | 'daily')
 
@@ -1765,6 +1770,87 @@ alter table budget_settings enable row level security;
 alter table money_entries enable row level security;
 create policy "own" on budget_settings for all using (auth.uid()=user_id);
 create policy "own" on money_entries for all using (auth.uid()=user_id);
+
+-- Linked partner (see Linked partner). Both tables are written only by
+-- the functions below (security definer) — no insert/update policies.
+create table money_links (       -- one row per side: A→B and B→A
+  user_id uuid primary key references auth.users on delete cascade,
+  partner_id uuid not null references auth.users on delete cascade,
+  partner_name text,             -- copied from the partner's Google profile
+  partner_email text,
+  created_at timestamptz default now()
+);
+create table money_link_invites (
+  code text primary key,         -- 8 hex chars, shown as A1B2-C3D4
+  user_id uuid not null references auth.users on delete cascade,
+  expires_at timestamptz not null
+);
+alter table money_links enable row level security;
+alter table money_link_invites enable row level security;
+create policy "own link" on money_links for select using (auth.uid()=user_id);
+
+-- The partner may read shared spending created since the link was made
+-- (so a later partner never sees what was shared with an earlier one).
+create policy "partner shared spending" on money_entries for select using (
+  visibility = 'shared' and type = 'spending' and exists (
+    select 1 from money_links l
+    where l.user_id = auth.uid() and l.partner_id = money_entries.user_id
+      and money_entries.created_at >= l.created_at));
+
+create or replace function create_money_link_invite() returns json
+language plpgsql security definer set search_path = public as $$
+declare new_code text := upper(substr(md5(gen_random_uuid()::text), 1, 8));
+        expires timestamptz := now() + interval '10 minutes';
+begin
+  if auth.uid() is null then raise exception 'not_signed_in'; end if;
+  delete from money_link_invites i
+    where i.user_id = auth.uid() or i.expires_at < now();
+  insert into money_link_invites (code, user_id, expires_at)
+    values (new_code, auth.uid(), expires);
+  return json_build_object('code', new_code, 'expires_at', expires);
+end $$;
+
+create or replace function accept_money_link(invite_code text) returns json
+language plpgsql security definer set search_path = public as $$
+declare me uuid := auth.uid(); inviter uuid;
+        my_name text; my_email text; their_name text; their_email text;
+begin
+  if me is null then raise exception 'not_signed_in'; end if;
+  select i.user_id into inviter from money_link_invites i
+    where i.code = upper(replace(invite_code, '-', ''))
+      and i.expires_at > now();
+  if inviter is null then raise exception 'invite_invalid'; end if;
+  if inviter = me then raise exception 'invite_own'; end if;
+  if exists (select 1 from money_links where user_id in (me, inviter)) then
+    raise exception 'already_linked';
+  end if;
+  select coalesce(u.raw_user_meta_data->>'full_name',
+                  u.raw_user_meta_data->>'name', u.email), u.email
+    into my_name, my_email from auth.users u where u.id = me;
+  select coalesce(u.raw_user_meta_data->>'full_name',
+                  u.raw_user_meta_data->>'name', u.email), u.email
+    into their_name, their_email from auth.users u where u.id = inviter;
+  insert into money_links (user_id, partner_id, partner_name, partner_email)
+    values (me, inviter, their_name, their_email),
+           (inviter, me, my_name, my_email);
+  delete from money_link_invites i where i.user_id = inviter;
+  return json_build_object('partner_id', inviter);
+end $$;
+
+create or replace function unlink_money_partner() returns void
+language plpgsql security definer set search_path = public as $$
+declare me uuid := auth.uid(); other uuid;
+begin
+  select l.partner_id into other from money_links l where l.user_id = me;
+  delete from money_links l where l.user_id = me or l.user_id = other;
+end $$;
+
+revoke execute on function create_money_link_invite() from public, anon;
+revoke execute on function accept_money_link(text) from public, anon;
+revoke execute on function unlink_money_partner() from public, anon;
+grant execute on function create_money_link_invite() to authenticated;
+grant execute on function accept_money_link(text) to authenticated;
+grant execute on function unlink_money_partner() to authenticated;
 ```
 
 ### Data models (Dart)
@@ -1790,6 +1876,11 @@ MoneyEntry (Freezed):
     until someone picks a bill type; an update to an everyday entry clears
     the column explicitly, retrying without it on PGRST204 (column
     missing).
+- visibility: EntryVisibility (shared | private, domain/
+    entry_visibility.dart) — who sees it while linked (see Linked
+    partner); default private, so old rows and Hive caches read as
+    private. Always sent; a database without the column (PGRST204 naming
+    it) gets the write retried without it — the entry then stays private.
 - date: DateTime (date only)
 - syncStatus: SyncStatus
 - createdAt: DateTime
@@ -1840,7 +1931,13 @@ Add to floating nav bar as 4th tab:
 Shell route tabs:
   /home/today, /home/tasks, /home/journal, /home/money
 
-MoneyTab layout (BlobBackground, CustomScrollView):
+MoneyTab layout (BlobBackground, CustomScrollView in a RefreshIndicator
+— pull down reloads the partner's spending; so does opening the tab):
+
+HEADER: "Money" title + GlassIconButton on the right →
+  openMoneyPartner (partner/money_partner_flow.dart): group_add_outlined
+  white60 "Link a partner" → LinkPartnerSheet while not linked;
+  people_alt_outlined moneyAccent → PartnerSheet while linked
 
 BUDGET CARD (budget_card.dart, top) — one strong GlassCard (padding
   12 16), compact:
@@ -1888,7 +1985,17 @@ No quick add buttons on the tab — adding goes through the nav bar's
 write button ("Add spending" / "Add income" on this tab) or the empty
 state's IntroCard.
 
+PARTNER SPENDING CARD (partner_spending_card.dart — only while linked,
+  under the budget card, above the recap): GlassCard, header
+  people_outline moneyAccent "With <first name> · this month" + chevron;
+  SummaryRows (red): You (all your spending), "<name> (shared)",
+  Together (bold, the sum). Tap → PartnerSheet.
+
 ENTRY LIST (grouped by date, newest first):
+  while linked: a scope pill row above the period pills — Together
+    (default) | You | <partner first name> (moneyScopeProvider,
+    money_partner_providers.dart, kept while the app runs); Together
+    merges both lists, and the date header totals follow what's shown
   no entries at all: IntroCard account_balance_wallet_outlined moneyAccent "Record your spending" +
     a short why + TintedPill("Record spending") → AddMoneySheet
     (Spending), in place of the period pills + list
@@ -1905,7 +2012,11 @@ ENTRY LIST (grouped by date, newest first):
       Column flex:
         Text category 14px white85 bold
         Text note 12px white45 if exists
-        Text date 11px white30 — "Oct 1 · Monthly bill" for a bill
+        Text date 11px white30 — "Oct 1 · Monthly bill" for a bill; while
+          linked "· Shared" on your shared spending, "· <first name>" on
+          the partner's
+      the partner's entries: their initial in an 18px moneyAccent badge
+        on the icon circle's corner; tap → read-only detail (no ⋯)
       Column right:
         Text amount:
           spending: "- [currency][amount]" red
@@ -2064,6 +2175,17 @@ spending type (SpendingTypePicker — spending_type_picker.dart; Spending
     yearly budget." ...) — see Spending type
   edit mode keeps the entry's type
 
+who sees it (VisibilityPicker — visibility_picker.dart; Spending only,
+  and only while linked — see Linked partner):
+  "Who sees it" label + chips "Shared with <first name>"
+    (people_outline) / "Private" (lock_outline), moneySpending tint like
+    the spending type chips
+  below: "<name> sees it, and it counts toward both your budgets." /
+    "Only you see it."
+  new spending defaults to Shared while linked; not linked → no picker,
+    saved Private (so nothing from before a link ever shows up);
+    income always Private; edit mode keeps the entry's
+
 date row:
   Icon calendar + formatted date (defaults today)
   tap → showDatePicker
@@ -2079,8 +2201,11 @@ edit mode: pre-fills all fields, title "Edit entry"
 lib/features/money/presentation/money_detail_sheet.dart
 
 shows: type badge, amount large, category, spending type + what it
-  counts toward (bills only), note, date
+  counts toward (bills only), who sees it while linked (people_outline /
+  lock_outline + the picker's hint line), note, date
 "⋯" more → Edit (AddMoneySheet pre-filled) / Delete confirm
+the partner's entry (MoneyDetailSheet(owner:)): no "⋯" — only they can
+  change it — and "Added by <name>" instead of the visibility line
 no primary action button (read-only detail)
 
 ### Budget Settings Sheet
@@ -2101,6 +2226,78 @@ currency selector: text button showing the shared currency (one for every
 on save: upsert that period's budget_settings row in Supabase
   (onConflict user_id,budget_type), then invalidate budgets +
   budgetCurrency + remainingBudget
+
+### Linked partner (shared spending)
+
+Two accounts can link their money — e.g. a couple — and see each other's
+shared spending. At most one partner per account. Copy: `moneyLink*`,
+`moneyPartner*`, `moneyVisibility*`, `moneyScope*`, `moneyTogether*`.
+
+Linking (iteration 1 — one phone scans the other's QR):
+  Money tab header button → LinkPartnerSheet (partner/link_partner_sheet
+  .dart), intro + two tabs:
+    "My code" (LinkCodeView): create_money_link_invite → an 8-hex code
+      valid 10 minutes, drawn as a QR (qr_flutter, white quiet zone,
+      200px) holding `mindful-link:<code>`, with the code below as
+      "A1B2-C3D4" (selectable) + how the partner scans it + "Waiting for
+      your partner to scan…". Polls refreshMoneyPartner every 3s; once
+      linked the sheet pops → SnackBar "Linked with <name>". Expired →
+      "This code has expired." + New code; error → message + New code.
+    "Scan code" (LinkScanView): on phones and the web a 240px
+      mobile_scanner view (QR only; in a browser it needs HTTPS or
+      localhost + camera permission, and uses the browser's
+      BarcodeDetector or zxing-wasm from jsDelivr) — the first `mindful-link:` QR it reads links at once;
+      below it (and alone in the macOS app) a text field for the typed code
+      + TintedPill("Link"). accept_money_link → pops → the same SnackBar.
+      Errors under the field: wrong/expired code, your own code, one of
+      you is already linked, offline/other. MoneyLinkInvite.parseCode
+      accepts the QR text or a typed code (case, dash, spaces ignored).
+  The link is made server-side for both accounts at once (two
+  money_links rows), with each side's name/email copied from the other's
+  Google profile.
+
+While linked:
+  PartnerSheet (partner/partner_sheet.dart): initial avatar, name, email,
+    "Linked since <date>", what linking means, TintedPill("Unlink",
+    moneySpending) → confirm AlertDialog → unlink_money_partner (removes
+    both rows) → SnackBar "Unlinked". Nothing is deleted; the partner's
+    phone notices on its next refresh.
+  Spending has a visibility (see Add Money Sheet "who sees it"): shared
+    shows on the partner's Money tab (scope pills, partner card) and —
+    the rule — counts toward BOTH people's budgets (MoneyRepository
+    .getRemaining adds the partner's shared spending, with the same
+    spending-type rule, so the gauges, home card and remaining line all
+    include it); private stays with its owner. Income is never shared.
+  The partner's entries are read-only here.
+  Currencies aren't converted — amounts show as recorded.
+  Monthly recap, the cashflow history and AI advice stay personal (your
+    own entries only).
+
+Data:
+  SupabaseMoneyPartnerDatasource (data/supabase_money_partner_datasource
+    .dart): getPartner (money_links, RLS = own row), createInvite,
+    acceptInvite (maps the SQL errors invite_invalid / invite_own /
+    already_linked to MoneyLinkError), unlink, getPartnerEntries.
+  MoneyPartnerRepository (data/money_partner_repository.dart): Hive boxes
+    `money_partner` (the partner) + `partner_money_entries` (their shared
+    spending, re-filtered to shared spending) — account boxes, cleared
+    on sign-out. refresh() replaces both from Supabase (clears them when
+    the link is gone). Hand-written providers: moneyPartnerRepository,
+    moneyPartner, partnerEntries(range), moneyScope
+    (money_partner_providers.dart); refreshMoneyPartner /
+    invalidateMoneyPartner also invalidate remainingBudget.
+  Refreshed by SyncService on open (with the rest, 5-min throttle), when
+    the Money tab opens, and on pull-to-refresh.
+  SupabaseMoneyDatasource.getEntries filters user_id = me — RLS also lets
+    the partner's shared rows through, and they must never land in the
+    user's own cache (or be re-uploaded as theirs).
+  Privacy: RLS only returns the partner's spending that is shared AND
+    created after the link, so entries shared with an earlier partner
+    never reach a new one.
+
+Not in iteration 1: more than one partner, editing the partner's
+entries, realtime updates (refresh/poll only), partner on the home
+screen card or widgets, a shared budget of its own.
 
 ### Home Screen — Money Flow integration
 
@@ -2136,8 +2333,12 @@ lib/features/money/
   data/
     money_repository.dart
     supabase_money_datasource.dart
+    money_partner_repository.dart        ← linked partner + their spending (Hive)
+    supabase_money_partner_datasource.dart ← link functions + partner rows
   domain/
     money_entry.dart
+    entry_visibility.dart       ← shared | private
+    money_partner.dart          ← MoneyPartner, invite code, link errors
     budget_settings.dart
     budget_type.dart
     entry_type.dart
@@ -2146,6 +2347,14 @@ lib/features/money/
     money_tab.dart
     add_money_sheet.dart
     spending_type_picker.dart   ← Everyday / weekly / monthly / yearly bill
+    visibility_picker.dart      ← Shared / Private (while linked)
+    money_partner_providers.dart ← partner, partner entries, scope
+    partner/
+      money_partner_flow.dart   ← openMoneyPartner (link or partner sheet)
+      link_partner_sheet.dart   ← "My code" / "Scan code" tabs
+      link_code_view.dart       ← QR + code, polls for the partner
+      link_scan_view.dart       ← camera scan + typed code
+      partner_sheet.dart        ← who, since when, Unlink
     money_detail_sheet.dart
     budget_settings_sheet.dart
     money_advice_sheet.dart     ← AI advice result sheet
@@ -2164,6 +2373,9 @@ lib/features/money/
       money_recap_parts.dart    ← category bars + summary rows
       money_spending_calendar.dart ← history: spending per day
       remaining_budget_widget.dart ← home screen card
+      partner_spending_card.dart ← you / partner / together this month
+      entry_card.dart           ← one entry (+ partner badge)
+      grouped_entries.dart      ← by-day groups + day totals
 ```
 
 ### GlassTheme additions
@@ -2185,7 +2397,8 @@ Add to glass_theme.dart:
 - No multi-currency conversion (display only)
 - No budget per category in v1
 - No export to CSV in v1
-- No shared/family budget in v1
+- No shared/family budget of its own in v1 — a linked partner's shared
+  spending counts toward each person's own budgets (see Linked partner)
 - AI advice is not financial advice, and is never stored
 
 

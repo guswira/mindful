@@ -1934,6 +1934,246 @@ abstract class AppLocalizations {
   /// **'{date}: no spending'**
   String moneyRecapDayEmpty(String date);
 
+  /// No description provided for @moneyPartnerButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked partner'**
+  String get moneyPartnerButton;
+
+  /// No description provided for @moneyLinkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Link a partner'**
+  String get moneyLinkTitle;
+
+  /// No description provided for @moneyLinkIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Link with one other account to see each other\'s shared spending and spend from the same budgets. Private spending stays yours.'**
+  String get moneyLinkIntro;
+
+  /// No description provided for @moneyLinkShowCode.
+  ///
+  /// In en, this message translates to:
+  /// **'My code'**
+  String get moneyLinkShowCode;
+
+  /// No description provided for @moneyLinkScanCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan code'**
+  String get moneyLinkScanCode;
+
+  /// No description provided for @moneyLinkShowHint.
+  ///
+  /// In en, this message translates to:
+  /// **'On your partner\'s phone: Money → Link a partner → Scan code, then point it at this.'**
+  String get moneyLinkShowHint;
+
+  /// No description provided for @moneyLinkWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for your partner to scan…'**
+  String get moneyLinkWaiting;
+
+  /// No description provided for @moneyLinkValidFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Valid for 10 minutes'**
+  String get moneyLinkValidFor;
+
+  /// No description provided for @moneyLinkExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'This code has expired.'**
+  String get moneyLinkExpired;
+
+  /// No description provided for @moneyLinkNewCode.
+  ///
+  /// In en, this message translates to:
+  /// **'New code'**
+  String get moneyLinkNewCode;
+
+  /// No description provided for @moneyLinkCodeError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t create a code. Check your connection and try again.'**
+  String get moneyLinkCodeError;
+
+  /// No description provided for @moneyLinkScanHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Point the camera at your partner\'s code.'**
+  String get moneyLinkScanHint;
+
+  /// No description provided for @moneyLinkCameraError.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera unavailable — type the code instead.'**
+  String get moneyLinkCameraError;
+
+  /// No description provided for @moneyLinkTypeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Or type the code (A1B2-C3D4)'**
+  String get moneyLinkTypeHint;
+
+  /// No description provided for @moneyLinkButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Link'**
+  String get moneyLinkButton;
+
+  /// No description provided for @moneyLinkLinked.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked with {name}'**
+  String moneyLinkLinked(String name);
+
+  /// No description provided for @moneyLinkErrorInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'That code is wrong or has expired. Ask for a new one.'**
+  String get moneyLinkErrorInvalid;
+
+  /// No description provided for @moneyLinkErrorOwn.
+  ///
+  /// In en, this message translates to:
+  /// **'That\'s your own code — scan your partner\'s phone.'**
+  String get moneyLinkErrorOwn;
+
+  /// No description provided for @moneyLinkErrorAlreadyLinked.
+  ///
+  /// In en, this message translates to:
+  /// **'One of you is already linked with someone. Unlink first.'**
+  String get moneyLinkErrorAlreadyLinked;
+
+  /// No description provided for @moneyLinkErrorUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t link right now. Check your connection and try again.'**
+  String get moneyLinkErrorUnknown;
+
+  /// No description provided for @moneyPartnerSince.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked since {date}'**
+  String moneyPartnerSince(String date);
+
+  /// No description provided for @moneyPartnerExplain.
+  ///
+  /// In en, this message translates to:
+  /// **'You see each other\'s shared spending, and it counts toward both your budgets. Private spending and income stay yours.'**
+  String get moneyPartnerExplain;
+
+  /// No description provided for @moneyPartnerUnlink.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlink'**
+  String get moneyPartnerUnlink;
+
+  /// No description provided for @moneyPartnerUnlinkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlink {name}?'**
+  String moneyPartnerUnlinkTitle(String name);
+
+  /// No description provided for @moneyPartnerUnlinkBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ll stop seeing each other\'s spending, and theirs stops counting toward your budgets. Nothing is deleted.'**
+  String get moneyPartnerUnlinkBody;
+
+  /// No description provided for @moneyPartnerUnlinked.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlinked'**
+  String get moneyPartnerUnlinked;
+
+  /// No description provided for @moneyPartnerUnlinkError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t unlink. Check your connection and try again.'**
+  String get moneyPartnerUnlinkError;
+
+  /// No description provided for @moneyVisibilityHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Who sees it'**
+  String get moneyVisibilityHeading;
+
+  /// No description provided for @moneyVisibilityShared.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared with {name}'**
+  String moneyVisibilityShared(String name);
+
+  /// No description provided for @moneyVisibilityPrivate.
+  ///
+  /// In en, this message translates to:
+  /// **'Private'**
+  String get moneyVisibilityPrivate;
+
+  /// No description provided for @moneyVisibilitySharedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} sees it, and it counts toward both your budgets.'**
+  String moneyVisibilitySharedHint(String name);
+
+  /// No description provided for @moneyVisibilityPrivateHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Only you see it.'**
+  String get moneyVisibilityPrivateHint;
+
+  /// No description provided for @moneyVisibilitySharedTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared'**
+  String get moneyVisibilitySharedTag;
+
+  /// No description provided for @moneyScopeTogether.
+  ///
+  /// In en, this message translates to:
+  /// **'Together'**
+  String get moneyScopeTogether;
+
+  /// No description provided for @moneyScopeMine.
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get moneyScopeMine;
+
+  /// No description provided for @moneyTogetherTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'With {name} · this month'**
+  String moneyTogetherTitle(String name);
+
+  /// No description provided for @moneyTogetherYou.
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get moneyTogetherYou;
+
+  /// No description provided for @moneyTogetherPartner.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} (shared)'**
+  String moneyTogetherPartner(String name);
+
+  /// No description provided for @moneyTogetherTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Together'**
+  String get moneyTogetherTotal;
+
+  /// No description provided for @moneyEntryAddedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Added by {name}'**
+  String moneyEntryAddedBy(String name);
+
   /// No description provided for @moneyRecapNet.
   ///
   /// In en, this message translates to:

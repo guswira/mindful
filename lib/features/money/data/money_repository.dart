@@ -12,6 +12,7 @@ import '../domain/budget_settings.dart';
 import '../domain/budget_type.dart';
 import '../domain/entry_type.dart';
 import '../domain/money_entry.dart';
+import 'money_partner_repository.dart';
 import 'supabase_money_datasource.dart';
 
 part 'money_repository.g.dart';
@@ -30,10 +31,12 @@ class MoneyRepository {
     required Box<dynamic> settingsBox,
     SupabaseMoneyDatasource? datasource,
     FlutterSecureStorage storage = const FlutterSecureStorage(),
+    MoneyPartnerRepository? partner,
   }) : _entriesBox = entriesBox,
        _settingsBox = settingsBox,
        _datasource = datasource ?? SupabaseMoneyDatasource(),
-       _storage = storage;
+       _storage = storage,
+       _partner = partner;
 
   /// The Hive box names this repository caches into.
   static const String entriesBoxName = 'money_entries';
@@ -45,6 +48,10 @@ class MoneyRepository {
   final Box<dynamic> _settingsBox;
   final SupabaseMoneyDatasource _datasource;
   final FlutterSecureStorage _storage;
+
+  /// The linked partner, whose shared spending also counts toward this
+  /// user's budgets; null leaves budgets personal (tests).
+  final MoneyPartnerRepository? _partner;
 
   static String _settingsCacheKey(BudgetType type) => 'settings_${type.name}';
 
@@ -182,12 +189,19 @@ class MoneyRepository {
   /// toward it (see [spendingTowardBudget] — longer bills skip shorter
   /// budgets), or 0 if that budget hasn't been set. Income doesn't offset
   /// a budget's remaining amount — it's only reflected in the recap.
+  ///
+  /// A linked partner's shared spending counts too: shared spending
+  /// lowers both people's budgets (see SPEC.md Linked partner).
   double getRemaining(BudgetType type) {
     final settings = getBudgetSettings(type);
     if (settings == null) {
       return 0;
     }
-    final entries = getEntries(range: getPeriodRange(type));
+    final range = getPeriodRange(type);
+    final entries = [
+      ...getEntries(range: range),
+      ...?_partner?.getEntries(range: range),
+    ];
     return settings.amount - spendingTowardBudget(entries, type);
   }
 
@@ -239,5 +253,10 @@ Future<Box<dynamic>> budgetSettingsBox(Ref ref) =>
 Future<MoneyRepository> moneyRepository(Ref ref) async {
   final entriesBox = await ref.watch(moneyEntriesBoxProvider.future);
   final settingsBox = await ref.watch(budgetSettingsBoxProvider.future);
-  return MoneyRepository(entriesBox: entriesBox, settingsBox: settingsBox);
+  final partner = await ref.watch(moneyPartnerRepositoryProvider.future);
+  return MoneyRepository(
+    entriesBox: entriesBox,
+    settingsBox: settingsBox,
+    partner: partner,
+  );
 }
